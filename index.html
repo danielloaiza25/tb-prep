@@ -1273,7 +1273,7 @@ const SB_KEY='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZ
 const TBID='9f8d7c6b-5a49-4e38-b271-06d5f00dbeef'; // Tommy Bahama tenant inside ChefOpsAI
 // Stamped by publish.sh at upload time. It is the only version label there is now —
 // one address, updated in place, so this tells you which build that address is serving.
-const BUILD='Sep 23, 2026 · 9:05 PM';
+const BUILD='Sep 23, 2026 · forecast v2.1';
 // ---------- IS THIS PHONE EVEN RUNNING THE LATEST BUILD? ----------
 // Sep 3 2026. Three prep fixes shipped and Dan still saw the old behaviour, because the app
 // installs to the home screen and an installed web app does not go back and re-fetch its own
@@ -1797,7 +1797,7 @@ function guestPlan(dstr){
 // Every number here is recomputed from the ledger on each load — no hidden state.
 const FC2={hist:{}, dates:[], on:true};
 function fcHistLoad(rows){
-  FC2.hist={}; FC2.dates=[];
+  FC2.hist={}; FC2.dates=[]; FC2.memo={};
   (rows||[]).forEach(r=>{ const k=String(r.business_date); FC2.hist[k]={s:Number(r.net_sales)||0, g:Number(r.guests)||0, c:Number(r.checks)||0}; FC2.dates.push(k); });
   FC2.dates.sort();
 }
@@ -1845,39 +1845,66 @@ function fcTrend(d,key){
     const w=Math.pow(0.97,k); sw+=w; swl+=w*Math.log(Math.max(0.2,Math.min(5,r)));
   }
   if(!sw) return 1;
-  return Math.min(2,Math.max(0.5,Math.exp(swl/(sw+21))));
+  // v2.1 (Sep 23 2026): the +21 shrink turned a real -15% into about -2%. The 265-day replay
+  // picked +3: enough that one odd day can't swing it, not enough to hide a season.
+  return Math.min(2,Math.max(0.5,Math.exp(swl/(sw+3))));
 }
 // same weekday, last 6 weeks, median — only when last year has nothing usable
 function fcFallback(d,key){ const v=[]; for(let k=1;k<=6;k++){ const x=shiftDay(d,-7*k); if(fcUsable(x)) v.push(FC2.hist[x][key]/evLift(x).f); } return fcMedian(v); }
 // weekday check average, trailing 8 same weekdays, median — how sales become guests
 function fcCheckAvg(d){ const v=[]; for(let k=1;k<=8;k++){ const x=shiftDay(d,-7*k); const r=FC2.hist[x]; if(r&&!fcClosed(x)&&r.g>0) v.push(r.s/r.g); } return fcMedian(v); }
-// residual correction on what the last-year side got wrong lately (same shape as v1, tighter cap)
-function fcResid(d,key){
-  const rows=(S.fc2rows||[]).filter(r=>String(r.business_date)<d && r.actual_s!=null && r.actual_s>0 && r.ly_s>0 && r.trend>0)
-    .sort((a,b)=>String(b.business_date).localeCompare(String(a.business_date))).slice(0,28);
-  if(!rows.length) return 1;
-  let sw=0, swl=0;
-  rows.forEach((r,k)=>{ const f=Number(r.ly_s)*Number(r.trend)*Number(r.ev||1); if(!(f>0)) return; const w=Math.pow(0.85,k); sw+=w; swl+=w*Math.log(Number(r.actual_s)/f); });
-  if(!sw) return 1;
-  return Math.min(1.25,Math.max(0.8,Math.exp(swl/(sw+4))));
+// ---- v2.1 self-correction (Sep 23 2026) ----
+// What the finished blend got wrong on the last 28 real, non-holiday days, recomputed the way
+// it would have been that morning (every input looks backward only). Decay 0.7, shrink +8,
+// capped at ±15%. Replay: took the constant low lean from -2.4% to -0.9%.
+function fcRaw(d){ const m=FC2.memo||(FC2.memo={}); const k='r'+d; if(m[k]!==undefined) return m[k]; let v=null; try{ v=fcParts(d).raw; }catch(e){} m[k]=v; return v; }
+function fcResid(d){
+  const m=FC2.memo||(FC2.memo={}); const k='c'+d; if(m[k]!==undefined) return m[k];
+  let sw=0, swl=0, j=0;
+  for(let i=1;i<=40 && j<28;i++){
+    const a=shiftDay(d,-i); if(!fcUsable(a)||fcHol(a)) continue;
+    const f=fcRaw(a); if(!(f>0)) continue;
+    const w=Math.pow(0.7,j); sw+=w; swl+=w*Math.log(FC2.hist[a].s/f); j++;
+  }
+  const c=sw?Math.min(1.15,Math.max(0.85,Math.exp(swl/(sw+8)))):1;
+  m[k]=c; return c;
+}
+// ---- the likely range: how far off the finished number has really been, last 60 real days ----
+// 10th-90th percentile of actual / forecast. Replay: the real day landed inside it 76% of the time.
+function fcBand(d, v){
+  const r=[]; for(let i=1;i<=75 && r.length<60;i++){ const a=shiftDay(d,-i); if(!fcUsable(a)) continue; const f=fcRaw(a); if(!(f>0)) continue; r.push(FC2.hist[a].s/(f*fcResid(a))); }
+  if(r.length<20||!v) return null; r.sort((x,y)=>x-y);
+  return {lo:Math.round(v*r[Math.floor(r.length*0.1)]), hi:Math.round(v*r[Math.floor(r.length*0.9)]), n:r.length};
 }
 // ---- the whole calculation for one day, with every part shown ----
-function fcExplain(d){
+function fcParts(d){
   const hol=fcHol(d); const ev=evLift(d).f;
   const v1g=guestForecastV1(d);
   const chk=fcCheckAvg(d);
   const v1s=chk?v1g*chk:null;
-  const ly=fcLy(d,'s'); const trend=fcTrend(d,'s'); const resid=fcResid(d,'s');
-  let lyBase=null, src='fallback';
-  if(ly&&ly.v>0){ lyBase=ly.v/(ly.how==='median'?1:evLift(ly.date).f); src='ly-'+ly.how; }
-  else { lyBase=fcFallback(d,'s'); }
-  const lySide=lyBase?lyBase*trend*ev*resid:null;
-  let v2s=null, mode='v1';
-  if(lySide&&v1s){ if(hol){ v2s=lySide; mode='holiday'; } else { v2s=Math.sqrt(v1s*lySide); mode='blend'; } }
-  else if(lySide){ v2s=lySide; mode='ly-only'; }
-  else if(v1s){ v2s=v1s; mode='v1'; }
-  const v2g=(v2s&&chk)?Math.max(1,Math.round(v2s/chk)):v1g;
-  return {d, hol:hol?hol.name:null, ev, v1g, v1s:v1s?Math.round(v1s):null, chk, ly:ly?{s:Math.round(ly.v),date:ly.date,how:ly.how}:null, lyBase:lyBase?Math.round(lyBase):null, trend:Math.round(trend*1000)/1000, resid:Math.round(resid*1000)/1000, lySide:lySide?Math.round(lySide):null, v2s:v2s?Math.round(v2s):null, v2g, mode, src};
+  const ly=fcLy(d,'s'); const trend=fcTrend(d,'s');
+  let lyBase=null, src='fallback', lySide=null;
+  if(ly&&ly.v>0){
+    src='ly-'+ly.how;
+    // v2.1 (Sep 23 2026): last year's same holiday already carries the holiday bump.
+    // Multiplying by this year's measured holiday lift counted it twice — Labor Day
+    // Saturday replayed at $28k against $17.8k real.
+    if(ly.how==='holiday'){ lyBase=ly.v; lySide=lyBase*trend; }
+    else { lyBase=ly.v/(ly.how==='median'?1:evLift(ly.date).f); lySide=lyBase*trend*ev; }
+  } else { lyBase=fcFallback(d,'s'); if(lyBase) lySide=lyBase*trend*ev; }
+  let raw=null, mode='v1';
+  // 50/50 stays: the replay tried 50-100% last-year weight and 50/50 won across the year.
+  if(lySide&&v1s){ if(hol){ raw=lySide; mode='holiday'; } else { raw=Math.sqrt(v1s*lySide); mode='blend'; } }
+  else if(lySide){ raw=lySide; mode='ly-only'; }
+  else if(v1s){ raw=v1s; mode='v1'; }
+  return {hol, ev, v1g, v1s, chk, ly, lyBase, trend, lySide, raw, mode, src};
+}
+function fcExplain(d){
+  const P=fcParts(d); const resid=P.raw?fcResid(d):1;
+  const v2s=P.raw?P.raw*resid:null;
+  const v2g=(v2s&&P.chk)?Math.max(1,Math.round(v2s/P.chk)):P.v1g;
+  const band=v2s?fcBand(d,v2s):null;
+  return {d, hol:P.hol?P.hol.name:null, ev:P.ev, v1g:P.v1g, v1s:P.v1s?Math.round(P.v1s):null, chk:P.chk, ly:P.ly?{s:Math.round(P.ly.v),date:P.ly.date,how:P.ly.how}:null, lyBase:P.lyBase?Math.round(P.lyBase):null, trend:Math.round(P.trend*1000)/1000, resid:Math.round(resid*1000)/1000, lySide:P.lySide?Math.round(P.lySide):null, v2s:v2s?Math.round(v2s):null, v2g, mode:P.mode, src:P.src, band, engine:'v2.1'};
 }
 // ---- the watchdog: three morning rules, shown as a confidence note, never an alarm ----
 function fcWatch(d,X){
@@ -1906,7 +1933,7 @@ async function fcLogShown(d){
     if((S.fc2rows||[]).some(r=>String(r.business_date)===d)) return;
     const X=fcExplain(d); const notes=fcWatch(d,X);
     const row={business_date:d, v1_g:X.v1g, v2_g:X.v2g, v1_s:X.v1s, v2_s:X.v2s, ly_s:X.ly?X.ly.s:null, ly_date:X.ly?X.ly.date:null, ly_how:X.ly?X.ly.how:X.src,
-      trend:X.trend, ev:X.ev, resid:X.resid, holiday:X.hol, engine:X.mode, notes:notes.map(n=>({k:n.k,en:n.en}))};
+      trend:X.trend, ev:X.ev, resid:X.resid, holiday:X.hol, engine:'v2.1 '+X.mode, notes:[...notes.map(n=>({k:n.k,en:n.en})), ...(X.band?[{k:'band',lo:X.band.lo,hi:X.band.hi}]:[])]};
     const q=await db.from('tb_forecast_v2').upsert(row,{onConflict:'business_date',ignoreDuplicates:true}).select('*');
     if(!q.error&&q.data&&q.data.length){ S.fc2rows=[q.data[0],...(S.fc2rows||[])]; }
     else if(!q.error){ S.fc2rows=[row,...(S.fc2rows||[])]; }
@@ -1941,11 +1968,11 @@ function fcNoteHtml(d){
   if(X.ly&&money) parts.push(`last year ${X.ly.how==='holiday'?'same holiday':X.ly.how==='median'?'nearby same weekday':'same weekday'} $${X.ly.s.toLocaleString()}`);
   if(X.trend!==1) parts.push(`trend ×${X.trend.toFixed(2)}`);
   if(X.ev!==1) parts.push(`event ×${X.ev.toFixed(2)}`);
-  if(X.resid!==1) parts.push(`residual ×${X.resid.toFixed(2)}`);
+  if(X.resid!==1) parts.push(`self-correction ×${X.resid.toFixed(2)}`);
   const conf = notes.length? (notes.some(n=>n.k==='holiday-ahead')?'watch':'low') : 'normal';
   const lab = conf==='normal' ? (es?'Confianza: normal':'Confidence: normal') : conf==='watch' ? (es?'Confianza: atento':'Confidence: watch') : (es?'Confianza: baja':'Confidence: low');
   return `<div class="muted" style="font-size:11.5px;margin-top:6px;border-left:3px solid ${conf==='normal'?'var(--lagoon)':'var(--coral)'};padding-left:8px">
-    <b>${lab}</b> · ${(X.v2s&&money)?`$${X.v2s.toLocaleString()} sales → ${X.v2g} covers`:`${X.v2g} covers`} · ${parts.join(' · ')}
+    <b>${lab}</b> · ${(X.v2s&&money)?`$${X.v2s.toLocaleString()} sales → ${X.v2g} covers`:`${X.v2g} covers`}${X.band?(money?` · <b>${es?"rango":"likely"} $${X.band.lo.toLocaleString()}–$${X.band.hi.toLocaleString()}</b>`:(X.chk?` · <b>${es?"rango":"likely"} ${Math.round(X.band.lo/X.chk)}–${Math.round(X.band.hi/X.chk)} covers</b>`:"")):""} · ${parts.join(" · ")}
     ${notes.map(n=>`<div style="margin-top:3px">• ${esc(es?n.es:n.en)}</div>`).join('')}
   </div>`;
 }
@@ -9895,7 +9922,7 @@ function fcLedgerCardHtml(){
     ${open?`<div class="tbl-wrap" style="margin-top:8px"><table><tr><th>Day</th><th class="num">Real</th><th class="num">v1</th><th class="num">v2</th><th>Engine</th></tr>
       ${rows.map(r=>`<tr><td>${fmtDate(String(r.business_date)).replace(/day,/,'')}</td><td class="num">${r.actual_g??'—'}</td><td class="num">${r.v1_g??'—'}${r.err_v1_g!=null?` <span class="muted">${r.err_v1_g>0?'+':''}${Math.round(r.err_v1_g)}%</span>`:''}</td><td class="num">${r.v2_g??'—'}${r.err_v2_g!=null?` <span class="muted">${r.err_v2_g>0?'+':''}${Math.round(r.err_v2_g)}%</span>`:''}</td><td class="muted" style="font-size:11px">${esc(r.engine||'')}${r.holiday?' · '+esc(r.holiday):''}</td></tr>`).join('')}
     </table></div>`:''}
-    <div class="prov" style="margin-top:8px">Both engines are frozen the morning each day is first opened and graded when its Oracle file lands. The app plans on v2; v1 keeps running for the comparison. Replay before launch (363 days): v1 18.0% → v2 15.3% average miss on sales.</div>`
+    <div class="prov" style="margin-top:8px">Both engines are frozen the morning each day is first opened and graded when its Oracle file lands. The app plans on v2; v1 keeps running for the comparison. Replay before launch (363 days): v1 18.0% → v2 15.3% average miss on sales. v2.1 (Sep 23): holiday double-count fixed, trend reacts faster, self-correction on its own misses, likely range shown — 2026 replay 16.2% → 15.0%, holidays 25% → 17%, days within 20%: 69% → 75%.</div>`
     :`<div class="muted" style="font-size:12px">No graded days yet. The first row lands the morning after the next Oracle upload.</div>`}
   </div>`;
 }
