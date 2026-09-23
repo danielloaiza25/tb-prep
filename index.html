@@ -1181,6 +1181,33 @@
   .amt button.z{color:var(--ok)}
   .amt button.z.on{background:var(--ok);border-color:var(--ok);color:#fff}
   .fcsaved{font-size:11px;font-weight:700;color:var(--ok);white-space:nowrap}
+  /* order-day reminders (Sep 22 2026) */
+  .or-card{background:#fff;border-left:5px solid var(--gold);border-radius:12px;padding:11px 13px;margin:0 0 10px;box-shadow:0 1px 3px rgba(0,0,0,.06);font-size:13.5px}
+  .or-card.or-late{border-left-color:var(--coral)}
+  .or-card.or-done{border-left-color:var(--palm);opacity:.85}
+  .or-card b{color:var(--ocean-dark)}
+  .or-d{font-size:12.5px;color:#444;margin-top:3px}
+  .or-btn{margin:8px 6px 0 0;padding:8px 12px;font-size:13px;width:auto}
+  .or-badge{position:absolute;top:2px;right:6px;background:var(--coral);color:#fff;border-radius:9px;font-size:10px;line-height:1;padding:3px 5px;font-weight:800}
+  #tabs button{position:relative}
+  .or-wk{display:grid;grid-template-columns:repeat(7,1fr);gap:4px;font-size:11px;text-align:center;margin-top:8px}
+  .or-wk>div{background:var(--sand);border-radius:8px;padding:5px 2px;min-height:40px}
+  .or-wk>div.today{outline:2px solid var(--ocean)}
+  .or-wk .dn{display:block;font-weight:700;color:var(--muted)}
+  .or-wk .v{display:block;border-radius:5px;margin-top:3px;padding:2px 0;color:#fff;font-weight:700;font-size:10px;cursor:pointer}
+  /* opening / closing checklist (Sep 23 2026) */
+  .ck-big{font-size:23px;font-weight:800;color:var(--ocean-dark);line-height:1.22;margin:12px 0 6px}
+  .ck-yes{display:block;width:100%;padding:24px 0;border-radius:16px;background:linear-gradient(135deg,var(--ocean),var(--lagoon));color:#fff;font-size:28px;font-weight:900;text-align:center;margin-top:20px;box-shadow:0 3px 10px rgba(11,74,79,.3);border:none;font-family:inherit}
+  .ck-row{display:flex;gap:8px;margin-top:10px}
+  .ck-btn{flex:1;padding:12px 10px;border-radius:11px;font-weight:700;font-size:13.5px;width:auto}
+  .ck-warn{color:var(--coral)}
+  .ck-prog{display:flex;gap:3px;margin:8px 0 2px}.ck-prog i{flex:1;height:6px;border-radius:3px;background:var(--sand-dark)}.ck-prog i.d{background:var(--palm)}.ck-prog i.s{background:var(--gold)}.ck-prog i.n{background:var(--coral)}.ck-prog i.cur{background:var(--ocean)}
+  .ck-li{display:flex;align-items:center;gap:9px;padding:7px 0;border-top:1px solid var(--line);font-size:13px}
+  .ck-ck{width:22px;height:22px;border-radius:6px;border:2px solid var(--line);flex:0 0 auto;text-align:center;line-height:20px;font-weight:900;color:#fff;font-size:13px}
+  .ck-ck.d{background:var(--palm);border-color:var(--palm)}.ck-ck.s{background:var(--gold);border-color:var(--gold)}.ck-ck.n{background:var(--coral);border-color:var(--coral)}
+  .ck-kpi{display:flex;gap:8px}.ck-kpi div{flex:1;background:var(--sand);border-radius:10px;padding:8px 4px;text-align:center}.ck-kpi b{display:block;font-size:20px;color:var(--ocean-dark)}.ck-kpi i{font-style:normal;font-size:10.5px;color:var(--muted)}
+  .ck-lab{display:flex;flex-direction:column;gap:3px;font-size:12px;color:var(--muted);margin-top:8px}.ck-lab input,.ck-lab select{font-size:14px;padding:8px 9px;border:1.5px solid var(--line);border-radius:9px;width:100%;box-sizing:border-box}
+  .tag{display:inline-block;font-size:10.5px;padding:2px 7px;border-radius:6px;background:var(--sand-dark);color:#444;margin-right:4px}
 </style>
 <script>
 // The background choice is a per-device thing — Dan's phone and the kitchen tablet can
@@ -1211,6 +1238,7 @@
   <symbol id="i-back" viewBox="0 0 24 24"><path d="M20 12H4.5M10.4 5.6 4 12l6.4 6.4"/></symbol>
   <symbol id="i-plus" viewBox="0 0 24 24"><path d="M12 4.5v15M4.5 12h15"/></symbol>
   <symbol id="i-search" viewBox="0 0 24 24"><circle cx="10.8" cy="10.8" r="6.6"/><path d="M15.6 15.6 20.5 20.5"/></symbol>
+  <symbol id="i-checklist" viewBox="0 0 24 24"><rect x="4" y="3.5" width="16" height="17" rx="2.5"/><path d="M8 9.2l1.8 1.8 3.4-3.6M8 15.2l1.8 1.8 3.4-3.6"/><path d="M15 9h2.5M15 15h2.5"/></symbol>
   <symbol id="i-check" viewBox="0 0 24 24"><path d="M4.5 12.6 9.6 17.7 19.5 6.9"/></symbol>
   <symbol id="i-caret" viewBox="0 0 24 24"><path d="M9.5 5.5 16 12l-6.5 6.5"/></symbol>
   <symbol id="i-expand" viewBox="0 0 24 24"><path d="M9 3.8H3.8V9M15 3.8h5.2V9M9 20.2H3.8V15M15 20.2h5.2V15"/></symbol>
@@ -1231,6 +1259,7 @@
   <button data-v="today"><svg class="ico"><use href="#i-today"/></svg>Today</button>
   <button data-v="count"><svg class="ico"><use href="#i-count"/></svg>Count/Lists</button>
   <button data-v="prep"><svg class="ico"><use href="#i-prep"/></svg>Prep</button>
+  <button data-v="checklist"><svg class="ico"><use href="#i-checklist"/></svg>Checklist</button>
   <button data-v="recipes"><svg class="ico"><use href="#i-recipes"/></svg>Recipes</button>
   <button data-v="waste"><svg class="ico"><use href="#i-waste"/></svg>Waste</button>
   <button data-v="orders"><svg class="ico"><use href="#i-orders"/></svg>Orders</button>
@@ -1244,7 +1273,7 @@ const SB_KEY='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZ
 const TBID='9f8d7c6b-5a49-4e38-b271-06d5f00dbeef'; // Tommy Bahama tenant inside ChefOpsAI
 // Stamped by publish.sh at upload time. It is the only version label there is now —
 // one address, updated in place, so this tells you which build that address is serving.
-const BUILD='Sep 22, 2026 · 11:15 AM';
+const BUILD='Sep 23, 2026 · 9:05 PM';
 // ---------- IS THIS PHONE EVEN RUNNING THE LATEST BUILD? ----------
 // Sep 3 2026. Three prep fixes shipped and Dan still saw the old behaviour, because the app
 // installs to the home screen and an installed web app does not go back and re-fetch its own
@@ -2238,9 +2267,13 @@ function splitTasks(rows, staffIds){
 const PERM_SECTIONS=[
   ['today','Today','Hoy'],['count','Count','Conteo'],['prep','Prep','Preparación'],
   ['recipes','Recipes','Recetas'],['waste','Waste','Merma'],['orders','Orders','Pedidos'],
-  ['analytics','Analytics','Análisis'],['admin','Admin/Settings','Admin/Ajustes']];
+  ['analytics','Analytics','Análisis'],['admin','Admin/Settings','Admin/Ajustes'],
+  ['checklist','Checklist','Lista']];
 const PERM_CAPS=[
   ['count.start','Start & submit a count','Hacer y enviar un conteo'],
+  ['checklist.do','Do the opening / closing checklist','Hacer la lista de apertura / cierre'],
+  ['checklist.edit','Edit the checklist (items, who, order)','Editar la lista (puntos, quién, orden)'],
+  ['checklist.results','See checklist results','Ver resultados de la lista'],
   ['count.delete','Delete a count','Borrar un conteo'],
   ['prep.generate','Generate / replace / delete the prep list','Generar o borrar la lista'],
   ['prep.assign','Assign prep to people','Asignar prep a la gente'],
@@ -2273,11 +2306,18 @@ function permDefaults(){
     lead:   {label:'Lead', es:'Encargado', rank:2,
              // Orders shipped ON for leads per Dan Aug 11 ("usually management, sometimes
              // the leads") — one switch in Roles & access turns it off if he changes his mind.
-             sections:off(SK,['today','count','prep','recipes','waste','orders']),
-             caps:off(CK,['count.start','prep.assign','prep.check','prep.print','waste.log','86.log','cuts.log','orders.edit','dev.report'])},
+             sections:off(SK,['today','count','prep','recipes','waste','orders','checklist']),
+             caps:off(CK,['count.start','prep.assign','prep.check','prep.print','waste.log','86.log','cuts.log','orders.edit','dev.report','checklist.do','checklist.results'])},
     cook:   {label:'Cook', es:'Cocinero', rank:3,
-             sections:off(SK,['today','recipes','waste']),
-             caps:off(CK,['waste.log','86.log','cuts.log','dev.report'])} }};
+             sections:off(SK,['today','recipes','waste','checklist']),
+             caps:off(CK,['waste.log','86.log','cuts.log','dev.report','checklist.do'])},
+    // Sep 23 2026 — Dan: a PIN-gated workbench for the Chef that is ONLY the checklist. Same
+    // address, same PIN, one tab: do the lists, edit them, read the results. Nothing else
+    // of the app is drawn for this role. Rank 2 so the login screen files him under
+    // Management, not Kitchen team.
+    chef_checklist:{label:'Chef · checklist only', es:'Chef · solo la lista', rank:2,
+             sections:off(SK,['checklist']),
+             caps:off(CK,['checklist.do','checklist.edit','checklist.results'])} }};
 }
 // Saved switches win; defaults only fill in a role or a switch that shipped after the save,
 // so an update never silently flips something Dan set on purpose.
@@ -2362,7 +2402,7 @@ window.setRole=async(id,role)=>{ if(!guard('admin.perms')) { render(); return; }
 
 // ---------- data layer (ChefOpsAI schema) ----------
 async function loadAll(){
-  const [emp,inv,rec,fam,mo,se,pe,fcm,fsq,dhq,f2q] = await Promise.all([
+  const [emp,inv,rec,fam,mo,se,pe,fcm,fsq,dhq,f2q,vrq] = await Promise.all([
     db.from('employees').select('*').eq('restaurant_id',TBID).order('created_at'),
     db.from('inventory').select('*').eq('restaurant_id',TBID).order('sheet_order',{nullsFirst:false}),
     db.from('recipes').select('*').eq('restaurant_id',TBID).eq('recipe_type','book'),
@@ -2376,9 +2416,10 @@ async function loadAll(){
     // year-over-year trend, plus the side-by-side ledger both engines write to.
     db.from('tb_daily_history').select('business_date,guests,net_sales,checks').eq('synthetic',false).order('business_date'),
     db.from('tb_forecast_v2').select('*').order('business_date',{ascending:false}).limit(400),
+    db.from('tb_vendor_rules').select('*'),
   ]);
   S.scores=fsq.data||[];
-  fcHistLoad(dhq.data||[]); S.fc2rows=f2q.data||[];
+  fcHistLoad(dhq.data||[]); S.fc2rows=f2q.data||[]; S.vrules=vrq.data||[];
   await loadEvents();                 // corrections read the calendar, so it loads first
   S.corr=corrCompute(S.scores);
   // Unsaved switch edits survive a background refresh; otherwise the nightly reload would
@@ -5482,6 +5523,421 @@ window.setLang=async(lg)=>{
   s.lang=lg; s.meta=jparse(notes,{}); S.user=s; render();
 };
 
+// ---- ORDER-DAY REMINDERS (Dan, Sep 15: "reminders on days i usually do an order. but through
+// the app. not you." · mockup approved Sep 22: Sysco Sun+Thu, Ed Don and NOR included) ----
+// Days come from tb_vendor_rules.remind_days (the calendar Dan saved, corrected for what he
+// actually does). Nothing here pushes to a phone — it is what you see when you open the app.
+const OR_SUPPLIER={sysco:'Sysco', wcpm:'West Coast Prime Meats', proact:'Proact'};
+function orRules(){ return (S.vrules||[]).filter(r=>Array.isArray(r.remind_days)&&r.remind_days.length); }
+function orLabel(r){ const v=ogVendor(r.vendor); return (v&&v.label)||r.label||r.vendor; }
+function orHasGuide(vendor){ const v=ogVendor(vendor); return !!(v && !v.pending); }
+function orNowMin(){ const p=new Intl.DateTimeFormat('en-US',{timeZone:'America/Los_Angeles',hour:'numeric',minute:'numeric',hour12:false}).formatToParts(new Date()); const h=Number((p.find(x=>x.type==='hour')||{}).value||0)%24, m=Number((p.find(x=>x.type==='minute')||{}).value||0); return h*60+m; }
+function orCutMin(r){ const m=/^(\d{1,2}):(\d{2})/.exec(String(r.cutoff||'')); return m?Number(m[1])*60+Number(m[2]):null; }
+function orCutLabel(r){ const c=orCutMin(r); if(c==null) return ''; const h=Math.floor(c/60), mi=c%60; return `${((h+11)%12)+1}:${String(mi).padStart(2,'0')} ${h<12?'AM':'PM'}`; }
+function orNextDelivery(r,d){ const dd=r.delivery_days||[]; if(!dd.length) return null; for(let k=1;k<=7;k++){ const x=shiftDay(d,k); if(dd.includes(dateObjLA(x).getDay())) return x; } return null; }
+function orDismissKey(d){ return 'tb_or_dismiss_'+d; }
+function orDismissed(d,vendor){ try{ return (JSON.parse(localStorage.getItem(orDismissKey(d))||'[]')).includes(vendor); }catch(e){ return false; } }
+// what happened today per vendor: the app's own orders (sent / in progress) and logged skips
+async function orLoadToday(d){
+  if(S.orDay&&S.orDay.d===d&&Date.now()-S.orDay.at<60000) return S.orDay;
+  const out={d, at:Date.now(), orders:{}, skips:{}, last:{}};
+  try{
+    const [o,s,l]=await Promise.all([
+      db.from('tb_vendor_orders').select('vendor,status,sent_at,sent_by,counted_by,created_at').eq('order_date',d).neq('status','duplicate').order('created_at',{ascending:false}),
+      db.from('tb_dev_events').select('name,who,at').eq('kind','order.skip').eq('on_date',d),
+      db.from('tb_supplier_orders').select('supplier,order_no,delivery_date,total,line_count').order('delivery_date',{ascending:false}).limit(40)
+    ]);
+    (o.data||[]).forEach(x=>{ const cur=out.orders[x.vendor]; if(!cur || (x.status==='sent'&&cur.status!=='sent')) out.orders[x.vendor]=x; });
+    (s.data||[]).forEach(x=>{ out.skips[x.name]=x; });
+    (l.data||[]).forEach(x=>{ if(!out.last[x.supplier]) out.last[x.supplier]=x; });
+  }catch(e){}
+  S.orDay=out; return out;
+}
+// one row per vendor due today, with its state
+function orToday(d){
+  const dow=dateObjLA(d).getDay(), T=S.orDay&&S.orDay.d===d?S.orDay:{orders:{},skips:{},last:{}};
+  const now=d===todayLA()?orNowMin():0;
+  return orRules().filter(r=>r.remind_days.includes(dow)).map(r=>{
+    const o=T.orders[r.vendor], cut=orCutMin(r);
+    let state='open';
+    if(o&&o.status==='sent') state='sent';
+    else if(T.skips[r.vendor]) state='skipped';
+    else if(orDismissed(d,r.vendor)) state='dismissed';
+    else if(o&&o.status==='in_progress') state='counting';
+    else if(cut!=null && now>cut) state='late';
+    return {r, state, order:o, skip:T.skips[r.vendor], last:T.last[OR_SUPPLIER[r.vendor]]||null};
+  });
+}
+function orOpenCount(){ try{ return orToday(todayLA()).filter(x=>x.state==='open'||x.state==='late'||x.state==='counting').length; }catch(e){ return 0; } }
+function orCardHtml(d){
+  if(d!==todayLA() || !sec('orders')) return '';
+  const rows=orToday(d); if(!rows.length) return '';
+  const es=isES();
+  return rows.map(({r,state,order,skip,last})=>{
+    const lab=orLabel(r), cut=orCutLabel(r), nd=orNextDelivery(r,d);
+    const lands=nd?(nd===shiftDay(d,1)?(es?'llega mañana':'lands tomorrow'):(es?'llega ':'lands ')+fmtDate(nd)):'';
+    const lastLine=last?`<div class="or-d">${es?'Último pedido':'Last order'} ${esc(lab)}: ${fmtDate(last.delivery_date)} · ${last.line_count||0} ${es?'líneas':'lines'}${can('analytics.money')&&last.total!=null?' · $'+Number(last.total).toLocaleString(undefined,{minimumFractionDigits:2,maximumFractionDigits:2}):''}</div>`:'';
+    const startBtn=orHasGuide(r.vendor)?`<button class="btn-secondary or-btn" onclick="orStart('${r.vendor}')">${es?'Empezar el conteo ›':'Start the count ›'}</button>`:`<button class="btn-secondary or-btn" onclick="orStart('${r.vendor}')">${es?'Ir a Pedidos ›':'Go to Orders ›'}</button>`;
+    if(state==='sent') return `<div class="or-card or-done"><b>✓ ${esc(lab)}</b> — ${es?'enviado':'sent'} ${order.sent_at?new Date(order.sent_at).toLocaleTimeString('en-US',{timeZone:'America/Los_Angeles',hour:'numeric',minute:'2-digit'}):''}${order.sent_by?' · '+esc(order.sent_by):''}${nd?' · '+lands:''}</div>`;
+    if(state==='skipped') return `<div class="or-card or-done"><b>${esc(lab)}</b> — ${es?'omitido a propósito':'skipped on purpose'}${skip.who?' · '+esc(skip.who):''}</div>`;
+    if(state==='dismissed') return '';
+    if(state==='counting') return `<div class="or-card"><b>${es?'Día de pedido':'Order day'} · ${esc(lab)}</b> — ${es?'conteo en curso':'count in progress'}${cut?` · ${es?'cierre':'cutoff'} ${cut}`:''}${lastLine}${startBtn}</div>`;
+    if(state==='late') return `<div class="or-card or-late"><b>${esc(lab)} — ${es?'pasó el cierre':'cutoff passed'}${cut?' ('+cut+')':''}</b> · ${es?'sin pedido hoy':'no order sent today'}${lastLine}
+      ${startBtn}<button class="btn-ghost or-btn" onclick="orSkip('${r.vendor}')">${es?'Omitido a propósito':'Skipped on purpose'}</button></div>`;
+    return `<div class="or-card"><b>${es?'Día de pedido':'Order day'} · ${esc(lab)}</b>${cut?` — ${es?'cierre':'cutoff'} ${cut}`:''}${lands?' · '+lands:''}${lastLine}
+      ${startBtn}<button class="btn-ghost or-btn" onclick="orNotToday('${r.vendor}')">${es?'Hoy no':'Not today'}</button></div>`;
+  }).join('');
+}
+window.orStart=(vendor)=>{ S.view='orders'; if(orHasGuide(vendor)){ ogOpen(vendor); } else { S.og.page='pick'; render(); } };
+window.orNotToday=(vendor)=>{ const d=todayLA(); try{ const a=JSON.parse(localStorage.getItem(orDismissKey(d))||'[]'); if(!a.includes(vendor)) a.push(vendor); localStorage.setItem(orDismissKey(d),JSON.stringify(a)); }catch(e){} render(); };
+window.orSkip=async(vendor)=>{
+  const d=todayLA();
+  try{ await db.from('tb_dev_events').insert({restaurant_id:TBID, kind:'order.skip', name:vendor, on_date:d, who:(pu()&&pu().name)||null, who_id:(pu()&&pu().id)||null, detail:'skipped on purpose', build:BUILD}); }catch(e){ toast('Could not log the skip'); return; }
+  S.orDay=null; await orLoadToday(d); render();
+};
+// the Orders tab badge — painted after the tab bar is drawn
+function orPaintBadge(){
+  try{
+    const b=document.querySelector('#tabs button[data-v="orders"]'); if(!b) return;
+    const old=b.querySelector('.or-badge'); if(old) old.remove();
+    const n=sec('orders')?orOpenCount():0; if(!n) return;
+    const s=document.createElement('span'); s.className='or-badge'; s.textContent=n; b.appendChild(s);
+  }catch(e){}
+}
+// this-week strip on the Orders screen: order days per vendor, today outlined
+function orWeekHtml(){
+  const rules=orRules(); if(!rules.length) return '';
+  const d=todayLA(), wk=weekOf(d), es=isES();
+  const col={sysco:'var(--ocean)',proact:'var(--palm)',wcpm:'var(--navy)',eddon:'var(--gold)',nor:'#8d6e63',seasonguys:'var(--gold)'};
+  const short={sysco:'Sysco',proact:'Pro Act',wcpm:'WCPM',eddon:'Ed Don',nor:'NOR',seasonguys:'Season'};
+  return `<div class="card"><h2>${es?'Esta semana':'This week'} · ${es?'días de pedido':'order days'}<span class="h2sub">${es?'toca un día para empezar ese conteo':'tap a vendor to start that count'}</span></h2>
+    <div class="or-wk">${wk.map(x=>{ const dow=dateObjLA(x).getDay(); const vs=rules.filter(r=>r.remind_days.includes(dow));
+      return `<div class="${x===d?'today':''}"><span class="dn">${WD[dow].slice(0,3)}</span>${vs.map(r=>`<span class="v" style="background:${col[r.vendor]||'#777'}" ${orHasGuide(r.vendor)?`onclick="orStart('${r.vendor}')"`:''}>${short[r.vendor]||esc(orLabel(r))}</span>`).join('')}</div>`; }).join('')}</div>
+    <div class="muted" style="font-size:10.5px;margin-top:6px">${es?'Días del calendario de proveedores (Admin › Proveedores). "Hoy no" oculta el aviso solo por hoy; "omitido a propósito" queda registrado.':'From the vendor calendar you saved. "Not today" hides the reminder for that day only; "Skipped on purpose" is logged, so a missed order and a chosen skip never look the same.'}</div></div>`;
+}
+
+// ---- OPENING / CLOSING CHECKLIST (Izzi's ask, Sep 22 2026; Dan's rules Sep 23) ----
+// One item fills the screen. YES saves ONE row and the next item slides in. Skipped items
+// come back at the end. Nothing forces the ten minutes: two answers at 9:00 and six at 9:45
+// are eight rows with eight times. Who did it comes from the login, never from typing.
+// Nothing here is assigned by us — every item's "assign to" is the Chef's to set.
+const CK_AREAS=['Walk-in','Line','Prep','Back','Front','Office','Dish','Bar'];
+const CK_TYPES=[
+  ['yes','Tap YES','Marcar SÍ'],
+  ['number','A number (temp, count) with an optional range','Un número (temperatura, cantidad) con rango opcional'],
+  ['photo','YES with a photo','SÍ con foto'],
+  ['choice','Pick one of a few answers','Elegir una respuesta'],
+  ['verify','Opener checks a closing item — was it left right?','El que abre revisa un punto del cierre — ¿quedó bien?']];
+const CK_REASONS=[['time','Ran out of time','No hubo tiempo'],['supplies','No supplies / broken','Sin material / descompuesto'],['station','Not my station','No es mi estación'],['other','Other','Otro']];
+function ckState(){ if(!S.ck) S.ck={page:'home', shift:null, items:[], runs:{}, logs:{}, loadedFor:null, idx:0, order:[], edit:null, res:null}; return S.ck; }
+function ckShiftFor(){ // which list the phone offers first: closing after 3 PM, opening before
+  return orNowMin()>=15*60?'closing':'opening'; }
+function ckItems(shift){ return ckState().items.filter(i=>i.active && i.shift===shift).sort((a,b)=>a.ord-b.ord); }
+function ckLabel(i){ return (isES()&&i.text_es)?i.text_es:i.text_en; }
+function ckDetail(i){ return (isES()&&i.detail_es)?i.detail_es:(i.detail_en||''); }
+function ckStaffLabel(id){ const s=S.staff.find(x=>x.id===id); return s?`${s.name}${s.title?` <span class="muted" style="font-size:10.5px">${esc(s.title)}</span>`:''}`:''; }
+async function ckLoad(d, force){
+  const C=ckState(); d=d||todayLA();
+  if(!force && C.loadedFor===d && Date.now()-(C.loadedAt||0)<30000) return;
+  const [it,ru]=await Promise.all([
+    db.from('tb_check_items').select('*').order('shift').order('ord'),
+    db.from('tb_check_runs').select('*').in('on_date',[d,shiftDay(d,-1)])
+  ]);
+  C.items=it.data||[]; C.runs={}; C.logs={};
+  (ru.data||[]).forEach(r=>{ C.runs[r.on_date+'|'+r.shift]=r; });
+  const ids=Object.values(C.runs).map(r=>r.id);
+  if(ids.length){ const lg=await db.from('tb_check_log').select('*').in('run_id',ids); (lg.data||[]).forEach(l=>{ (C.logs[l.run_id]=C.logs[l.run_id]||{})[l.item_id]=l; }); }
+  C.loadedFor=d; C.loadedAt=Date.now();
+}
+function ckRun(d,shift){ return ckState().runs[d+'|'+shift]||null; }
+function ckLogOf(run){ return run?(ckState().logs[run.id]||{}):{}; }
+async function ckOpenRun(d,shift){
+  let r=ckRun(d,shift); if(r) return r;
+  const u=pu(); const row={on_date:d, shift, opened_by:u.name, opened_by_id:u.id, build:BUILD};
+  const q=await db.from('tb_check_runs').upsert(row,{onConflict:'restaurant_id,on_date,shift',ignoreDuplicates:true}).select('*').maybeSingle();
+  if(q.error){ toast(q.error.message||'Could not start the list'); return null; }
+  if(!q.data){ const g=await db.from('tb_check_runs').select('*').eq('on_date',d).eq('shift',shift).maybeSingle(); r=g.data; } else r=q.data;
+  if(r){ ckState().runs[d+'|'+shift]=r; ckState().logs[r.id]=ckState().logs[r.id]||{}; }
+  return r;
+}
+// auto items: the app already knows whether these happened — no tap, and it cannot be faked
+async function ckAutoCheck(d, items){
+  const out={};
+  for(const i of items){
+    if(i.auto_key==='prep_list'){ try{ const q=await db.from('prep_lists').select('id').eq('restaurant_id',TBID).eq('date',d).limit(1); out[i.id]=!!(q.data&&q.data.length); }catch(e){} }
+    if(i.auto_key==='orders_placed'){ try{ const q=await db.from('tb_vendor_orders').select('id').eq('order_date',d).eq('status','sent').limit(1); out[i.id]=!!(q.data&&q.data.length); }catch(e){} }
+  }
+  return out;
+}
+async function ckSave(run, item, result, extra){
+  const u=pu(); if(S.previewUser){ toast('Preview only · Solo vista'); return false; }
+  const row=Object.assign({run_id:run.id, item_id:item.id, on_date:run.on_date, shift:run.shift, result, who:u.name, who_id:u.id, at:new Date().toISOString(), build:BUILD}, extra||{});
+  const q=await db.from('tb_check_log').upsert(row,{onConflict:'run_id,item_id'}).select('*').maybeSingle();
+  if(q.error){ toast(q.error.message||'Could not save'); return false; }
+  (ckState().logs[run.id]=ckState().logs[run.id]||{})[item.id]=q.data||row;
+  return true;
+}
+// ---- the run: one item at a time ----
+async function ckStart(shift){
+  const C=ckState(); const d=todayLA();
+  await ckLoad(d,true);
+  const run=await ckOpenRun(d,shift); if(!run) return;
+  const items=ckItems(shift); const log=ckLogOf(run);
+  const auto=await ckAutoCheck(d, items.filter(i=>i.auto_key));
+  for(const i of items){ if(i.auto_key && auto[i.id] && !log[i.id]) await ckSave(run,i,'auto',{note:'checked by the app'}); }
+  C.shift=shift; C.page='run'; C.pass=1;
+  C.order=items.filter(i=>!ckLogOf(run)[i.id] || ckLogOf(run)[i.id].result==='skipped').map(i=>i.id);
+  C.idx=0; C.pending=null; tbMark('check.start', shift);
+  render();
+}
+function ckCurrent(){ const C=ckState(); const id=C.order[C.idx]; return C.items.find(i=>i.id===id)||null; }
+function ckAdvance(){ const C=ckState(); C.idx++; if(C.idx>=C.order.length){ C.page='end'; } render(); }
+window.ckYes=async()=>{ const C=ckState(); const it=ckCurrent(); const run=ckRun(todayLA(),C.shift); if(!it||!run) return;
+  if(it.type==='number'){ const v=Number((document.getElementById('ck-num')||{}).value); if(!isFinite(v)||(document.getElementById('ck-num')||{}).value===''){ toast(isES()?'Escribe el número':'Type the number'); return; }
+    const out=(it.range_lo!=null&&v<Number(it.range_lo))||(it.range_hi!=null&&v>Number(it.range_hi));
+    if(await ckSave(run,it,'yes',{value:v, note:out?'out of range':null})) ckAdvance(); return; }
+  if(it.type==='choice'){ const c=C.pending&&C.pending.choice; if(!c){ toast(isES()?'Elige una':'Pick one'); return; } if(await ckSave(run,it,'yes',{choice:c})){ C.pending=null; ckAdvance(); } return; }
+  if(it.type==='photo'){ const f=C.pending&&C.pending.photo; let path=null; if(f){ try{ path=`${TBID}/checks/${todayLA()}/${Date.now()}-${safeName(f.name)}`; const up=await db.storage.from('imports').upload(path,f,{contentType:f.type||'image/jpeg'}); if(up.error) path=null; }catch(e){ path=null; } }
+    if(await ckSave(run,it,'yes',{photo_path:path})){ C.pending=null; ckAdvance(); } return; }
+  if(await ckSave(run,it,'yes')) ckAdvance(); };
+window.ckNo=async()=>{ const C=ckState(); const it=ckCurrent(); const run=ckRun(todayLA(),C.shift); if(!it||!run) return;
+  const f=C.pending&&C.pending.photo; let path=null; if(f){ try{ path=`${TBID}/checks/${todayLA()}/${Date.now()}-${safeName(f.name)}`; const up=await db.storage.from('imports').upload(path,f,{contentType:f.type||'image/jpeg'}); if(up.error) path=null; }catch(e){} }
+  const note=(document.getElementById('ck-note')||{}).value||null;
+  if(await ckSave(run,it,'no',{photo_path:path, note})){ C.pending=null; ckAdvance(); } };
+window.ckSkip=async()=>{ const C=ckState(); const it=ckCurrent(); const run=ckRun(todayLA(),C.shift); if(!it||!run) return;
+  if(await ckSave(run,it,'skipped')){ C.pending=null; ckAdvance(); } };
+window.ckNotPossible=(on)=>{ const C=ckState(); C.pending=Object.assign({},C.pending||{},{np:!!on}); render(); };
+window.ckReason=async(code)=>{ const C=ckState(); const it=ckCurrent(); const run=ckRun(todayLA(),C.shift); if(!it||!run) return;
+  if(await ckSave(run,it,'not_possible',{reason:code})){ C.pending=null; ckAdvance(); } };
+window.ckPick=(c)=>{ const C=ckState(); C.pending=Object.assign({},C.pending||{},{choice:c}); render(); };
+window.ckPhoto=(input)=>{ const C=ckState(); const f=input.files&&input.files[0]; C.pending=Object.assign({},C.pending||{},{photo:f||null}); const l=document.getElementById('ck-photo-lab'); if(l) l.textContent=f?(isES()?'foto lista ✓':'photo ready ✓'):''; };
+window.ckAnswerSkipped=()=>{ const C=ckState(); const run=ckRun(todayLA(),C.shift); const log=ckLogOf(run);
+  C.order=ckItems(C.shift).filter(i=>log[i.id]&&log[i.id].result==='skipped').map(i=>i.id); C.idx=0; C.pass=2; C.page=C.order.length?'run':'end'; render(); };
+window.ckFinish=async()=>{ const C=ckState(); const run=ckRun(todayLA(),C.shift); if(!run) return; const u=pu();
+  const ini=(u.name||'').split(/\s+/).map(w=>w[0]||'').join('').toUpperCase().slice(0,3);
+  const secs=Math.max(0,Math.round((Date.now()-new Date(run.opened_at).getTime())/1000));
+  const q=await db.from('tb_check_runs').update({status:'closed', closed_by:u.name, closed_by_id:u.id, closed_at:new Date().toISOString(), initials:ini, seconds:secs}).eq('id',run.id).select('*').maybeSingle();
+  if(q.error){ toast(q.error.message||'Could not close'); return; }
+  C.runs[run.on_date+'|'+run.shift]=q.data||Object.assign(run,{status:'closed'}); tbMark('check.finish', C.shift+' · '+secs+'s');
+  C.page='home'; render(); };
+window.ckHome=()=>{ ckState().page='home'; render(); };
+window.ckGo=(p)=>{ ckState().page=p; render(); };
+// ---- HTML: the run screen ----
+function ckRunHtml(){
+  const C=ckState(); const it=ckCurrent(); const es=isES(); const run=ckRun(todayLA(),C.shift); if(!it||!run) return ckEndHtml();
+  const items=ckItems(C.shift), log=ckLogOf(run);
+  const bars=items.map(i=>{ const l=log[i.id]; const k=l?(l.result==='skipped'?'s':(l.result==='no'||l.result==='not_possible'?'n':'d')):(i.id===it.id?'cur':''); return `<i class="${k}"></i>`; }).join('');
+  const P=C.pending||{};
+  const who=it.assign_id?`<span class="tag">${es?'para':'for'} ${esc(it.assign_name||'')}</span>`:'';
+  let body='';
+  if(it.type==='verify'){ /* handled below */ }
+  if(P.np && it.type!=='verify'){
+    body=`<div class="sub" style="margin-top:14px"><b>${es?'¿Por qué no se pudo?':'Why not possible?'}</b></div>
+      <div style="display:flex;flex-direction:column;gap:7px;margin-top:8px">${CK_REASONS.map(r=>`<button class="btn-ghost ck-btn" onclick="ckReason('${r[0]}')">${es?r[2]:r[1]}</button>`).join('')}</div>
+      <button class="btn-ghost ck-btn" style="margin-top:10px" onclick="ckNotPossible(false)">‹ ${es?'Regresar':'Back'}</button>`;
+  } else if(it.type==='number'){
+    body=`<div style="display:flex;gap:8px;margin-top:16px;align-items:center"><input id="ck-num" type="number" inputmode="decimal" step="any" style="flex:1;font-size:30px;font-weight:800;text-align:center;padding:12px;border:2px solid var(--ocean);border-radius:12px" placeholder="—">${it.unit?`<div style="font-size:20px;color:var(--muted)">${esc(it.unit)}</div>`:''}</div>
+      ${it.range_lo!=null||it.range_hi!=null?`<div class="muted" style="font-size:12px;margin-top:4px">${es?'esperado':'expected'} ${it.range_lo!=null?it.range_lo:''}${it.range_lo!=null&&it.range_hi!=null?' – ':''}${it.range_hi!=null?it.range_hi:''} ${esc(it.unit||'')}</div>`:''}
+      <button class="ck-yes" onclick="ckYes()">${es?'GUARDAR':'SAVE'}</button>
+      <div class="ck-row"><button class="btn-ghost ck-btn" onclick="ckSkip()">${es?'Después':'Skip for now'}</button><button class="btn-ghost ck-btn ck-warn" onclick="ckNotPossible(true)">${es?'No se pudo':'Not possible'}</button></div>`;
+  } else if(it.type==='choice'){
+    const ch=Array.isArray(it.choices)?it.choices:[];
+    body=`<div style="display:flex;flex-wrap:wrap;gap:8px;margin-top:14px">${ch.map(c=>`<button class="${P.choice===c?'btn-primary':'btn-ghost'} ck-btn" style="width:auto;flex:1 1 40%" onclick="ckPick('${esc(c).replace(/'/g,'&#39;')}')">${esc(c)}</button>`).join('')}</div>
+      <button class="ck-yes" onclick="ckYes()">${es?'GUARDAR':'SAVE'}</button>
+      <div class="ck-row"><button class="btn-ghost ck-btn" onclick="ckSkip()">${es?'Después':'Skip for now'}</button><button class="btn-ghost ck-btn ck-warn" onclick="ckNotPossible(true)">${es?'No se pudo':'Not possible'}</button></div>`;
+  } else if(it.type==='verify'){
+    const src=C.items.find(x=>x.id===it.verify_item); const yrun=ckRun(shiftDay(todayLA(),-1),'closing'); const yl=src&&yrun?ckLogOf(yrun)[src.id]:null;
+    body=`<div class="muted" style="font-size:12px;margin-top:8px">${es?'Anoche':'Last night'}: ${yrun?`${esc(yrun.closed_by||yrun.opened_by||'')} · ${yrun.status==='open'?(es?'lista sin cerrar':'list left open'):(es?'cerró':'closed')+' '+new Date(yrun.closed_at||yrun.opened_at).toLocaleTimeString('en-US',{timeZone:'America/Los_Angeles',hour:'numeric',minute:'2-digit'})}${yl?` · ${esc(src.code||'')} ${yl.result==='yes'||yl.result==='auto'?'✓':yl.result} ${new Date(yl.at).toLocaleTimeString('en-US',{timeZone:'America/Los_Angeles',hour:'numeric',minute:'2-digit'})}`:(src?` · ${esc(src.code||'')} ${es?'sin marcar':'not marked'}`:'')}`:(es?'sin lista de cierre':'no closing list')}</div>
+      <div class="ck-row" style="margin-top:18px"><button class="btn-primary ck-btn" style="padding:22px 0;font-size:22px" onclick="ckYes()">${es?'SÍ':'YES'}</button><button class="btn-ghost ck-btn ck-warn" style="padding:22px 0;font-size:22px" onclick="ckNotPossible('no')">NO</button></div>`;
+    if(P.np==='no'||P.np===true){ body=`<div class="sub" style="margin-top:12px"><b>${es?'¿Qué encontraste?':'What did you find?'}</b> <span class="muted">(${es?'opcional':'optional'})</span></div>
+      <input id="ck-note" style="width:100%;margin-top:6px;padding:10px;border:1.5px solid var(--line);border-radius:10px;font-size:14px" placeholder="${es?'una línea':'one line'}">
+      <label class="btn-ghost ck-btn" style="display:block;margin-top:8px;text-align:center">📷 ${es?'Foto':'Photo'} <span id="ck-photo-lab"></span><input type="file" accept="image/*" capture="environment" style="display:none" onchange="ckPhoto(this)"></label>
+      <button class="ck-yes" style="background:var(--coral)" onclick="ckNo()">${es?'GUARDAR "NO"':'SAVE "NO"'}</button>
+      <button class="btn-ghost ck-btn" style="margin-top:8px" onclick="ckNotPossible(false)">‹ ${es?'Regresar':'Back'}</button>`; }
+  } else { // yes / photo
+    body=`${it.type==='photo'?`<label class="btn-ghost ck-btn" style="display:block;margin-top:14px;text-align:center">📷 ${es?'Tomar foto':'Take the photo'} <span id="ck-photo-lab"></span><input type="file" accept="image/*" capture="environment" style="display:none" onchange="ckPhoto(this)"></label>`:''}
+      <button class="ck-yes" onclick="ckYes()">${es?'SÍ':'YES'}</button>
+      <div class="ck-row"><button class="btn-ghost ck-btn" onclick="ckSkip()">${es?'Después':'Skip for now'}</button><button class="btn-ghost ck-btn ck-warn" onclick="ckNotPossible(true)">${es?'No se pudo':'Not possible'}</button></div>`;
+  }
+  const done=items.filter(i=>log[i.id]&&log[i.id].result!=='skipped').length;
+  return `<div class="card" style="padding:12px 14px">
+    <div style="display:flex;justify-content:space-between;align-items:center"><b style="color:var(--ocean-dark)">${C.shift==='closing'?(es?'Cierre':'Closing'):(es?'Apertura':'Opening')}</b><span class="muted" style="font-size:12px">${done}/${items.length} · ${C.idx+1} ${es?'de':'of'} ${C.order.length}${C.pass===2?(es?' · repaso':' · second pass'):''}</span></div>
+    <div class="ck-prog">${bars}</div></div>
+  <div class="card" style="min-height:300px">
+    <div><span class="tag">${esc(it.area||'')}</span>${who}${it.code?`<span class="muted" style="font-size:10.5px">${esc(it.code)}</span>`:''}</div>
+    <div class="ck-big">${esc(ckLabel(it))}</div>
+    ${ckDetail(it)?`<div class="sub" style="font-size:13px;color:#444">${esc(ckDetail(it))}</div>`:''}
+    ${body}
+  </div>
+  <button class="btn-ghost ck-btn" style="width:100%" onclick="ckHome()">‹ ${es?'Salir (lo hecho queda guardado)':'Leave (what you did is saved)'}</button>`;
+}
+function ckEndHtml(){
+  const C=ckState(); const es=isES(); const run=ckRun(todayLA(),C.shift); if(!run) return '';
+  const items=ckItems(C.shift), log=ckLogOf(run);
+  const sk=items.filter(i=>log[i.id]&&log[i.id].result==='skipped'), un=items.filter(i=>!log[i.id]);
+  const done=items.length-sk.length-un.length;
+  const mins=Math.max(1,Math.round((Date.now()-new Date(run.opened_at).getTime())/60000));
+  const u=pu(); const ini=(u.name||'').split(/\s+/).map(w=>w[0]||'').join('').toUpperCase().slice(0,3);
+  return `<div class="card"><div class="ck-big" style="font-size:20px">${done} ${es?'de':'of'} ${items.length} ${es?'contestados':'answered'} · ${mins} min</div>
+    ${sk.length||un.length?`<div class="sub">${sk.length+un.length} ${es?'sin contestar — contéstalos ahora o quedan como "después" esta noche.':'skipped — answer them now, or they stay marked "skipped" tonight.'}</div>
+      ${[...sk,...un].map(i=>`<div class="ck-li"><span class="ck-ck s">·</span>${esc(ckLabel(i))}</div>`).join('')}
+      <div class="ck-row"><button class="btn-primary ck-btn" onclick="ckAnswerSkipped()">${es?'Contestar':'Answer them'} (${sk.length+un.length})</button></div>`:`<div class="sub" style="color:var(--palm);font-weight:700">${es?'Todo contestado.':'Everything answered.'}</div>`}
+  </div>
+  <div class="card"><div class="sub"><b>${es?'Terminar:':'Finish:'}</b> ${es?'toca tus iniciales para cerrar la lista.':'tap your initials to close the list.'}</div>
+    <button class="btn-primary ck-btn" style="font-size:24px;padding:16px 0;margin-top:8px" onclick="ckFinish()">${esc(ini||'OK')}</button>
+    <div class="muted" style="font-size:11px;margin-top:6px">${es?'Quién eres viene de tu inicio de sesión, no de lo que escribes.':'Who you are comes from your login, not from what you type.'}</div></div>`;
+}
+// ---- home: today's two lists ----
+function ckHomeHtml(){
+  const es=isES(); const d=todayLA(); const C=ckState();
+  const card=(shift)=>{ const items=ckItems(shift); const run=ckRun(d,shift); const log=ckLogOf(run);
+    const done=items.filter(i=>log[i.id]&&log[i.id].result!=='skipped').length;
+    const lab=shift==='closing'?(es?'Cierre':'Closing'):(es?'Apertura':'Opening');
+    const first=ckShiftFor()===shift;
+    let st='';
+    if(run&&run.status!=='open') st=`<div class="muted" style="font-size:12px">${es?'cerrada por':'closed by'} ${esc(run.closed_by||'')} · ${done}/${items.length} · ${run.seconds!=null?Math.round(run.seconds/60)+' min':''}</div>`;
+    else if(run) st=`<div class="muted" style="font-size:12px">${es?'en curso':'in progress'} · ${done}/${items.length} · ${es?'empezó':'started by'} ${esc(run.opened_by||'')}</div>`;
+    else st=`<div class="muted" style="font-size:12px">${items.length} ${es?'puntos · unos':'items · about'} ${Math.max(2,Math.round(items.length*0.8))} min</div>`;
+    const btn=!items.length?'':(run&&run.status!=='open')?'':`<button class="btn-primary ck-btn" style="margin-top:8px" onclick="ckStart('${shift}')">${run?(es?'Continuar':'Continue'):(es?'Empezar':'Start')} ›</button>`;
+    return `<div class="card" style="${first?'border-left:4px solid var(--gold)':''}"><b style="font-size:15px;color:var(--ocean-dark)">${lab} · ${fmtDate(d)}</b>${st}${btn}</div>`; };
+  const first=ckShiftFor(), second=first==='closing'?'opening':'closing';
+  const y=ckRun(shiftDay(d,-1),'closing'); const ylog=ckLogOf(y); const yi=ckItems('closing');
+  const yline=y?`<div class="card"><div class="sub"><b>${es?'Anoche':'Last night'}</b> · ${esc(y.closed_by||y.opened_by||'')} · ${yi.filter(i=>ylog[i.id]&&['yes','auto'].includes(ylog[i.id].result)).length}/${yi.length} ✓${y.status==='open'?` · <span style="color:var(--coral)">${es?'lista sin cerrar':'list left open'}</span>`:''}</div></div>`:'';
+  return `<div class="card"><h2>${es?'Lista de apertura / cierre':'Opening / Closing checklist'}<span class="h2sub">${es?'un punto a la vez · cada SÍ se guarda al momento':'one item at a time · every YES saves the moment you tap it'}</span></h2>
+    ${can('checklist.edit')||can('checklist.results')?`<div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:6px">${can('checklist.results')?`<button class="btn-ghost ck-btn" style="width:auto" onclick="ckGo('results')">${es?'Resultados':'Results'}</button>`:''}${can('checklist.edit')?`<button class="btn-ghost ck-btn" style="width:auto" onclick="ckGo('edit')">${es?'Editar la lista':'Edit the list'}</button>`:''}</div>`:''}</div>
+    ${card(first)}${card(second)}${yline}`;
+}
+// ---- Chef's editor ----
+function ckEditHtml(){
+  const es=isES(); const C=ckState(); const sh=C.editShift||'closing'; const items=ckItems(sh);
+  const E=C.edit; // item being edited (object) or null
+  const staff=S.staff.filter(s=>s.active&&s.login);
+  const form=(it)=>`<div class="card" style="border-left:4px solid var(--gold)">
+    <b>${it.id?(es?'Editar punto':'Edit item'):(es?'Nuevo punto':'New item')}</b>
+    <label class="ck-lab">${es?'Texto (EN)':'Text (EN)'}<input id="ed-en" value="${esc(it.text_en||'')}"></label>
+    <label class="ck-lab">Texto (ES)<input id="ed-es" value="${esc(it.text_es||'')}"></label>
+    <label class="ck-lab">${es?'Detalle / instrucción (opcional)':'Detail / instruction (optional)'}<input id="ed-det" value="${esc(it.detail_en||'')}"></label>
+    <label class="ck-lab">${es?'Turno':'Shift'}<select id="ed-shift"><option value="closing" ${it.shift==='closing'?'selected':''}>${es?'Cierre':'Closing'}</option><option value="opening" ${it.shift==='opening'?'selected':''}>${es?'Apertura':'Opening'}</option></select></label>
+    <label class="ck-lab">${es?'Área':'Area'}<select id="ed-area">${CK_AREAS.map(a=>`<option ${it.area===a?'selected':''}>${a}</option>`).join('')}</select></label>
+    <label class="ck-lab">${es?'Tipo de respuesta':'Answer type'}<select id="ed-type" onchange="ckEdType(this.value)">${CK_TYPES.map(t=>`<option value="${t[0]}" ${it.type===t[0]?'selected':''}>${es?t[2]:t[1]}</option>`).join('')}</select></label>
+    <div id="ed-type-extra">${ckEdTypeExtra(it)}</div>
+    <label class="ck-lab">${es?'Asignar a':'Assign to'}<select id="ed-assign"><option value="">${es?'— nadie (quien esté en turno)':'— open (whoever is on shift)'}</option>${staff.map(s=>`<option value="${s.id}" ${it.assign_id===s.id?'selected':''}>${esc(s.name)}${s.title?' · '+esc(s.title):''}</option>`).join('')}</select></label>
+    <label class="ck-lab">${es?'Cuándo':'When'}<select id="ed-timing"><option value="any" ${it.timing==='any'?'selected':''}>${es?'en cualquier momento del turno':'any time in the shift'}</option><option value="first" ${it.timing==='first'?'selected':''}>${es?'al empezar':'first thing'}</option><option value="last" ${it.timing==='last'?'selected':''}>${es?'antes de irse':'before leaving'}</option></select></label>
+    <label class="ck-lab" style="flex-direction:row;align-items:center;gap:8px"><input type="checkbox" id="ed-req" ${it.required!==false?'checked':''} style="width:auto">${es?'Obligatorio (cuenta en el porcentaje)':'Required (counts toward the completion %)'}</label>
+    <label class="ck-lab">${es?'Nota del Chef (se muestra debajo del punto)':'Chef\'s note (shown under the item)'}<input id="ed-note" value="${esc(it.note||'')}"></label>
+    <div class="ck-row"><button class="btn-primary ck-btn" onclick="ckEdSave()">${es?'Guardar':'Save'}</button><button class="btn-ghost ck-btn" onclick="ckEdCancel()">${es?'Cancelar':'Cancel'}</button>${it.id?`<button class="btn-ghost ck-btn ck-warn" onclick="ckEdRetire('${it.id}')">${it.active?(es?'Quitar de la lista':'Remove from list'):(es?'Volver a poner':'Put back')}</button>`:''}</div></div>`;
+  return `<div class="card"><h2>${es?'Editar la lista':'Edit the list'}<span class="h2sub">${es?'tuya: orden, texto, a quién, tipo de respuesta':'yours: order, wording, who, answer type'}</span>
+      <div style="display:flex;gap:8px;margin-top:6px"><button class="${sh==='closing'?'btn-primary':'btn-ghost'} ck-btn" style="width:auto" onclick="ckEdShift('closing')">${es?'Cierre':'Closing'}</button><button class="${sh==='opening'?'btn-primary':'btn-ghost'} ck-btn" style="width:auto" onclick="ckEdShift('opening')">${es?'Apertura':'Opening'}</button><button class="btn-ghost ck-btn" style="width:auto;margin-left:auto" onclick="ckHome()">‹ ${es?'Lista':'Checklist'}</button></div></div>
+    ${E&&!E.id?form(E):''}
+    ${items.map((it,k)=>E&&E.id===it.id?form(E):`<div class="card" style="padding:10px 12px;${it.active?'':'opacity:.5'}">
+      <div style="display:flex;align-items:flex-start;gap:8px"><b style="color:var(--muted);min-width:22px">${k+1}</b>
+        <div style="flex:1;min-width:0"><div style="font-size:13.5px"><b>${esc(it.text_en)}</b></div><div class="muted" style="font-size:11.5px">${esc(it.area||'')} · ${(CK_TYPES.find(t=>t[0]===it.type)||[])[1]||it.type}${it.auto_key?' · auto':''}${it.assign_id?` · <b>${ckStaffLabel(it.assign_id)}</b>`:` · ${es?'sin asignar':'unassigned'}`}</div></div>
+        <div style="display:flex;flex-direction:column;gap:3px"><button class="btn-ghost" style="padding:3px 8px;font-size:12px" onclick="ckEdMove('${it.id}',-1)">▲</button><button class="btn-ghost" style="padding:3px 8px;font-size:12px" onclick="ckEdMove('${it.id}',1)">▼</button></div>
+        <button class="btn-ghost" style="padding:6px 9px;font-size:12px" onclick="ckEdOpen('${it.id}')">${es?'editar':'edit'}</button></div></div>`).join('')}
+    ${E?'':`<button class="btn-ghost ck-btn" style="width:100%;border-style:dashed" onclick="ckEdNew()">+ ${es?'Agregar un punto':'Add an item'}</button>`}
+    <div class="muted" style="font-size:11px;margin-top:8px">${es?'Cada cambio queda registrado con tu nombre y fecha. Los cambios aplican la próxima vez que alguien abra la lista.':'Every change is logged with your name and date. Changes apply the next time someone opens the list.'}</div>`;
+}
+function ckEdTypeExtra(it){
+  const es=isES(); const t=(document.getElementById('ed-type')||{}).value||it.type;
+  if(t==='number') return `<div class="ck-row"><label class="ck-lab">${es?'Mín':'Min'}<input id="ed-lo" type="number" step="any" value="${it.range_lo!=null?it.range_lo:''}"></label><label class="ck-lab">${es?'Máx':'Max'}<input id="ed-hi" type="number" step="any" value="${it.range_hi!=null?it.range_hi:''}"></label><label class="ck-lab">${es?'Unidad':'Unit'}<input id="ed-unit" value="${esc(it.unit||'')}" placeholder="°F"></label></div>`;
+  if(t==='choice') return `<label class="ck-lab">${es?'Opciones (separadas por coma)':'Answers (comma separated)'}<input id="ed-choices" value="${esc((it.choices||[]).join(', '))}" placeholder="Sauté, Grill, Fry, Pantry"></label>`;
+  if(t==='verify'){ const cl=ckState().items.filter(i=>i.shift==='closing'&&i.active&&i.type!=='verify'); return `<label class="ck-lab">${es?'Revisa este punto del cierre':'Checks this closing item'}<select id="ed-verify">${cl.map(c=>`<option value="${c.id}" ${it.verify_item===c.id?'selected':''}>${esc(c.code||'')} ${esc(c.text_en)}</option>`).join('')}</select></label>`; }
+  return '';
+}
+window.ckEdType=(v)=>{ const C=ckState(); if(C.edit){ C.edit.type=v; const x=document.getElementById('ed-type-extra'); if(x) x.innerHTML=ckEdTypeExtra(C.edit); } };
+window.ckEdShift=(s)=>{ ckState().editShift=s; ckState().edit=null; render(); };
+window.ckEdOpen=(id)=>{ const it=ckState().items.find(i=>i.id===id); if(it) ckState().edit=Object.assign({},it); render(); };
+window.ckEdNew=()=>{ const C=ckState(); const sh=C.editShift||'closing'; const mx=Math.max(0,...ckItems(sh).map(i=>i.ord)); C.edit={shift:sh, ord:mx+10, area:'Line', type:'yes', timing:'any', required:true, active:true}; render(); };
+window.ckEdCancel=()=>{ ckState().edit=null; render(); };
+function ckEdRead(){
+  const g=id=>(document.getElementById(id)||{}).value; const E=ckState().edit||{};
+  const type=g('ed-type')||E.type||'yes';
+  const out={shift:g('ed-shift')||E.shift, area:g('ed-area')||null, text_en:(g('ed-en')||'').trim(), text_es:(g('ed-es')||'').trim()||null, detail_en:(g('ed-det')||'').trim()||null,
+    type, assign_id:g('ed-assign')||null, timing:g('ed-timing')||'any', required:!!(document.getElementById('ed-req')||{}).checked, note:(g('ed-note')||'').trim()||null,
+    range_lo:null, range_hi:null, unit:null, choices:null, verify_item:null};
+  if(type==='number'){ out.range_lo=g('ed-lo')!==''&&g('ed-lo')!=null?Number(g('ed-lo')):null; out.range_hi=g('ed-hi')!==''&&g('ed-hi')!=null?Number(g('ed-hi')):null; out.unit=(g('ed-unit')||'').trim()||null; }
+  if(type==='choice'){ out.choices=(g('ed-choices')||'').split(',').map(s=>s.trim()).filter(Boolean); }
+  if(type==='verify'){ out.verify_item=g('ed-verify')||null; }
+  if(out.assign_id){ const s=S.staff.find(x=>x.id===out.assign_id); out.assign_name=s?s.name:null; out.assign_role=s?(s.title||s.role):null; } else { out.assign_name=null; out.assign_role=null; }
+  return out;
+}
+window.ckEdSave=async()=>{
+  if(!guard('checklist.edit')) return; const C=ckState(); const E=C.edit; if(!E) return; const u=pu();
+  const vals=ckEdRead(); if(!vals.text_en){ toast(isES()?'Falta el texto':'Text is missing'); return; }
+  if(E.id){
+    const before=C.items.find(i=>i.id===E.id)||{};
+    const q=await db.from('tb_check_items').update(Object.assign({},vals,{updated_by:u.name, updated_at:new Date().toISOString()})).eq('id',E.id).select('*').maybeSingle();
+    if(q.error){ toast(q.error.message||'Could not save'); return; }
+    await db.from('tb_check_edits').insert({item_id:E.id, who:u.name, who_id:u.id, action:'edit', before, after:q.data});
+  } else {
+    const q=await db.from('tb_check_items').insert(Object.assign({},vals,{ord:E.ord, created_by:u.name, updated_by:u.name})).select('*').maybeSingle();
+    if(q.error){ toast(q.error.message||'Could not save'); return; }
+    await db.from('tb_check_edits').insert({item_id:q.data&&q.data.id, who:u.name, who_id:u.id, action:'add', after:q.data});
+  }
+  C.edit=null; await ckLoad(todayLA(),true); toast(isES()?'Guardado':'Saved'); render();
+};
+window.ckEdRetire=async(id)=>{
+  if(!guard('checklist.edit')) return; const C=ckState(); const it=C.items.find(i=>i.id===id); if(!it) return; const u=pu();
+  const q=await db.from('tb_check_items').update({active:!it.active, updated_by:u.name, updated_at:new Date().toISOString()}).eq('id',id);
+  if(q.error){ toast(q.error.message||'Could not save'); return; }
+  await db.from('tb_check_edits').insert({item_id:id, who:u.name, who_id:u.id, action:it.active?'retire':'restore', before:{active:it.active}, after:{active:!it.active}});
+  C.edit=null; await ckLoad(todayLA(),true); render();
+};
+window.ckEdMove=async(id,dir)=>{
+  if(!guard('checklist.edit')) return; const C=ckState(); const it=C.items.find(i=>i.id===id); if(!it) return;
+  const list=ckItems(it.shift); const k=list.findIndex(i=>i.id===id); const j=k+dir; if(j<0||j>=list.length) return;
+  const a=list[k], b=list[j]; const u=pu();
+  await db.from('tb_check_items').update({ord:b.ord, updated_by:u.name}).eq('id',a.id);
+  await db.from('tb_check_items').update({ord:a.ord, updated_by:u.name}).eq('id',b.id);
+  await db.from('tb_check_edits').insert({item_id:a.id, who:u.name, who_id:u.id, action:'move', before:{ord:a.ord}, after:{ord:b.ord}});
+  await ckLoad(todayLA(),true); render();
+};
+// ---- results ----
+async function ckLoadResults(days){
+  const since=shiftDay(todayLA(),-(days||14));
+  const [ru,lg]=await Promise.all([
+    db.from('tb_check_runs').select('*').gte('on_date',since).order('on_date',{ascending:false}),
+    db.from('tb_check_log').select('*').gte('on_date',since)
+  ]);
+  const logs={}; (lg.data||[]).forEach(l=>{ (logs[l.run_id]=logs[l.run_id]||{})[l.item_id]=l; });
+  ckState().res={since, runs:ru.data||[], logs, at:Date.now()};
+}
+function ckResultsHtml(){
+  const es=isES(); const C=ckState(); const R=C.res; if(!R) return `<div class="card"><div class="muted">${es?'Cargando…':'Loading…'}</div></div>`;
+  const items=C.items; const byId={}; items.forEach(i=>byId[i.id]=i);
+  const req=(shift)=>items.filter(i=>i.active&&i.shift===shift&&i.required!==false&&i.type!=='verify');
+  const runs=R.runs; const closing=runs.filter(r=>r.shift==='closing'), opening=runs.filter(r=>r.shift==='opening');
+  const pct=(r)=>{ const it=req(r.shift); if(!it.length) return null; const L=R.logs[r.id]||{}; return Math.round(100*it.filter(i=>L[i.id]&&['yes','auto'].includes(L[i.id].result)).length/it.length); };
+  const cp=closing.map(pct).filter(x=>x!=null); const avg=cp.length?Math.round(cp.reduce((a,b)=>a+b,0)/cp.length):null;
+  const found=opening.reduce((a,r)=>a+Object.values(R.logs[r.id]||{}).filter(l=>byId[l.item_id]&&byId[l.item_id].type==='verify'&&l.result==='no').length,0);
+  const secs=closing.filter(r=>r.seconds!=null).map(r=>r.seconds).sort((a,b)=>a-b); const med=secs.length?Math.round(secs[Math.floor(secs.length/2)]/60):null;
+  const money=false;
+  const runHtml=(r)=>{ const L=R.logs[r.id]||{}; const its=items.filter(i=>i.shift===r.shift&&(i.active||L[i.id])).sort((a,b)=>a.ord-b.ord);
+    return `<div class="card"><div class="sub"><b>${r.shift==='closing'?(es?'Cierre':'Closing'):(es?'Apertura':'Opening')} · ${fmtDate(r.on_date)}</b> · ${esc(r.closed_by||r.opened_by||'')}${r.status==='open'?` · <span style="color:var(--coral)">${es?'sin cerrar':'left open'}</span>`:(r.seconds!=null?` · ${Math.round(r.seconds/60)} min`:'')}</div>
+      ${its.map(i=>{ const l=L[i.id]; const k=!l?'':(['yes','auto'].includes(l.result)?'d':(l.result==='skipped'?'s':'n')); const t=l?new Date(l.at).toLocaleTimeString('en-US',{timeZone:'America/Los_Angeles',hour:'numeric',minute:'2-digit'}):'';
+        const extra=l?(l.result==='auto'?' · app':(l.value!=null?` · ${l.value}${i.unit?' '+esc(i.unit):''}${l.note==='out of range'?' ⚠':''}`:'')+(l.choice?` · ${esc(l.choice)}`:'')+(l.reason?` · ${esc((CK_REASONS.find(x=>x[0]===l.reason)||[])[1]||l.reason)}`:'')+(l.result==='no'&&l.note?` · "${esc(l.note)}"`:'')+(l.photo_path?' · 📷':'')):'';
+        return `<div class="ck-li"><span class="ck-ck ${k}">${k==='d'?'✓':(k==='n'?'✕':'·')}</span><span style="flex:1">${esc(ckLabel(i))}${i.assign_name?` <span class="muted" style="font-size:10.5px">${esc(i.assign_name)}</span>`:''}</span><span class="muted" style="font-size:11px;white-space:nowrap">${l?(l.result==='skipped'?(es?'después':'skipped'):(l.result==='not_possible'?(es?'no se pudo':'not possible'):(l.result==='no'?'NO':t))):(es?'sin marcar':'not marked')}${extra}${l&&l.who&&l.who!==(r.closed_by||r.opened_by)?` · ${esc(l.who)}`:''}</span></div>`; }).join('')}</div>`; };
+  return `<div class="card"><h2>${es?'Resultados':'Results'}<span class="h2sub">${es?'últimos 14 días':'last 14 days'}</span>
+      <button class="btn-ghost ck-btn" style="width:auto;margin-top:6px" onclick="ckHome()">‹ ${es?'Lista':'Checklist'}</button></div>
+    <div class="card"><div class="ck-kpi"><div><b>${avg!=null?avg+'%':'—'}</b><i>${es?'cierre hecho':'closing done'} · ${cp.length} ${es?'noches':'nights'}</i></div><div><b>${found}</b><i>${es?'encontrado mal por el que abre':'found not right by openers'}</i></div><div><b>${med!=null?med+' min':'—'}</b><i>${es?'cierre, mediana':'median closing time'}</i></div></div>
+      <div class="muted" style="font-size:11px;margin-top:6px">${es?'Hecho = puntos obligatorios marcados SÍ (o por la app). Los "no se pudo" y los "después" no cuentan como hechos.':'Done = required items answered YES (or by the app). "Not possible" and "skipped" do not count as done.'}</div></div>
+    ${runs.length?runs.map(runHtml).join(''):`<div class="card"><div class="muted">${es?'Todavía no hay listas.':'No lists yet.'}</div></div>`}`;
+}
+async function viewChecklist(){
+  const C=ckState(); if(can('checklist.results') && !C.swept){ C.swept=true; await ckSweep(); }
+  await ckLoad(todayLA());
+  if(C.page==='results' && can('checklist.results')){ if(!C.res||Date.now()-C.res.at>30000) await ckLoadResults(14); shell(ckResultsHtml()); return; }
+  if(C.page==='edit' && can('checklist.edit')){ shell(ckEditHtml()); return; }
+  if(C.page==='run'){ shell(ckRunHtml()); return; }
+  if(C.page==='end'){ shell(ckEndHtml()); return; }
+  C.page='home'; shell(ckHomeHtml());
+}
+// auto-close lists left open: anything from before today still 'open' is marked auto_closed
+// the first time an admin/manager opens the checklist screen
+async function ckSweep(){
+  try{ const y=shiftDay(todayLA(),-1); await db.from('tb_check_runs').update({status:'auto_closed'}).eq('status','open').lte('on_date',y); }catch(e){}
+}
+
 async function viewToday(){
   const d=S.selDate||todayLA(); S.selDate=d;
   if(!S.wx.loaded) await loadWeather();
@@ -5564,7 +6020,9 @@ async function viewToday(){
   const maxH=Math.max(...hrs.map(x=>x.g),1);
   const hlabel=h=>{const x=h%12===0?12:h%12; return x+(h<12?'am':'pm');};
 
+  if(d===todayLA() && sec('orders')) await orLoadToday(d);
   let inner=`
+  ${orCardHtml(d)}
   ${(()=>{
     // ---- the week strip, now walkable (mockup Reading B, Dan's pick Aug 26) ----
     // Arrows move the SELECTED DAY by seven, so the strip, the day report and everything
@@ -12724,6 +13182,7 @@ async function viewOrders(){
           <div class="muted" style="font-size:11px">${v.pending?v.sub:`${counts[v.key]||0} items · ${v.sub}${last[v.key]?` · last: ${fmtDate(last[v.key].order_date)}`:''}`}</div></div>
         <div class="muted" style="font-size:20px">${v.pending?'·':'›'}</div>
       </div>`).join('')}
+    ${orWeekHtml()}
     ${ogUploadCard()}
     ${ogInvoiceBook()}
     ${ogBookSummary(S.og.book)}
@@ -14121,18 +14580,20 @@ async function render(){
   $('#tabs').style.display='flex';
   // This table is what the tab bar actually shows — the labels in the static markup are only
   // a first paint and get replaced here on every render.
-  const TABL={today:['Today','Hoy'],count:['Count/Lists','Conteo/Listas'],prep:['Prep','Prep'],recipes:['Recipes','Recetas'],waste:['Waste','Merma'],orders:['Orders','Pedidos'],analytics:['Analytics','Análisis'],admin:['Admin/Settings','Admin/Ajustes']};
+  const TABL={today:['Today','Hoy'],count:['Count/Lists','Conteo/Listas'],prep:['Prep','Prep'],checklist:['Checklist','Lista'],recipes:['Recipes','Recetas'],waste:['Waste','Merma'],orders:['Orders','Pedidos'],analytics:['Analytics','Análisis'],admin:['Admin/Settings','Admin/Ajustes']};
   document.querySelectorAll('#tabs button').forEach(b=>{
     const v=b.dataset.v;
     b.innerHTML=`<svg class="ico"><use href="#i-${v}"/></svg>`+(TABL[v]?TABL[v][isES()?1:0]:v);
     b.style.display=sec(v)?'':'none';
     b.classList.toggle('active',v===S.view || ((S.view==='pars'||S.view==='dev') && v==='admin'));
   });
+  if(S.view!=='today' && sec('orders') && !(S.orDay&&S.orDay.d===todayLA())) orLoadToday(todayLA()).then(orPaintBadge); else orPaintBadge();
   // How long he stayed on the screen he is leaving — the "where the time went" bars.
   try{ const _s=S.dev.scr; if(_s.name!==S.view){ if(_s.name&&_s.at) devEvent('stay',_s.name,Date.now()-_s.at); S.dev.scr={name:S.view,at:Date.now()}; } }catch(e){}
   const _t0=(window.performance&&performance.now)?performance.now():Date.now();
   if(S.view==='today') await viewToday();
   else if(S.view==='prep') await viewPrep();
+  else if(S.view==='checklist') await viewChecklist();
   else if(S.view==='count') await viewCount();
   else if(S.view==='waste') await viewWaste();
   else if(S.view==='recipes') await viewRecipes();
