@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
 <meta name="theme-color" content="#0b4a4f">
-<link rel="manifest" href="data:application/manifest+json,%7B%22name%22%3A%20%22TB%20Prep%20%5Cu2014%20Tommy%20Bahama%20Palm%20Springs%22%2C%20%22short_name%22%3A%20%22TB%20Prep%22%2C%20%22start_url%22%3A%20%22https%3A%2F%2Fdanielloaiza25.github.io%2Ftb-prep%2F%22%2C%20%22scope%22%3A%20%22https%3A%2F%2Fdanielloaiza25.github.io%2Ftb-prep%2F%22%2C%20%22display%22%3A%20%22standalone%22%2C%20%22background_color%22%3A%20%22%23f4ecdf%22%2C%20%22theme_color%22%3A%20%22%230b4a4f%22%2C%20%22icons%22%3A%20%5B%7B%22src%22%3A%20%22data%3Aimage%2Fsvg%2Bxml%2C%253Csvg%20xmlns%3D%27http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%27%20viewBox%3D%270%200%20100%20100%27%253E%253Crect%20width%3D%27100%27%20height%3D%27100%27%20rx%3D%2720%27%20fill%3D%27%25230b4a4f%27%2F%253E%253Ctext%20x%3D%2750%27%20y%3D%2764%27%20font-size%3D%2740%27%20text-anchor%3D%27middle%27%20fill%3D%27%2523f4ecdf%27%20font-family%3D%27Arial%27%20font-weight%3D%27bold%27%253ETB%253C%2Ftext%253E%253C%2Fsvg%253E%22%2C%20%22sizes%22%3A%20%22any%22%2C%20%22type%22%3A%20%22image%2Fsvg%2Bxml%22%7D%5D%2C%20%22id%22%3A%20%22https%3A%2F%2Fdanielloaiza25.github.io%2Ftb-prep%2F%22%7D">
+<link rel="manifest" href="data:application/manifest+json,%7B%22name%22%3A%20%22TB%20Prep%20%5Cu2014%20Tommy%20Bahama%20Palm%20Springs%22%2C%20%22short_name%22%3A%20%22TB%20Prep%22%2C%20%22start_url%22%3A%20%22https%3A%2F%2Fapp.chefsopai.com%2F%22%2C%20%22scope%22%3A%20%22https%3A%2F%2Fapp.chefsopai.com%2F%22%2C%20%22display%22%3A%20%22standalone%22%2C%20%22background_color%22%3A%20%22%23f4ecdf%22%2C%20%22theme_color%22%3A%20%22%230b4a4f%22%2C%20%22icons%22%3A%20%5B%7B%22src%22%3A%20%22data%3Aimage%2Fsvg%2Bxml%2C%253Csvg%20xmlns%3D%27http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%27%20viewBox%3D%270%200%20100%20100%27%253E%253Crect%20width%3D%27100%27%20height%3D%27100%27%20rx%3D%2720%27%20fill%3D%27%25230b4a4f%27%2F%253E%253Ctext%20x%3D%2750%27%20y%3D%2764%27%20font-size%3D%2740%27%20text-anchor%3D%27middle%27%20fill%3D%27%2523f4ecdf%27%20font-family%3D%27Arial%27%20font-weight%3D%27bold%27%253ETB%253C%2Ftext%253E%253C%2Fsvg%253E%22%2C%20%22sizes%22%3A%20%22any%22%2C%20%22type%22%3A%20%22image%2Fsvg%2Bxml%22%7D%5D%2C%20%22id%22%3A%20%22https%3A%2F%2Fapp.chefsopai.com%2F%22%7D">
 <title>TB Prep · Palm Springs</title>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
@@ -1221,7 +1221,7 @@
 </head>
 <body>
 <div class="toast" id="toast"></div>
-<div id="app"></div>
+<div id="app"><div id="bootsplash" style="min-height:70vh;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:12px;color:#0b4a4f;font:600 15px -apple-system,Segoe UI,Roboto,Arial,sans-serif"><div style="font-family:'Snell Roundhand','Segoe Script',cursive;font-size:40px">T.B</div><span class="spin" style="width:22px;height:22px;border-width:3px"></span><div style="font-size:12.5px;color:#6b6b60">Loading · Cargando…</div></div></div>
 <!-- Drawn icon set. One stroke weight, one grid, so nothing renders as OS emoji clip-art. -->
 <svg style="display:none" aria-hidden="true"><defs>
   <symbol id="i-today" viewBox="0 0 24 24"><circle cx="12" cy="9.5" r="3.6"/><path d="M12 2.6v1.7M12 14.7v1.5M4.6 9.5H3M21 9.5h-1.6M6.8 4.3 5.7 3.2M18.3 3.2l-1.1 1.1M6.8 14.7l-1.1 1.1M17.2 14.7l1.1 1.1M2.5 19.5h19M4.5 22h15"/></symbol>
@@ -1273,7 +1273,7 @@ const SB_KEY='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZ
 const TBID='9f8d7c6b-5a49-4e38-b271-06d5f00dbeef'; // Tommy Bahama tenant inside ChefOpsAI
 // Stamped by publish.sh at upload time. It is the only version label there is now —
 // one address, updated in place, so this tells you which build that address is serving.
-const BUILD='Sep 23, 2026 · forecast v2.1';
+const BUILD='Sep 24, 2026 · secure + faster';
 // ---------- IS THIS PHONE EVEN RUNNING THE LATEST BUILD? ----------
 // Sep 3 2026. Three prep fixes shipped and Dan still saw the old behaviour, because the app
 // installs to the home screen and an installed web app does not go back and re-fetch its own
@@ -1295,8 +1295,21 @@ const BUILD='Sep 23, 2026 · forecast v2.1';
 // same file publish uploads. Works from the hosted app, from a saved copy, from anywhere.
 // Sep 22 2026 — moved to GitHub Pages (repo danielloaiza25/tb-prep). The Supabase functions
 // address started serving browsers plain text on Sep 16 and no app-side change could fix it.
-const BUILD_TXT_URL = 'https://danielloaiza25.github.io/tb-prep/build.txt';
-const APP_HOSTED = 'https://danielloaiza25.github.io/tb-prep/';
+// Sep 24 2026 — moved to Cloudflare at Dan's own domain, app.chefsopai.com (same repo; every
+// commit publishes to both). The old GitHub address keeps working until the repo goes private,
+// and checks its OWN build.txt: a cross-site fetch to the new address is blocked by the browser.
+const OLD_HOST = 'danielloaiza25.github.io';
+const APP_HOSTED = 'https://app.chefsopai.com/';
+const BUILD_TXT_URL = (location.hostname===OLD_HOST) ? 'https://'+OLD_HOST+'/tb-prep/build.txt' : APP_HOSTED+'build.txt';
+// On the old address, point people at the new one once per visit.
+function movedBar(){
+  if(location.hostname!==OLD_HOST || document.getElementById('movedbar')) return;
+  const b=document.createElement('div'); b.id='movedbar';
+  b.style.cssText='position:fixed;left:0;right:0;bottom:0;z-index:9999;background:#0b4a4f;color:#f7f0e2;padding:10px 14px;display:flex;gap:10px;align-items:center;font:600 13px/1.35 -apple-system,Segoe UI,Roboto,Arial,sans-serif';
+  b.innerHTML='<span style="flex:1">The app has a new home: <b>app.chefsopai.com</b> — open it there and add it to your home screen again. · Nueva dirección.</span>'+
+    '<a href="https://app.chefsopai.com/" style="background:#f7f0e2;color:#0b4a4f;border-radius:9px;padding:7px 12px;font-weight:800;text-decoration:none">Open</a>';
+  document.body.appendChild(b);
+}
 let LATEST_BUILD=null;
 async function checkBuild(){
   if(!BUILD_TXT_URL) return;
@@ -1387,7 +1400,7 @@ function updateVerify(){
 // the right content type, so it is the only hosted address that actually opens.
 const APP_URL = (location.protocol==='http:'||location.protocol==='https:')
   ? location.href.split('#')[0].split('?')[0]
-  : 'https://danielloaiza25.github.io/tb-prep/';
+  : 'https://app.chefsopai.com/';
 // ---- one hook that sees every save that did not go through ----
 // A save that silently fails is the worst bug this app can have, and until now nothing
 // would have told us. Rather than wrap 200 call sites, watch the responses themselves.
@@ -1418,6 +1431,62 @@ const APP_URL = (location.protocol==='http:'||location.protocol==='https:')
   };
 })();
 const db = (typeof supabase!=='undefined') ? supabase.createClient(SB_URL, SB_KEY) : null;
+
+// ---------- Security (Sep 24 2026): every phone signs in to the database ----------
+// Each phone gets its own anonymous session from Supabase — a signed token that belongs to
+// that device. A PIN, checked inside the database, ties that session to one person, and every
+// table rule asks "is this phone tied to an active person, and what is their role?". Nothing
+// about a PIN or a role is decided on the phone any more.
+// Until the database side is switched on, the app runs exactly as it always has ('legacy');
+// SEC.mode says which. Switching it on needs no new build.
+const SEC={mode:'legacy', bound:false, emp:null, role:null};
+function secDevice(){ const ua=navigator.userAgent||''; const m=ua.match(/\(([^)]+)\)/); return (m?m[1]:ua).slice(0,120); }
+function secIsMissingFn(err){ return !!err && /PGRST202|Could not find the function|404/i.test(String(err.code||'')+' '+String(err.message||'')); }
+async function secBoot(){
+  if(!db||!db.auth) return SEC;
+  // If the database side is not on yet, do not make a new anonymous session on every start.
+  let skipUntil=0; try{ skipUntil=Number(localStorage.getItem('tb_sec_legacy_until')||0); }catch(e){}
+  try{
+    let {data:{session}}=await db.auth.getSession();
+    if(!session){
+      if(Date.now()<skipUntil){ SEC.mode='legacy'; return SEC; }
+      const r=await db.auth.signInAnonymously();
+      if(r.error){ SEC.mode='legacy'; try{ localStorage.setItem('tb_sec_legacy_until', String(Date.now()+30*60000)); }catch(e){} return SEC; }
+    }
+    const w=await db.rpc('tb_whoami');
+    if(w.error){
+      if(secIsMissingFn(w.error)){                 // database side not switched on yet
+        try{ await db.auth.signOut({scope:'local'}); }catch(e){}
+        try{ localStorage.setItem('tb_sec_legacy_until', String(Date.now()+30*60000)); }catch(e){}
+        SEC.mode='legacy'; return SEC;
+      }
+      throw new Error('Could not reach the database — check the internet and reload. / Revisa el internet y recarga.');
+    }
+    try{ localStorage.removeItem('tb_sec_legacy_until'); }catch(e){}
+    SEC.mode='secure'; SEC.bound=!!(w.data&&w.data.bound);
+    SEC.emp=SEC.bound?w.data.employee_id:null; SEC.role=SEC.bound?w.data.role:null;
+  }catch(e){ if(/database|internet/i.test(e.message||'')) throw e; SEC.mode='legacy'; }
+  return SEC;
+}
+// Before anyone has put in a PIN the phone can see names and nothing else.
+async function loadRoster(){
+  const r=await db.rpc('tb_roster');
+  if(r.error) throw new Error('Could not load the staff list — check the internet. / No se pudo cargar la lista.');
+  if(!S.perms) S.perms=permNormalize(null);
+  S.staff=(r.data||[]).map(staffMap);
+}
+// Is this phone still signed in? (someone may have signed it out, or the person was turned off)
+async function secRecheck(){
+  if(SEC.mode!=='secure'||!SEC.bound||!S.user) return;
+  try{
+    const w=await db.rpc('tb_whoami');
+    if(w.error) return;                           // offline: say nothing, try again later
+    if(!(w.data&&w.data.bound) || w.data.employee_id!==S.user.id){
+      toast('You were signed out · Se cerró tu sesión');
+      setTimeout(()=>location.reload(), 900);
+    }
+  }catch(e){}
+}
 
 const S = { user:null, staff:[], families:[], preps:[], model:null, settings:null,
             view:'today', pin:'', counts:{}, countId:null, tasks:[], listId:null,
@@ -1869,6 +1938,30 @@ function fcResid(d){
   const c=sw?Math.min(1.15,Math.max(0.85,Math.exp(swl/(sw+8)))):1;
   m[k]=c; return c;
 }
+// ---- v2.2 learned weather (Sep 23 2026) ----
+// Measured, not typed. 265-day replay: temperature vs NORMAL did nothing (the season is already in
+// last year + trend), but two things did: the day's actual high in bands (pleasant 70-100°F days ran
+// above forecast, <70°F and 110°F+ below) and rain. Each band's effect is learned from the last 120
+// real days, shrunk hard (+30 days of "no effect") so a thin band can't swing the number; rain from
+// every rainy day on file, shrunk +3. Capped ±15%. Replay: 15.3% -> 14.9% average miss.
+function fcWxBand(t){ return t<70?0:t<85?1:t<100?2:t<110?3:4; }
+function fcWxDay(d){ const w=(S.wx&&S.wx.byDate||{})[d]; return (w&&w.tmax_f!=null)?{t:Number(w.tmax_f), rain:Number(w.precip_mm||0)>=1, src:w.source}:null; }
+function fcWx(d){
+  const m=FC2.memo||(FC2.memo={}); const k='w'+d; if(m[k]!==undefined) return m[k];
+  const W=fcWxDay(d); let res={f:1, band:null, rain:false, parts:[]};
+  if(W && !fcHol(d)){
+    const b=fcWxBand(W.t); const rs=[], rb=[], rr=[];
+    for(let i=1;i<=400;i++){ const a=shiftDay(d,-i); if(!fcUsable(a)||fcHol(a)) continue; const wa=fcWxDay(a); const f=fcRaw(a); if(!wa||!(f>0)) continue;
+      const r=Math.log(FC2.hist[a].s/(f*fcResid(a)));
+      if(i<=180 && rs.length<120){ rs.push(r); if(fcWxBand(wa.t)===b) rb.push(r); }
+      if(wa.rain) rr.push(r); }
+    let adj=0;
+    if(rs.length>=40 && rb.length){ const mAll=rs.reduce((x,y)=>x+y,0)/rs.length; const ab=(rb.reduce((x,y)=>x+y,0)-rb.length*mAll)/(rb.length+30); adj+=ab; if(Math.abs(ab)>0.005) res.parts.push({k:'temp', f:Math.exp(ab), t:W.t}); }
+    if(W.rain && rr.length){ const ar=rr.reduce((x,y)=>x+y,0)/(rr.length+3); adj+=ar; res.parts.push({k:'rain', f:Math.exp(ar), n:rr.length}); }
+    adj=Math.max(-0.15,Math.min(0.15,adj)); res={f:Math.exp(adj), band:b, rain:W.rain, t:W.t, src:W.src, parts:res.parts};
+  }
+  m[k]=res; return res;
+}
 // ---- the likely range: how far off the finished number has really been, last 60 real days ----
 // 10th-90th percentile of actual / forecast. Replay: the real day landed inside it 76% of the time.
 function fcBand(d, v){
@@ -1901,10 +1994,11 @@ function fcParts(d){
 }
 function fcExplain(d){
   const P=fcParts(d); const resid=P.raw?fcResid(d):1;
-  const v2s=P.raw?P.raw*resid:null;
+  const WX=P.raw?fcWx(d):{f:1,parts:[]};
+  const v2s=P.raw?P.raw*resid*WX.f:null;
   const v2g=(v2s&&P.chk)?Math.max(1,Math.round(v2s/P.chk)):P.v1g;
   const band=v2s?fcBand(d,v2s):null;
-  return {d, hol:P.hol?P.hol.name:null, ev:P.ev, v1g:P.v1g, v1s:P.v1s?Math.round(P.v1s):null, chk:P.chk, ly:P.ly?{s:Math.round(P.ly.v),date:P.ly.date,how:P.ly.how}:null, lyBase:P.lyBase?Math.round(P.lyBase):null, trend:Math.round(P.trend*1000)/1000, resid:Math.round(resid*1000)/1000, lySide:P.lySide?Math.round(P.lySide):null, v2s:v2s?Math.round(v2s):null, v2g, mode:P.mode, src:P.src, band, engine:'v2.1'};
+  return {d, hol:P.hol?P.hol.name:null, ev:P.ev, v1g:P.v1g, v1s:P.v1s?Math.round(P.v1s):null, chk:P.chk, ly:P.ly?{s:Math.round(P.ly.v),date:P.ly.date,how:P.ly.how}:null, lyBase:P.lyBase?Math.round(P.lyBase):null, trend:Math.round(P.trend*1000)/1000, resid:Math.round(resid*1000)/1000, wx:Math.round(WX.f*1000)/1000, wxParts:WX.parts, wxT:WX.t, lySide:P.lySide?Math.round(P.lySide):null, v2s:v2s?Math.round(v2s):null, v2g, mode:P.mode, src:P.src, band, engine:'v2.2'};
 }
 // ---- the watchdog: three morning rules, shown as a confidence note, never an alarm ----
 function fcWatch(d,X){
@@ -1933,7 +2027,7 @@ async function fcLogShown(d){
     if((S.fc2rows||[]).some(r=>String(r.business_date)===d)) return;
     const X=fcExplain(d); const notes=fcWatch(d,X);
     const row={business_date:d, v1_g:X.v1g, v2_g:X.v2g, v1_s:X.v1s, v2_s:X.v2s, ly_s:X.ly?X.ly.s:null, ly_date:X.ly?X.ly.date:null, ly_how:X.ly?X.ly.how:X.src,
-      trend:X.trend, ev:X.ev, resid:X.resid, holiday:X.hol, engine:'v2.1 '+X.mode, notes:[...notes.map(n=>({k:n.k,en:n.en})), ...(X.band?[{k:'band',lo:X.band.lo,hi:X.band.hi}]:[])]};
+      trend:X.trend, ev:X.ev, resid:X.resid, holiday:X.hol, engine:'v2.2 '+X.mode, notes:[...notes.map(n=>({k:n.k,en:n.en})), ...(X.band?[{k:'band',lo:X.band.lo,hi:X.band.hi}]:[])]};
     const q=await db.from('tb_forecast_v2').upsert(row,{onConflict:'business_date',ignoreDuplicates:true}).select('*');
     if(!q.error&&q.data&&q.data.length){ S.fc2rows=[q.data[0],...(S.fc2rows||[])]; }
     else if(!q.error){ S.fc2rows=[row,...(S.fc2rows||[])]; }
@@ -1969,6 +2063,7 @@ function fcNoteHtml(d){
   if(X.trend!==1) parts.push(`trend ×${X.trend.toFixed(2)}`);
   if(X.ev!==1) parts.push(`event ×${X.ev.toFixed(2)}`);
   if(X.resid!==1) parts.push(`self-correction ×${X.resid.toFixed(2)}`);
+  if(X.wx&&X.wx!==1) parts.push(`weather ×${X.wx.toFixed(2)} (${X.wxT!=null?Math.round(X.wxT)+'°F':''}${(X.wxParts||[]).some(p=>p.k==='rain')?', rain':''}, learned)`);
   const conf = notes.length? (notes.some(n=>n.k==='holiday-ahead')?'watch':'low') : 'normal';
   const lab = conf==='normal' ? (es?'Confianza: normal':'Confidence: normal') : conf==='watch' ? (es?'Confianza: atento':'Confidence: watch') : (es?'Confianza: baja':'Confidence: low');
   return `<div class="muted" style="font-size:11.5px;margin-top:6px;border-left:3px solid ${conf==='normal'?'var(--lagoon)':'var(--coral)'};padding-left:8px">
@@ -2067,6 +2162,13 @@ function wxNormHigh(dstr){
   return n?Number(n.n):null;
 }
 function wxMonthHours(dstr){ return (((S.wx.normals||{}).hourly_by_month)||{})[dstr.slice(5,7)]||null; }
+// An older day opened on Today: fetch just that day's hours (one small row) the first time.
+async function wxEnsureHours(dstr){
+  const r=S.wx.byDate[dstr]; if(!r||!r._light) return;
+  r._light=false;
+  try{ const q=await db.from('tb_weather_daily').select('hourly').eq('business_date',dstr).maybeSingle();
+       if(q.data) r.hourly=q.data.hourly; }catch(e){}
+}
 // Feels-like by hour for one specific day. The day's own recorded or forecast hours are used
 // when they exist; the month's measured average is the fallback, and callers are told which.
 function wxHours(dstr){
@@ -2121,19 +2223,61 @@ function wxPairedDays(){
   const rows=(S.wx.realPairs||[]);
   return {n:rows.length, rows};
 }
+// The live 7-day forecast from Open-Meteo, written into tb_weather_daily for next time.
+async function wxRefreshForecast(){
+  // Open-Meteo needs no account and no key and allows browser calls, so the forecast comes
+  // straight from the source. Nothing of ours sits in the middle to go stale or go down.
+  const u='https://api.open-meteo.com/v1/forecast?latitude='+WXLAT+'&longitude='+WXLON
+    +'&daily=temperature_2m_max,temperature_2m_min,apparent_temperature_max,precipitation_sum,'
+    +'precipitation_probability_max,windspeed_10m_max&hourly=temperature_2m,apparent_temperature'
+    +'&temperature_unit=fahrenheit&timezone=America%2FLos_Angeles&forecast_days=7';
+  let j=null;
+  try{ const r=await fetch(u); if(r.ok) j=await r.json(); else S.wx.fcErr='HTTP '+r.status; }
+  catch(e){ S.wx.fcErr=e.message||String(e); }
+  if(j&&j.daily){
+    const hb={};
+    (j.hourly&&j.hourly.time||[]).forEach((t,i)=>{
+      const hr=Number(t.slice(11,13));
+      if(hr<10||hr>22) return;
+      const tp=j.hourly.temperature_2m[i], ap=j.hourly.apparent_temperature[i];
+      if(tp==null) return;
+      (hb[t.slice(0,10)]=hb[t.slice(0,10)]||{})[t.slice(11,13)]=
+        {t:Math.round(tp*10)/10, a:(ap==null?null:Math.round(ap*10)/10)};
+    });
+    const t0=todayLA();
+    const rows=j.daily.time.map((d,i)=>({business_date:d,
+      tmax_f:j.daily.temperature_2m_max[i], tmin_f:j.daily.temperature_2m_min[i],
+      feels_max_f:j.daily.apparent_temperature_max[i], precip_mm:j.daily.precipitation_sum[i],
+      precip_prob:j.daily.precipitation_probability_max[i],
+      wind_max_kmh:j.daily.windspeed_10m_max[i], hourly:hb[d]||null, source:'forecast',
+      fetched_at:new Date().toISOString()}))
+      // A past date already has MEASURED weather stored. Overwriting it with a prediction
+      // would quietly destroy the only real history the app has.
+      .filter(r=>r.business_date>=t0 && r.tmax_f!=null);
+    rows.forEach(r=>{ S.wx.byDate[r.business_date]=r; });
+    if(rows.length) await db.from('tb_weather_daily').upsert(rows,{onConflict:'business_date'});
+  }
+}
+
 async function loadWeather(force){
   if(S.wx.loading || (S.wx.loaded&&!force)) return;
   S.wx.loading=true;
   try{
-    const [nm,hist,act]=await Promise.all([
+    const near=(()=>{const t=dateObjLA(todayLA()); t.setDate(t.getDate()-3); return t.toISOString().slice(0,10);})();
+    const [nm,hist,act,hrs]=await Promise.all([
       db.from('tb_model').select('value').eq('key','weather_normals').maybeSingle(),
-      db.from('tb_weather_daily').select('*').order('business_date',{ascending:false}).limit(600),
+      // Speed pass Sep 24: the 600-day history WITHOUT the hourly column (that column was ~90% of
+      // a half-megabyte download). Hourly comes separately for the days around today, and for an
+      // older day only if somebody actually opens it (wxEnsureHours).
+      db.from('tb_weather_daily').select('business_date,tmax_f,tmin_f,feels_max_f,precip_mm,precip_prob,wind_max_kmh,source,fetched_at').order('business_date',{ascending:false}).limit(600),
       // guests_actual is the only place a real recorded guest count can currently come from.
       db.from('tb_day_forecast').select('business_date,guests_actual').not('guests_actual','is',null),
+      db.from('tb_weather_daily').select('business_date,hourly').gte('business_date',near),
     ]);
     S.wx.normals=(nm.data&&nm.data.value)||{};
     S.wx.hist=(hist.data||[]);
-    S.wx.byDate={}; S.wx.hist.forEach(r=>{ S.wx.byDate[r.business_date]=r; });
+    S.wx.byDate={}; S.wx.hist.forEach(r=>{ r._light=true; S.wx.byDate[r.business_date]=r; });
+    (hrs&&hrs.data||[]).forEach(h=>{ const r=S.wx.byDate[h.business_date]; if(r){ r.hourly=h.hourly; r._light=false; } });
     // Pair real recorded guest counts with that day's measured weather. Forecast rows are not
     // eligible: pairing a guess about the weather with a real guest count would put noise
     // into the only honest column here.
@@ -2144,38 +2288,12 @@ async function loadWeather(force){
       return {d:r.business_date, guests:Number(r.guests_actual), tmax:Number(w.tmax_f),
               norm:nh, anom:(nh!=null?Math.round((Number(w.tmax_f)-nh)*10)/10:null)};
     }).filter(Boolean).sort((a,b)=>a.d<b.d?-1:1);
-    // Open-Meteo needs no account and no key and allows browser calls, so the forecast comes
-    // straight from the source. Nothing of ours sits in the middle to go stale or go down.
-    const u='https://api.open-meteo.com/v1/forecast?latitude='+WXLAT+'&longitude='+WXLON
-      +'&daily=temperature_2m_max,temperature_2m_min,apparent_temperature_max,precipitation_sum,'
-      +'precipitation_probability_max,windspeed_10m_max&hourly=temperature_2m,apparent_temperature'
-      +'&temperature_unit=fahrenheit&timezone=America%2FLos_Angeles&forecast_days=7';
-    let j=null;
-    try{ const r=await fetch(u); if(r.ok) j=await r.json(); else S.wx.fcErr='HTTP '+r.status; }
-    catch(e){ S.wx.fcErr=e.message||String(e); }
-    if(j&&j.daily){
-      const hb={};
-      (j.hourly&&j.hourly.time||[]).forEach((t,i)=>{
-        const hr=Number(t.slice(11,13));
-        if(hr<10||hr>22) return;
-        const tp=j.hourly.temperature_2m[i], ap=j.hourly.apparent_temperature[i];
-        if(tp==null) return;
-        (hb[t.slice(0,10)]=hb[t.slice(0,10)]||{})[t.slice(11,13)]=
-          {t:Math.round(tp*10)/10, a:(ap==null?null:Math.round(ap*10)/10)};
-      });
-      const t0=todayLA();
-      const rows=j.daily.time.map((d,i)=>({business_date:d,
-        tmax_f:j.daily.temperature_2m_max[i], tmin_f:j.daily.temperature_2m_min[i],
-        feels_max_f:j.daily.apparent_temperature_max[i], precip_mm:j.daily.precipitation_sum[i],
-        precip_prob:j.daily.precipitation_probability_max[i],
-        wind_max_kmh:j.daily.windspeed_10m_max[i], hourly:hb[d]||null, source:'forecast',
-        fetched_at:new Date().toISOString()}))
-        // A past date already has MEASURED weather stored. Overwriting it with a prediction
-        // would quietly destroy the only real history the app has.
-        .filter(r=>r.business_date>=t0 && r.tmax_f!=null);
-      rows.forEach(r=>{ S.wx.byDate[r.business_date]=r; });
-      if(rows.length) await db.from('tb_weather_daily').upsert(rows,{onConflict:'business_date'});
-    }
+    // Sep 24 speed pass: if today's forecast on file is under 6 hours old, draw with it and
+    // refresh from Open-Meteo in the background — one less trip before Today appears.
+    const tr=S.wx.byDate[todayLA()];
+    const fresh=tr && tr.source==='forecast' && tr.fetched_at && (Date.now()-new Date(tr.fetched_at).getTime()) < 6*3600e3;
+    if(fresh){ wxRefreshForecast().catch(()=>{}); }
+    else { await wxRefreshForecast(); }
   }catch(e){ S.wx.err=e.message||String(e); }
   S.wx.loading=false; S.wx.loaded=true;
 }
@@ -2427,9 +2545,31 @@ window.setRole=async(id,role)=>{ if(!guard('admin.perms')) { render(); return; }
   if(S.user && s.id===S.user.id) S.user=s;
   toast('Saved · Guardado'); render(); };
 
+// One person's row → the shape the app uses. Shared by loadAll and the sign-in roster.
+function staffMap(e){
+    const m=jparse(e.notes,{});
+    // meta is kept whole so writing a PIN never silently drops a field somebody else added.
+    // temp: a code Dan issued. While one exists the person's own PIN is off — that is what
+    // a reset means — and the only thing that opens the app is the temp code, once.
+    // Sep 6 2026 — SECURITY. The PIN and the temp code used to be mapped straight out of
+    // here into memory, which meant they had to be downloadable, which meant anyone holding
+    // the public key could read every PIN in the kitchen. They are gone from the client for
+    // good: all that survives is WHETHER a code exists, which is not a secret. The checking
+    // happens inside the database (tb_pin_check), where the hash lives and cannot be read.
+    return {id:e.id, name:e.first_name, role:m.tb_role||'prep',
+            lang:m.tb_lang||'en',
+            has_pin:!!(m.tb_has_pin||m.tb_pin), has_temp:!!(m.tb_temp||m.tb_temp_at),
+            title:m.tb_title||'', temp_at:m.tb_temp_at||null,
+            pin_set_at:m.tb_pin_set_at||null, login:(m.tb_login!==false), meta:m,
+            active:e.status==='active'};
+  }
+
 // ---------- data layer (ChefOpsAI schema) ----------
 async function loadAll(){
-  const [emp,inv,rec,fam,mo,se,pe,fcm,fsq,dhq,f2q,vrq] = await Promise.all([
+  // Sep 24 2026 speed pass: the event calendar loads in the SAME round trip as everything else
+  // (it only needs today's date), instead of a second trip after the first one lands.
+  const [,emp,inv,rec,fam,mo,se,pe,fcm,fsq,dhq,f2q,vrq] = await Promise.all([
+    loadEvents().then(()=>null,()=>null),
     db.from('employees').select('*').eq('restaurant_id',TBID).order('created_at'),
     db.from('inventory').select('*').eq('restaurant_id',TBID).order('sheet_order',{nullsFirst:false}),
     db.from('recipes').select('*').eq('restaurant_id',TBID).eq('recipe_type','book'),
@@ -2446,29 +2586,13 @@ async function loadAll(){
     db.from('tb_vendor_rules').select('*'),
   ]);
   S.scores=fsq.data||[];
-  fcHistLoad(dhq.data||[]); S.fc2rows=f2q.data||[]; S.vrules=vrq.data||[];
-  await loadEvents();                 // corrections read the calendar, so it loads first
+  fcHistLoad(dhq.data||[]); S.dhRows=dhq.data||[]; S.fc2rows=f2q.data||[]; S.vrules=vrq.data||[];
+  await loadEvents();                 // already loaded above in the same trip; this returns at once
   S.corr=corrCompute(S.scores);
   // Unsaved switch edits survive a background refresh; otherwise the nightly reload would
   // quietly discard whatever Dan had flipped but not yet saved.
   if(!S.permsDirty) S.perms=permNormalize(pe&&pe.data?pe.data.value:null);
-  S.staff=(emp.data||[]).map(e=>{
-    const m=jparse(e.notes,{});
-    // meta is kept whole so writing a PIN never silently drops a field somebody else added.
-    // temp: a code Dan issued. While one exists the person's own PIN is off — that is what
-    // a reset means — and the only thing that opens the app is the temp code, once.
-    // Sep 6 2026 — SECURITY. The PIN and the temp code used to be mapped straight out of
-    // here into memory, which meant they had to be downloadable, which meant anyone holding
-    // the public key could read every PIN in the kitchen. They are gone from the client for
-    // good: all that survives is WHETHER a code exists, which is not a secret. The checking
-    // happens inside the database (tb_pin_check), where the hash lives and cannot be read.
-    return {id:e.id, name:e.first_name, role:m.tb_role||'prep',
-            lang:m.tb_lang||'en',
-            has_pin:!!(m.tb_has_pin||m.tb_pin), has_temp:!!(m.tb_temp||m.tb_temp_at),
-            title:m.tb_title||'', temp_at:m.tb_temp_at||null,
-            pin_set_at:m.tb_pin_set_at||null, login:(m.tb_login!==false), meta:m,
-            active:e.status==='active'};
-  });
+  S.staff=(emp.data||[]).map(staffMap);
   const recByExt={}; (rec.data||[]).forEach(r=>{ if(r.external_id) recByExt[r.external_id]=r; });
   S.allRecipes=(rec.data||[]);
   const allPreps=(inv.data||[]).map(i=>{
@@ -5311,6 +5435,34 @@ function signIn(u){
   S.user=u; S.pin=''; S.pin1=''; S.loginWho=null; S.loginStage='pin';
   localStorage.setItem('tbp_user',u.id); go('today');
 }
+// Sep 24 2026 — Dan: "the keyboard stays a second too long and the bottom bar appears; it
+// feels sluggish". On a secured phone the data can only load AFTER the PIN, so the moment
+// the 4th digit goes in, the keypad is covered by a plain "Signing in" screen, and that cover
+// stays until Today has actually drawn — no keypad hanging around, no bar flashing early.
+function secCover(name){
+  let el=document.getElementById('signingin');
+  if(!el){ el=document.createElement('div'); el.id='signingin'; document.body.appendChild(el); }
+  el.style.cssText='position:fixed;inset:0;z-index:10000;background:var(--sand,#f4ecdf);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:14px;color:var(--ocean,#0b4a4f);font:600 16px -apple-system,Segoe UI,Roboto,Arial,sans-serif;opacity:1;transition:opacity .15s';
+  el.innerHTML=`<span class="spin" style="width:26px;height:26px;border-width:3px"></span><div>Signing in${name?', '+esc(name):''}… · Entrando…</div>`;
+  try{ if(document.activeElement) document.activeElement.blur(); }catch(e){}
+}
+function secUncover(){
+  const el=document.getElementById('signingin'); if(!el) return;
+  el.style.opacity='0'; setTimeout(()=>{ try{ el.remove(); }catch(e){} },160);
+}
+// A secured phone was just tied to this person: now (and only now) the data can load.
+async function secSignedIn(id){
+  SEC.bound=true; SEC.emp=id;
+  secCover((S.staff.find(x=>x.id===id)||{}).name);
+  try{ await loadAll(); }catch(e){}
+  S.pinBusy=false;
+  const u=S.staff.find(x=>x.id===id);
+  if(!u){ secUncover(); toast('Signed in, but your data did not load — check the internet'); return viewLogin(); }
+  S.user=u; S.pin=''; S.pin1=''; S.loginWho=null; S.loginStage='pin';
+  localStorage.setItem('tbp_user',u.id); S.view='today';
+  try{ await render(); }catch(e){}
+  secUncover();
+}
 window.pinKey=async n=>{
   if(S.pinBusy) return;
   S.pin+=String(n); viewLogin();
@@ -5323,11 +5475,18 @@ window.pinKey=async n=>{
     // The four digits go to the database and a yes or a no comes back. Nothing on this phone
     // knows anybody's PIN, so there is nothing here to read off it. A temp code still turns
     // the old PIN off — the database enforces that now, not this screen.
-    S.pinBusy=true; viewLogin();
+    S.pinBusy=true;
+    if(SEC.mode==='secure') secCover(u.name); else viewLogin();
     let r=null, err=null;
-    try{ const q=await db.rpc('tb_pin_check',{p_staff:u.id, p_code:entered}); r=q.data; err=q.error; }
+    try{
+      // Secured phones: the same yes/no, and on yes the database ties this phone to the person.
+      const q = SEC.mode==='secure'
+        ? await db.rpc('tb_login',{p_staff:u.id, p_code:entered, p_device:secDevice()})
+        : await db.rpc('tb_pin_check',{p_staff:u.id, p_code:entered});
+      r=q.data; err=q.error; }
     catch(e){ err=e; }
     S.pinBusy=false;
+    if(!(r&&r.ok&&!r.must_set_pin)) secUncover();
     if(err||!r){
       toast('Could not reach the database — check the internet · Revisa el internet');
       return setTimeout(viewLogin,500);
@@ -5336,7 +5495,12 @@ window.pinKey=async n=>{
       // Hold the code that just worked ONLY for the few seconds until the new PIN is saved —
       // the database asks for it again as proof before it will change anything.
       if(r.must_set_pin){ S.pinCur=entered; S.loginStage='new'; return viewLogin(); }
+      if(SEC.mode==='secure') return secSignedIn(u.id);
       return signIn(u);
+    }
+    if(r.reason==='not_allowed'){
+      toast('This login is turned off — ask a manager · Acceso desactivado');
+      return setTimeout(viewLogin,800);
     }
     if(r.reason==='locked'){
       toast(`Too many wrong tries — wait ${r.minutes||15} min · Demasiados intentos`);
@@ -5358,13 +5522,19 @@ window.pinKey=async n=>{
     toast("Those didn't match — try again · No coinciden");
     return setTimeout(viewLogin,300);
   }
-  S.pinBusy=true; viewLogin();
+  S.pinBusy=true;
+  if(SEC.mode==='secure') secCover(u.name); else viewLogin();
   // The database hashes it and stores it. The PIN is sent once, over https, and is never
   // written to this device, never held after this line, and never readable back out.
   let r=null, err=null;
-  try{ const q=await db.rpc('tb_pin_set',{p_staff:u.id, p_code:S.pinCur||'', p_new:S.pin1}); r=q.data; err=q.error; }
+  try{
+    const q = SEC.mode==='secure'
+      ? await db.rpc('tb_login_set_pin',{p_staff:u.id, p_code:S.pinCur||'', p_new:S.pin1, p_device:secDevice()})
+      : await db.rpc('tb_pin_set',{p_staff:u.id, p_code:S.pinCur||'', p_new:S.pin1});
+    r=q.data; err=q.error; }
   catch(e){ err=e; }
   S.pinBusy=false;
+  if(err||!r||!r.ok) secUncover();
   if(err||!r||!r.ok){
     // Do NOT let them in on a PIN that was never saved — they would be locked out on the
     // next login with a code that no longer works and a PIN that was never stored.
@@ -5376,11 +5546,20 @@ window.pinKey=async n=>{
   S.pinCur='';
   Object.assign(u,{has_pin:true, has_temp:false, temp_at:null, pin_set_at:new Date().toISOString()});
   toast('PIN saved ✔ · PIN guardado');
+  if(SEC.mode==='secure') return secSignedIn(u.id);
   signIn(u);
 };
 window.pinClear=()=>{ S.pin=S.pin.slice(0,-1); viewLogin(); };
 window.addEventListener('beforeunload',()=>{ S.pinCur=''; S.pin1=''; S.freshTemp=null; });
-window.logout=()=>{ S.user=null; S.previewUser=null; S.loginWho=null; S.loginGroup=null; S.loginStage='pin'; S.pin=''; S.pin1='';
+window.logout=async()=>{
+  if(SEC.mode==='secure'){
+    // Untie this phone in the database, then restart so nothing of the last person's data
+    // stays in memory — the next person on a shared iPad starts from the name list.
+    try{ await db.rpc('tb_logout'); }catch(e){}
+    localStorage.removeItem('tbp_user');
+    return location.reload();
+  }
+  S.user=null; S.previewUser=null; S.loginWho=null; S.loginGroup=null; S.loginStage='pin'; S.pin=''; S.pin1='';
   localStorage.removeItem('tbp_user'); viewLogin(); };
 
 // The weather card. Every number on it says where it came from, and the card says out loud
@@ -5967,10 +6146,15 @@ async function ckSweep(){
 
 async function viewToday(){
   const d=S.selDate||todayLA(); S.selDate=d;
+  // Sep 24 speed pass: the order-day card and the 86 list start loading NOW, in parallel with
+  // the weather, instead of each waiting its turn — same data, fewer trips before Today shows.
+  const pOr=(d===todayLA() && sec('orders')) ? orLoadToday(d).catch(()=>null) : null;
+  const p86=load86(d);
   if(!S.wx.loaded) await loadWeather();
+  await wxEnsureHours(d);
   await loadEvents();
   if(!S.evMonth) S.evMonth=d.slice(0,7);
-  await load86(d);
+  await p86;
   const wxf=wxGuestFactor(d);
   const baseGuests=guestForecast(d);
   if(d>=todayLA()) await fcLogShown(d);   // freeze the morning number so the ledger grades what was shown
@@ -5997,8 +6181,10 @@ async function viewToday(){
   // Sales forecast = guest forecast × average check, where the average check is measured off
   // every real (non-synthetic) day on file — never a typed-in or modeled number. With zero
   // real days it stays null and the tile says so plainly instead of guessing a dollar figure.
-  const realHistQ=await db.from('tb_daily_history').select('business_date,net_sales,guests').eq('synthetic',false);
-  const realDays=(realHistQ.data||[]).filter(r=>Number(r.guests)>0 && r.net_sales!=null);
+  // Same real days loadAll already fetched for the forecast — no second trip (speed pass Sep 24).
+  const realHistRows=(S.dhRows&&S.dhRows.length)? S.dhRows
+    : ((await db.from('tb_daily_history').select('business_date,net_sales,guests').eq('synthetic',false)).data||[]);
+  const realDays=(realHistRows).filter(r=>Number(r.guests)>0 && r.net_sales!=null);
   const realGuestsSum=realDays.reduce((a,r)=>a+Number(r.guests),0);
   const realSalesSum=realDays.reduce((a,r)=>a+Number(r.net_sales),0);
   const avgCheck=realGuestsSum>0 ? realSalesSum/realGuestsSum : null;
@@ -6047,7 +6233,7 @@ async function viewToday(){
   const maxH=Math.max(...hrs.map(x=>x.g),1);
   const hlabel=h=>{const x=h%12===0?12:h%12; return x+(h<12?'am':'pm');};
 
-  if(d===todayLA() && sec('orders')) await orLoadToday(d);
+  if(pOr) await pOr;
   let inner=`
   ${orCardHtml(d)}
   ${(()=>{
@@ -10502,6 +10688,7 @@ async function viewAdmin(){
   <div class="card">
     <h2>Team · Equipo<span class="h2sub">ChefOpsAI employees table</span></h2>
     <div class="muted" style="font-size:12.5px;margin-bottom:10px">Nobody's PIN is shown here, including yours — once a person sets their own, it is theirs and this screen can't read it. What you can do is issue a temporary code to send them; that code turns their old PIN off until they pick a new one.</div>
+    ${(SEC.mode==='secure'&&can('admin.staff'))?secSessionsHtml():''}
     ${S.staff.map(s=>{
       const me=S.user&&S.user.id===s.id;
       // Three states worth telling apart: a code is out and unused, they have set their own,
@@ -10535,6 +10722,7 @@ async function viewAdmin(){
   ${parLauncher}
   ${devOn()?devAdminCard():''}
   ${rolesCard()}
+  ${can('admin.perms')?backupCard():''}
   ${countListCard()}
   ${needsCallCard()}
   ${freshCutsCard()}
@@ -10702,7 +10890,76 @@ window.editStaff=async id=>{ if(!guard('admin.staff')) return;
   if(error) return toast('Could not save — '+error.message);
   await loadAll(); render();
 };
-window.toggleStaff=async(id,v)=>{ if(!guard('admin.staff')) return; await db.from('employees').update({status:v?'active':'inactive'}).eq('id',id); await loadAll(); render(); };
+window.toggleStaff=async(id,v)=>{ if(!guard('admin.staff')) return;
+  const {error}=await db.from('employees').update({status:v?'active':'inactive'}).eq('id',id);
+  if(error){ toast('Did NOT save — '+error.message); return; }
+  // Turning someone off locks them out at once (the database checks on every request);
+  // this also clears their phones from the signed-in list.
+  if(!v && SEC.mode==='secure'){ try{ await db.rpc('tb_revoke_sessions',{p_staff:id}); }catch(e){} S.sess=null; }
+  await loadAll(); render(); };
+
+// Backup (admin): every table the app uses, in one file on this device. The database also
+// keeps its own daily backups; this one is yours, on your laptop, whenever you want it.
+const BACKUP_TABLES=['employees','inventory','recipes','prep_lists','prep_list_items','inventory_counts','inventory_count_items',
+ 'waste_records','tb_86','tb_fresh_cuts','tb_model','tb_settings','tb_families','tb_daily_history','tb_daily_item_history',
+ 'tb_day_forecast','tb_forecast_scores','tb_forecast_v2','tb_vendor_orders','tb_vendor_order_lines','tb_order_guide_items',
+ 'tb_order_guide_rooms','tb_order_guide_categories','tb_vendor_rules','tb_vendor_prices','tb_supplier_orders','tb_supplier_lines',
+ 'tb_sku_map','tb_par_engine','tb_par_engine_runs','tb_par_signals','tb_order_signals','tb_protein_count','tb_attach_scores',
+ 'tb_check_items','tb_check_runs','tb_check_log','tb_check_edits','tb_valley_events','tb_weather_daily','data_imports',
+ 'tb_dev_notes','tb_dev_events'];
+function backupCard(){
+  return `<div class="card"><h2>Backup · Respaldo<span class="h2sub">everything the app uses, as one file</span></h2>
+    <div class="muted" style="font-size:12.5px;margin-bottom:10px">Saves a copy of every table to this device. Keep it somewhere safe and never upload it anywhere public — it has everyone's names in it.</div>
+    <button class="btn-secondary btn-sm" onclick="downloadBackup()" ${S.backupBusy?'disabled':''}>${S.backupBusy?'Working… '+esc(S.backupBusy):'Download backup'}</button></div>`;
+}
+window.downloadBackup=async()=>{
+  if(!can('admin.perms')){ toast('Not allowed for your role'); return; }
+  const out={taken_at:new Date().toISOString(), build:BUILD, tables:{}, errors:{}};
+  for(const t of BACKUP_TABLES){
+    S.backupBusy=t; render();
+    let rows=[], from=0;
+    for(;;){
+      const r=await db.from(t).select('*').range(from, from+999);
+      if(r.error){ out.errors[t]=r.error.message; break; }
+      rows=rows.concat(r.data||[]); if(!r.data||r.data.length<1000) break; from+=1000;
+    }
+    out.tables[t]=rows;
+  }
+  S.backupBusy=null; render();
+  const blob=new Blob([JSON.stringify(out)],{type:'application/json'});
+  const a=document.createElement('a'); a.href=URL.createObjectURL(blob);
+  a.download='tb-backup-'+todayLA()+'.json'; document.body.appendChild(a); a.click();
+  setTimeout(()=>{ URL.revokeObjectURL(a.href); a.remove(); },2000);
+  const bad=Object.keys(out.errors).length;
+  toast(bad?`Saved, but ${bad} table(s) could not be read`:'Backup saved ✔ · Respaldo guardado');
+};
+
+// Signed-in phones (manager and up). Each row is one phone tied to one person.
+function secSessionsHtml(){
+  if(!S.sess) return `<div style="margin:0 0 10px"><button class="btn-ghost btn-sm" onclick="secLoadSessions()">Show signed-in phones · Teléfonos con sesión</button></div>`;
+  const nameOf=id=>{ const p=S.staff.find(x=>x.id===id); return p?p.name:'(removed)'; };
+  const ago=t=>{ const m=Math.round((Date.now()-new Date(t).getTime())/60000); return m<60?m+' min ago':m<1440?Math.round(m/60)+' h ago':Math.round(m/1440)+' d ago'; };
+  return `<div style="background:var(--sand-dark);border-radius:10px;padding:10px 12px;margin:0 0 12px">
+    <b style="font-size:13px">Signed-in phones · Teléfonos con sesión</b>
+    <div class="muted" style="font-size:11.5px;margin:2px 0 6px">Sign someone out and every phone they're on goes back to the name list on its next tap. Turning a person Off does the same, instantly.</div>
+    ${S.sess.length?S.sess.map(x=>`<div class="staff-row" style="padding:6px 2px">
+      <div style="flex:1"><b>${esc(nameOf(x.employee_id))}</b>${x.this_phone?' <span class="muted" style="font-size:11px">(this phone)</span>':''}
+        <div class="muted" style="font-size:11px">${esc(x.device||'unknown device')} · last seen ${ago(x.last_seen)}</div></div>
+      ${x.this_phone?'':`<button class="btn-ghost btn-sm" onclick="secSignOut('${x.employee_id}')">Sign out</button>`}
+    </div>`).join(''):'<div class="muted" style="font-size:12px">Nobody is signed in.</div>'}
+    <div style="margin-top:6px"><button class="btn-ghost btn-sm" onclick="secLoadSessions()">Refresh</button></div>
+  </div>`;
+}
+window.secLoadSessions=async()=>{
+  const r=await db.rpc('tb_list_sessions');
+  if(r.error){ toast('Could not load — '+r.error.message); return; }
+  S.sess=r.data||[]; render();
+};
+window.secSignOut=async id=>{
+  const r=await db.rpc('tb_revoke_sessions',{p_staff:id});
+  if(r.error||!(r.data&&r.data.ok)){ toast('Not allowed · No permitido'); return; }
+  toast('Signed out · Sesión cerrada'); await secLoadSessions();
+};
 window.addStaff=async()=>{ if(!guard('admin.staff')) return;
   const name=prompt('Name'); if(!name||!name.trim()) return;
   const title=prompt('Job title (shown on the login screen)','Prep Cook'); if(title===null) return;
@@ -14243,6 +14500,13 @@ function devStrip(){
     🐞 <b>${n.length} open note${n.length===1?'':'s'} on this screen</b>${bad?` · ${bad} bug${bad===1?'':'s'}`:''} — tap to read</div>`;
 }
 
+function devStripPaint(){
+  const html=devStrip(); const cur=document.querySelector('.dv-strip');
+  if(cur){ if(html) cur.outerHTML=html; else cur.remove(); return; }
+  if(!html) return;
+  const hdr=document.querySelector('header.top'); if(hdr) hdr.insertAdjacentHTML('afterend', html);
+}
+
 // ---- the board ----
 window.devGo=(tab)=>{ S.dev.tab=tab; if(tab==='today'&&!S.dev.day) devLoadDay(todayLA()); render(); };
 window.devFilter=(f)=>{ S.dev.filter=f; render(); };
@@ -14580,7 +14844,9 @@ function devBoot(){
     window.__devBooted=true;   // so a test can prove the listeners really installed
     // The notes themselves load quietly in the background: the 🐞 badge and the grey line
     // under the header both need them, and neither is worth delaying the first paint for.
-    devLoadNotes().then(()=>{ try{ devFabPaint(); render(); }catch(e){} });
+    // Sep 24 speed pass: this used to call render() — a SECOND full Today draw (every query
+    // again) racing the first one on every app open. Now it only drops the strip in place.
+    devLoadNotes().then(()=>{ try{ devFabPaint(); devStripPaint(); }catch(e){} });
     devFabPaint();
   }catch(e){}
 }
@@ -14641,7 +14907,8 @@ async function dailyRefresh(force){
   const today=todayLA();
   if(force || S.dayStamp!==today){
     S.dayStamp=today; S.selDate=today; S.guestsOverride=null; S.book=null; S.par.loaded=false;
-    try{ await loadAll(); }catch(e){}
+    // On the sign-in screen of a secured phone there is nothing to load but names.
+    try{ if(SEC.mode==='secure' && !SEC.bound) await loadRoster(); else await loadAll(); }catch(e){}
     render();
   }
 }
@@ -14650,6 +14917,7 @@ document.addEventListener('visibilitychange',()=>{
   if(!document.hidden){
     const idleMin=(Date.now()-(S.lastSeen||Date.now()))/60000;
     S.lastSeen=Date.now();
+    if(idleMin>1) secRecheck();
     if(idleMin>10) dailyRefresh(true);
   } else { S.lastSeen=Date.now(); }
 });
@@ -14657,16 +14925,30 @@ document.addEventListener('visibilitychange',()=>{
 (async()=>{
   try{
     if(typeof supabase==='undefined') throw new Error('Could not load the database driver. Check your internet connection and reload. / No se pudo cargar el sistema — revisa el internet y recarga.');
-    await loadAll();
+    // Speed pass: a phone that was signed in last time starts loading its data at the same
+    // moment it asks "who am I?", instead of waiting for the answer first. If the answer is
+    // "nobody", the data never arrives anyway (the database refuses) and the name list shows.
+    const pData = localStorage.getItem('tbp_user') ? loadAll().then(()=>true,()=>false) : null;
+    await secBoot();
+    if(SEC.mode==='secure' && !SEC.bound){ if(pData) await pData; await loadRoster(); }   // names only, until a PIN
+    else if(pData){ await pData; if(!S.staff.length) await loadAll(); }
+    else await loadAll();
     S.dayStamp=todayLA(); S.lastSeen=Date.now();
     if(!S.staff.length) throw new Error('Connected, but no data came back. Tell Dan to check the database.');
-    const saved=localStorage.getItem('tbp_user');
-    // A pending temp code means Dan reset this person — either they forgot their PIN or the
-    // login changed hands. Either way the phone must NOT walk straight back in on the session
-    // that was already saved here, or the reset does nothing on the one device that matters.
-    if(saved){ const u=S.staff.find(s=>s.id===saved&&s.active); if(u && !u.has_temp) S.user=u;
-               else if(u) localStorage.removeItem('tbp_user'); }
+    if(SEC.mode==='secure'){
+      // The database says who this phone belongs to — not the phone's own memory.
+      if(SEC.bound){ const u=S.staff.find(s=>s.id===SEC.emp&&s.active); if(u) S.user=u; }
+    } else {
+      const saved=localStorage.getItem('tbp_user');
+      // A pending temp code means Dan reset this person — either they forgot their PIN or the
+      // login changed hands. Either way the phone must NOT walk straight back in on the session
+      // that was already saved here, or the reset does nothing on the one device that matters.
+      if(saved){ const u=S.staff.find(s=>s.id===saved&&s.active); if(u && !u.has_temp) S.user=u;
+                 else if(u) localStorage.removeItem('tbp_user'); }
+    }
     render();
+    try{ movedBar(); }catch(e){}
+    setInterval(secRecheck, 5*60*1000);
     updateVerify();        // did the last Update actually land? only speaks if it did not
     checkBuild();          // after the first paint — never delays the app starting
     setInterval(checkBuild, 15*60*1000);
