@@ -1318,7 +1318,7 @@ const SB_KEY='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZ
 const TBID='9f8d7c6b-5a49-4e38-b271-06d5f00dbeef'; // Tommy Bahama tenant inside ChefOpsAI
 // Stamped by publish.sh at upload time. It is the only version label there is now —
 // one address, updated in place, so this tells you which build that address is serving.
-const BUILD='Sep 25, 2026 · ranges everywhere';
+const BUILD='Sep 25, 2026 · ranges + no fresh cuts';
 // ---------- IS THIS PHONE EVEN RUNNING THE LATEST BUILD? ----------
 // Sep 3 2026. Three prep fixes shipped and Dan still saw the old behaviour, because the app
 // installs to the home screen and an installed web app does not go back and re-fetch its own
@@ -2470,7 +2470,6 @@ const PERM_CAPS=[
   ['prep.check','Tick off prep tasks','Marcar tareas de prep'],
   ['prep.print','Print the prep list','Imprimir la lista'],
   ['waste.log','Log waste','Registrar merma'],
-  ['cuts.log','Log fresh cuts tossed at night','Registrar cortes frescos tirados'],
   ['86.log','Log an 86 — ran out','Registrar un 86 — se acabó'],
   ['today.override','Type over the cover forecast','Cambiar el pronóstico'],
   ['orders.edit','Count & build vendor orders','Contar y armar pedidos'],
@@ -9072,6 +9071,10 @@ async function viewCount(){
 }
 
 // ---------- fresh cuts: the nightly toss log ----------
+// Sep 25 2026 — Dan: "remove the fresh cuts. the waste should take care of this." Switched off
+// everywhere it shows (Waste card, Admin list, monthly report line, tours, Roles switch). The code
+// and every night already recorded in tb_fresh_cuts stay, so turning this back on is one line.
+const FRESH_CUTS_ON=false;
 // Approved from the mockup Aug 3; the cut list came from Dan the same day. Fresh cuts are
 // not count-sheet items and carry no par — nobody counts scallions at 6am — so the only
 // honest measurement of how much was over-cut is what goes in the bin at the end of the
@@ -9210,6 +9213,7 @@ function fcBarInner(){
 }
 
 function cardFreshCuts(d){
+  if(!FRESH_CUTS_ON) return '';
   const cuts=fcCuts();
   if(!cuts.length) return '';
   if(!can('cuts.log') && !Object.keys(S.fc.today||{}).length) return '';
@@ -9288,6 +9292,7 @@ window.fcSaveList=async()=>{ if(!guard('admin.items')) return;
   S.freshCuts=val; S.fcDirty=false; S.fc.loadedFor=null;
   toast('Cut list saved · Guardado'); render(); };
 function freshCutsCard(){
+  if(!FRESH_CUTS_ON) return '';
   if(!can('admin.items')) return '';
   const cuts=fcCuts();
   const noStation=cuts.filter(c=>!c.station).length;
@@ -9318,7 +9323,7 @@ function freshCutsCard(){
 
 async function viewWaste(){
   const d=S.selDate||todayLA(); S.selDate=d;
-  await Promise.all([loadWaste(d), loadFreshCuts(d)]);
+  await Promise.all([loadWaste(d), FRESH_CUTS_ON?loadFreshCuts(d):null]);
   const kitchen=S.preps.filter(p=>p.station!=='bar').slice().sort((a,b)=>a.name_en.localeCompare(b.name_en));
   const f=S.wasteForm;
   const today=S.waste.filter(r=>r.reason!=='none');
@@ -9908,8 +9913,8 @@ function reportHtml(){
       ${D.prevEntries? ` vs prior month: <b style="color:${D.entries<=D.prevEntries?'var(--ok)':'var(--coral)'}">${D.entries<=D.prevEntries?'−':'+'}${Math.abs(Math.round((D.entries-D.prevEntries)/D.prevEntries*100))}% entries</b> ${repLab('derived','est')}`:' No prior-month waste data yet — the month-over-month line starts next month.'}</div>`
     : '<div class="muted" style="font-size:12.5px">No waste was logged this month. If nothing was thrown out, that is excellent; if it went unlogged, the pars are learning from incomplete days.</div>'}
     <div class="muted" style="font-size:12.5px;margin-top:6px"><b>86s (ran out):</b> ${D.e86&&D.e86.length? D.e86.length+' this month — most often '+esc(Object.entries(D.e86.reduce((a,r)=>(a[r.item]=(a[r.item]||0)+1,a),{})).sort((a,b)=>b[1]-a[1]).slice(0,2).map(x=>x[0]+' ('+x[1]+'×)').join(', '))+'. Waste says a par is too high; these say too low.' : 'none logged this month.'}</div>
-    <div class="muted" style="font-size:12.5px;margin-top:6px"><b>Fresh cuts tossed at night:</b> ${D.fcAnswers? D.fcAnswers+' answer'+(D.fcAnswers===1?'':'s')+' across '+D.fcNights+' night'+(D.fcNights===1?'':'s')+'. Most over-cut: '+esc(D.fcTop.map(x=>x[0]+' ('+x[1].tossed+' of '+x[1].n+' nights)').join(', '))+'.' : 'nothing logged this month.'}
-    <span style="opacity:.8">Counted separately from the waste entries above and never added to them — a tap on the cuts card and a logged container are not the same unit.</span></div>
+    ${FRESH_CUTS_ON?`    <div class="muted" style="font-size:12.5px;margin-top:6px"><b>Fresh cuts tossed at night:</b> ${D.fcAnswers? D.fcAnswers+' answer'+(D.fcAnswers===1?'':'s')+' across '+D.fcNights+' night'+(D.fcNights===1?'':'s')+'. Most over-cut: '+esc(D.fcTop.map(x=>x[0]+' ('+x[1].tossed+' of '+x[1].n+' nights)').join(', '))+'.' : 'nothing logged this month.'}
+    <span style="opacity:.8">Counted separately from the waste entries above and never added to them — a tap on the cuts card and a logged container are not the same unit.</span></div>`:''}
 
     ${!EXACT()?'':`<h3>3 · Forecast vs reality ${repLab('derived','est')}</h3>`}
     ${!EXACT()?'':D.scored.length? `
@@ -15219,7 +15224,7 @@ const GS={
   C:[['welcome','Took the tour','Hiciste el recorrido'],['v:count','Open the morning count','Abre el conteo de la mañana'],
      ['v:prep','Open today’s prep list','Abre la lista de prep de hoy'],['v:checklist','Open the closing checklist','Abre la lista de cierre']],
   D:[['welcome','Took the tour','Hiciste el recorrido'],['v:checklist','Open the closing checklist','Abre la lista de cierre'],
-     ['v:waste','Find tonight’s fresh cuts (Waste)','Busca los cortes de hoy (Merma)'],['v:recipes','Find a recipe','Busca una receta']],
+     ['v:waste','Open the Waste tab','Abre la pestaña de Merma'],['v:recipes','Find a recipe','Busca una receta']],
   E:[['welcome','Took the tour','Hiciste el recorrido'],['v:prep','Open your prep list','Abre tu lista de prep'],
      ['prepdone','Mark one item done','Marca un artículo hecho'],['v:recipes','Find a recipe','Busca una receta']]
 };
@@ -15326,8 +15331,8 @@ const TOURS={
   {when:()=>can('waste.log'), el:()=>tCard('Log something'), en:'Threw something out? Count it first, then log it: the item, and how much in its own container.', es:'¿Tiraste algo? Primero cuéntalo y luego regístralo: el artículo y cuánto, en su propio envase.'},
   {when:()=>can('waste.log'), el:()=>tq('#w-reasons'), en:'Pick why: made too much, spoiled, quality, dropped, remake.', es:'Escoge por qué: sobró, se echó a perder, calidad, se cayó, se rehizo.'},
   {when:()=>can('waste.log'), el:()=>tq('button[onclick="logNoWaste()"]'), en:'Clean day? Tap Nothing wasted. That’s data too.', es:'¿Día limpio? Toca Sin merma. Eso también cuenta.'},
-  {when:()=>can('cuts.log'), el:()=>tCard('Fresh cuts tossed'), en:'At close: how much of each fresh cut gets tossed. Tap an amount for every one — 0 counts.', es:'Al cerrar: cuánto se tira de cada corte fresco. Toca una cantidad en cada uno — el 0 cuenta.'},
-  {when:()=>can('cuts.log'), el:()=>tq('#fcbar'), en:'Nothing is saved until you tap Save tonight’s cuts.', es:'No se guarda nada hasta que tocas Guardar.'},
+  {when:()=>FRESH_CUTS_ON&&can('cuts.log'), el:()=>tCard('Fresh cuts tossed'), en:'At close: how much of each fresh cut gets tossed. Tap an amount for every one — 0 counts.', es:'Al cerrar: cuánto se tira de cada corte fresco. Toca una cantidad en cada uno — el 0 cuenta.'},
+  {when:()=>FRESH_CUTS_ON&&can('cuts.log'), el:()=>tq('#fcbar'), en:'Nothing is saved until you tap Save tonight’s cuts.', es:'No se guarda nada hasta que tocas Guardar.'},
   {el:()=>tCard('Last 30 days'), en:'Last 30 days: what gets thrown out most, and why.', es:'Últimos 30 días: lo que más se tira, y por qué.'}
  ],
  orders:()=>[
@@ -15360,7 +15365,7 @@ const TOURS={
   {when:()=>can('admin.staff'), el:()=>tBtn('Show signed-in phones'), en:'See which phones are signed in and sign one out. Off turns a person off on every phone, instantly.', es:'Ve qué teléfonos tienen sesión y ciérrala. Off apaga a la persona en todos los teléfonos, al instante.'},
   {when:()=>can('admin.items'), el:()=>tCard('The count / prep list'), en:'The count / prep list: every item, where it’s counted and its container. Edit or turn Off.', es:'La lista de conteo / prep: cada artículo, dónde se cuenta y su envase. Editar o apagar.'},
   {el:()=>tCard('Put an item on the count list'), en:'Put a new item on the count list, from a recipe or by name.', es:'Agrega un artículo nuevo al conteo, desde una receta o por nombre.'},
-  {when:()=>can('admin.items'), el:()=>tCard('Fresh cuts list'), en:'The fresh cuts the night crew logs on Waste.', es:'Los cortes frescos que el turno de noche registra en Merma.'},
+  {when:()=>FRESH_CUTS_ON&&can('admin.items'), el:()=>tCard('Fresh cuts list'), en:'The fresh cuts the night crew logs on Waste.', es:'Los cortes frescos que el turno de noche registra en Merma.'},
   {el:()=>tCard('Admin/Settings'), en:()=>can('pars.approve')?'Par engine: run it, then apply the recommendations you agree with.':'Par engine: see what it recommends. Dan applies the changes.', es:()=>can('pars.approve')?'Motor de pares: recalcula y aplica lo que te parezca bien.':'Motor de pares: ve lo que recomienda. Dan aplica los cambios.'},
   {when:()=>can('admin.perms'), el:()=>tCard('Roles & access'), en:'Roles & access: one switch table for every column. Nothing changes until you tap Save. Preview as shows the app exactly as someone else sees it.', es:'Roles y accesos: una tabla de interruptores para cada grupo. Nada cambia hasta Guardar. Ver como muestra la app igual que otra persona.'},
   {when:()=>can('admin.perms'), el:()=>tCard('Backup ·'), en:'Download backup: every table, one file, to this device.', es:'Descargar respaldo: todas las tablas, un archivo, a este aparato.'}
