@@ -1318,7 +1318,7 @@ const SB_KEY='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZ
 const TBID='9f8d7c6b-5a49-4e38-b271-06d5f00dbeef'; // Tommy Bahama tenant inside ChefOpsAI
 // Stamped by publish.sh at upload time. It is the only version label there is now —
 // one address, updated in place, so this tells you which build that address is serving.
-const BUILD='Sep 25, 2026 · tutorial + 5 columns + ranges';
+const BUILD='Sep 25, 2026 · ranges everywhere';
 // ---------- IS THIS PHONE EVEN RUNNING THE LATEST BUILD? ----------
 // Sep 3 2026. Three prep fixes shipped and Dan still saw the old behaviour, because the app
 // installs to the home screen and an installed web app does not go back and re-fetch its own
@@ -4931,13 +4931,13 @@ function prepLog(){
     <div class="muted" style="margin-bottom:8px">Every prep list that was generated, newest first — what was on it, who it went to, and how much of it got checked off.<br>
     Cada lista generada. Ábrela para ver qué se pidió ese día.</div>
     <div class="tbl-wrap"><table>
-      <tr><th>Day · Día</th><th class="num">Items</th><th class="num">Batches</th><th class="num">T.D.</th><th class="num">Covers</th><th>Built from</th><th></th></tr>
+      <tr><th>Day · Día</th><th class="num">Items</th><th class="num">Batches</th><th class="num">T.D.</th><th class="num">${EXACT()?'Covers':'Guests'}</th><th>Built from</th><th></th></tr>
       ${rows.slice(0,60).map(r=>`<tr>
         <td><b>${fmtDate(r.d)}</b><div class="muted" style="font-size:11px">${r.d}</div></td>
         <td class="num">${r.done}<span class="muted">/${r.n}</span></td>
         <td class="num">${fmtQ(r.batches)}</td>
         <td class="num">${Math.round(r.min)}m</td>
-        <td class="num">${r.guests!=null?Math.round(r.guests):'—'}${r.overridden?'<span class="muted" style="font-size:10px"> set</span>':''}</td>
+        <td class="num">${r.guests!=null?(EXACT()||r.overridden?Math.round(r.guests):guestRangeTxt(r.d, r.guests)):'—'}${r.overridden?'<span class="muted" style="font-size:10px"> set</span>':''}</td>
         <td style="font-size:12px">${r.source==='count'?'a submitted count':'the forecast only'}${
           r.uncounted?`<div class="muted" style="font-size:11px;color:var(--coral)">${r.uncounted} not counted</div>`:''}</td>
         <td class="no-print" style="white-space:nowrap">
@@ -4948,7 +4948,7 @@ function prepLog(){
       </tr>`).join('')}
     </table></div>
     ${rows.length>60?`<div class="muted" style="font-size:11.5px;margin-top:6px">Showing the newest 60 of ${rows.length}.</div>`:''}
-    <div class="muted" style="font-size:11.5px;margin-top:8px"><b>Items</b> is checked off / on the list. <b>Covers</b> is the cover forecast the list was built against — “set” means somebody typed it in instead of using the model. <b>T.D.</b> is planned time duration, not clocked time.</div>`
+    <div class="muted" style="font-size:11.5px;margin-top:8px"><b>Items</b> is checked off / on the list. <b>${EXACT()?'Covers':'Guests'}</b> is the ${EXACT()?'cover forecast':'likely range of guests'} the list was built against — “set” means somebody typed it in instead of using the model. <b>T.D.</b> is planned time duration, not clocked time.</div>`
     : `<div class="muted">No prep lists saved yet. Every list you generate is kept here from now on.</div>`}
     ${anaSrc('prep_lists + prep_list_items — your own generated lists. Measured data, not modeled.')}
   </div>`;
@@ -5143,13 +5143,13 @@ function dayReportHtml(R){
   const anySyn=sold.some(x=>x.syn) || (hist && hist.synthetic!==false);
   const demand=`<h3 style="margin-top:0">1 · Demand · Demanda</h3>
   <div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:8px">
-    ${anaTile('Covers forecast', Math.round(gFore), gModel?'model — not measured':'saved forecast')}
+    ${EXACT()?anaTile('Covers forecast', Math.round(gFore), gModel?'model — not measured':'saved forecast'):anaTile('Guests expected', guestRangeTxt(d, gFore), 'likely range')}
     ${anaTile('Covers actual', gAct!=null?Math.round(gAct):'—', gAct!=null?(hist&&hist.synthetic===false?'hand-entered covers (Oracle)':'you typed this in'):'never entered')}
     ${hist&&hist.checks!=null?anaTile('Checks', hist.checks, 'machine-counted'):''}
     ${!can('analytics.money')?'':anaTile('Net sales', hist&&hist.net_sales!=null?('$'+Math.round(hist.net_sales).toLocaleString()):'—',
         hist? (hist.synthetic!==false?'MODELED, not real':'from an Oracle export') : 'no history row')}
   </div>
-  ${gAct!=null && gFore>0
+  ${!EXACT()?'':gAct!=null && gFore>0
     ? `<div class="muted" style="font-size:12.5px">Forecast missed by <b style="color:${Math.abs(gAct-gFore)/gFore>0.15?'var(--coral)':'var(--palm)'}">${gAct>=gFore?'+':''}${Math.round((gAct-gFore)/gFore*100)}%</b> (${Math.round(gFore)} predicted, ${Math.round(gAct)} covers recorded). Every par below was built against the forecast, not the actual — so on a day the forecast was low, running out is expected and is not a par problem.</div>`
     : `<div class="muted" style="font-size:12.5px">No actual cover count was ever entered for this day, so there is nothing to check the forecast against. You can add it in card 11 below · No se registró el número real de cubiertos.</div>`}
   ${sold.length? `<h4 style="margin:12px 0 4px">What sold that day · Lo que se vendió</h4>
@@ -5243,7 +5243,7 @@ function dayReportHtml(R){
     ${anaTile('On the list', li.length, 'items')}
     ${anaTile('Checked off', lDone+' / '+li.length, lDone===li.length&&li.length?'all done':(lDone?'partial':'nothing ticked'))}
     ${anaTile('Planned time', Math.round(lMin)+'m', 'T.D., not clocked')}
-    ${anaTile('Built against', lmeta.guests!=null?Math.round(lmeta.guests):'—', lmeta.overridden?'guest count typed in':'model forecast')}
+    ${anaTile('Built against', lmeta.guests!=null?(EXACT()||lmeta.overridden?Math.round(lmeta.guests):guestRangeTxt(d, lmeta.guests)):'—', lmeta.overridden?'guest count typed in':(EXACT()?'model forecast':'likely range of guests'))}
   </div>
   <div class="muted" style="font-size:12.5px;margin-bottom:8px">Built from <b>${L.source==='count'?'a submitted count':'the forecast only'}</b>${lmeta.uncounted?` · <span style="color:var(--coral)">${lmeta.uncounted} item(s) on it came from items that were never counted — assumed empty</span>`:''}${lmeta.blank_mode?` · blanks treated as <b>${esc(lmeta.blank_mode)}</b>`:''}.</div>
   <div class="tbl-wrap"><table>
@@ -6263,6 +6263,14 @@ function dayRange(x){
   const g=guestPlan(x); let X=null; try{ X=fcExplain(x); }catch(e){}
   if(X&&X.band&&X.v2s) return {g, lo:Math.round(g*X.band.lo/X.v2s), hi:Math.round(g*X.band.hi/X.v2s)};
   const sp=fcSpan(1); return {g, lo:Math.round(g*sp.lo), hi:Math.round(g*sp.hi)};
+}
+// Sep 25 2026 — Dan: ranges "anywhere it appears on the app" for everyone but him.
+const EXACT=()=>can('today.exact');
+function guestRangeTxt(d, g){ const R=dayRange(d); const k=(g!=null&&R.g)?g/R.g:1; return `${Math.round(R.lo*k)}–${Math.round(R.hi*k)}`; }
+function sumRange(days){   // guests over several days: real where Oracle has the day, measured spread for the rest
+  const act={}; (S.dhRows||[]).forEach(r=>{ if(Number(r.guests)>0) act[String(r.business_date)]=Number(r.guests); });
+  let real=0, plan=0, k=0; days.forEach(x=>{ if(act[x]!=null) real+=act[x]; else { plan+=guestPlan(x); k++; } });
+  const sp=fcSpan(k); return {lo:real+plan*sp.lo, hi:real+plan*sp.hi, k};
 }
 function weekMonSun(d){
   const i=['Monday','Tuesday','Wednesday','Thursday','Friday','Saturday','Sunday'].indexOf(weekdayOf(d));
@@ -7821,9 +7829,9 @@ async function viewPrep(){
   <div class="card">
     <div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap">
       <input type="date" value="${d}" style="max-width:170px" onchange="S.selDate=this.value;S.guestsOverride=null;S.editPlan=false;render()">
-      <div><div class="muted">Cover forecast · Pronóstico de cubiertos</div>
+      <div><div class="muted">${EXACT()?'Cover forecast · Pronóstico de cubiertos':(S.guestsOverride!=null?'Your number · Tu número':'Guests expected · Clientes esperados')}</div>
       <div style="display:flex;align-items:center;gap:8px">
-        <span class="big">${guests}</span>
+        <span class="big">${EXACT()||S.guestsOverride!=null?guests:guestRangeTxt(d)}</span>
         ${can('today.override')?`<input class="qty no-print" type="number" placeholder="edit" style="width:74px" onchange="S.guestsOverride=Number(this.value)||null;render()">`:''}
       </div></div>
       <div style="margin-left:auto;text-align:right" class="muted">${fmtDate(d)}</div>
@@ -9049,7 +9057,7 @@ async function viewCount(){
   </div>
   <div class="card">
     <h2>Finish the count · Terminar el conteo<span class="h2sub" id="cnt-sub">${counted} of ${kitchen.length} counted</span></h2>
-    <div class="muted" style="font-size:12.5px">Submitting does the subtraction for every item — <b>par for ${fmtDate(tgt)} minus what you counted</b> — and turns the shortfall into whole batches on the prep list for that day. Cover forecast used: <b>${guests}</b> for ${fmtDate(tgt)}${close?' (the model\'s number for that day — an override typed on today\'s forecast is not carried over)':''}.<br>
+    <div class="muted" style="font-size:12.5px">Submitting does the subtraction for every item — <b>par for ${fmtDate(tgt)} minus what you counted</b> — and turns the shortfall into whole batches on the prep list for that day. ${EXACT()?`Cover forecast used: <b>${guests}</b>`:`Guests expected: <b>${(!close&&S.guestsOverride!=null)?guests:guestRangeTxt(tgt)}</b>`} for ${fmtDate(tgt)}${close?' (the model\'s number for that day — an override typed on today\'s forecast is not carried over)':''}.<br>
     Al enviarlo se resta lo contado del par de <b>${fmtDate(tgt)}</b> y se arma la lista de ese día en lotes completos.</div>
     <div id="cnt-blank">${blankPanel()}</div>
     ${can('count.start')?`<div style="margin-top:14px"><button class="btn-primary" onclick="submitCount()">${ic('check','ico-sm')}Submit — build the list for ${fmtDate(tgt)} · Enviar conteo</button></div>`
@@ -9903,8 +9911,8 @@ function reportHtml(){
     <div class="muted" style="font-size:12.5px;margin-top:6px"><b>Fresh cuts tossed at night:</b> ${D.fcAnswers? D.fcAnswers+' answer'+(D.fcAnswers===1?'':'s')+' across '+D.fcNights+' night'+(D.fcNights===1?'':'s')+'. Most over-cut: '+esc(D.fcTop.map(x=>x[0]+' ('+x[1].tossed+' of '+x[1].n+' nights)').join(', '))+'.' : 'nothing logged this month.'}
     <span style="opacity:.8">Counted separately from the waste entries above and never added to them — a tap on the cuts card and a logged container are not the same unit.</span></div>
 
-    <h3>3 · Forecast vs reality ${repLab('derived','est')}</h3>
-    ${D.scored.length? `
+    ${!EXACT()?'':`<h3>3 · Forecast vs reality ${repLab('derived','est')}</h3>`}
+    ${!EXACT()?'':D.scored.length? `
       <div class="muted" style="font-size:12.5px">Scored on the <b>${D.scored.length}</b> day${D.scored.length===1?'':'s'} where somebody typed the real cover count (${D.actualsEntered} day${D.actualsEntered===1?'':'s'} had actuals entered).
       <b>${D.within15}</b> of ${D.scored.length} landed within ±15%. Average miss <b>${Math.round(D.avgMiss*100)}%</b>.
       ${D.worst? ` Biggest miss: ${fmtDate(D.worst.d)} (${D.worst.miss>0?'+':''}${Math.round(D.worst.miss*100)}% — forecast ${Math.round(D.worst.f)}, walked in ${Math.round(D.worst.a)}).`:''}</div>`
@@ -10414,6 +10422,7 @@ async function viewAnalytics(){
     S.anaDay=(closed||done[0]||{}).d||d;
   }
   const gToday=guestForecast(d);
+  const gSp=fcSpan(1), gRng=v=>`${Math.round(v*gSp.lo)}–${Math.round(v*gSp.hi)}`;   // a typical single day's likely range
   const wk=weekOf(d), wkG=wk.reduce((a,x)=>a+guestForecast(x),0);
   const nextWk=wk.map(x=>{const dt=dateObjLA(x); dt.setDate(dt.getDate()+7); return dt.toISOString().slice(0,10);});
   const nextG=nextWk.reduce((a,x)=>a+guestForecast(x),0);
@@ -10625,21 +10634,21 @@ async function viewAnalytics(){
   if(S.report&&S.report.data){ shell(reportHtml()); return; }
   shell(`
   ${reportBuilderCard()}
-  ${fcLedgerCardHtml()}
+  ${EXACT()?fcLedgerCardHtml():''}
   ${timingCardHtml()}
   <div class="card">
     <h2 style="margin-bottom:8px">Analytics · Analíticas</h2>
     <div style="display:flex;gap:8px;flex-wrap:wrap">
-      ${anaTile('Covers today','~'+gToday, fmtDate(d).split(',')[0])}
-      ${anaTile('This week','~'+wkG.toLocaleString(),'Sun → Sat')}
-      ${anaTile('Next week', (wkDelta>=0?'+':'')+wkDelta+'%', '~'+nextG.toLocaleString()+' covers')}
+      ${EXACT()?anaTile('Covers today','~'+gToday, fmtDate(d).split(',')[0]):anaTile('Guests today',guestRangeTxt(d), fmtDate(d).split(',')[0])}
+      ${EXACT()?anaTile('This week','~'+wkG.toLocaleString(),'Sun → Sat'):(()=>{const W=sumRange(weekMonSun(d)); return anaTile('This week',`${r10(W.lo).toLocaleString()}–${r10(W.hi).toLocaleString()}`,'Mon → Sun');})()}
+      ${EXACT()?anaTile('Next week', (wkDelta>=0?'+':'')+wkDelta+'%', '~'+nextG.toLocaleString()+' covers'):(()=>{const W=sumRange(weekMonSun(shiftDay(d,7))); return anaTile('Next week', (wkDelta>=0?'+':'')+wkDelta+'%', `${r10(W.lo).toLocaleString()}–${r10(W.hi).toLocaleString()} guests`);})()}
       ${anaTile('Season now', cur.mult.toFixed(2)+'×', MON[curM-1]+' vs July base')}
       ${anaTile('YoY traffic', (m.yoy_trend>=0?'+':'')+Math.round(m.yoy_trend*100)+'%', 'July 26 vs July 25')}
     </div>
     ${anaSrc('Model: weekday pattern (Service by Weekday) × seasonal curve — Jan–Jul + Sep–Dec now <b>measured</b> from your Oracle month exports; Aug still assumed. Every forecast is an <b>estimate</b> — it sharpens each time you upload a real export.')}
   </div>
 
-  ${weeklyReportsListHtml(weeks, fva?fva.end:null)}
+  ${EXACT()?weeklyReportsListHtml(weeks, fva?fva.end:null):''}
 
   <div class="card" id="dayrep-card">
     <h2>Day report · Reporte del día<span class="h2sub">one day, start to finish</span></h2>
@@ -10656,8 +10665,8 @@ async function viewAnalytics(){
   <div class="card">
     <h2>1 · Season curve — when the volume comes back</h2>
     <div class="muted" style="margin-bottom:8px">Estimated covers per average day, by month. You are here: <b>${MON[curM-1]}</b>.</div>
-    ${season.map(s=>anaBar(s.nm+(s.mo===curM?' ●':''), s.g, sMax, s.mo===curM?'var(--coral)':'var(--teal)', s.g, s.mo===curM?'today':'')).join('')}
-    ${anaNote(`Slowest stretch is <b>${trough.nm}</b> (~${trough.g}/day); peak is <b>${peak.nm}</b> (~${peak.g}/day). From where you sit now, volume roughly <b>${climb.toFixed(1)}×</b> by peak season — every par on this system scales with it automatically, so you do not have to re-guess in November.`)}
+    ${season.map(s=>anaBar(s.nm+(s.mo===curM?' ●':''), s.g, sMax, s.mo===curM?'var(--coral)':'var(--teal)', EXACT()?s.g:gRng(s.g), s.mo===curM?'today':'')).join('')}
+    ${anaNote(`Slowest stretch is <b>${trough.nm}</b> (${EXACT()?'~'+trough.g:gRng(trough.g)}/day); peak is <b>${peak.nm}</b> (${EXACT()?'~'+peak.g:gRng(peak.g)}/day). From where you sit now, volume roughly <b>${climb.toFixed(1)}×</b> by peak season — every par on this system scales with it automatically, so you do not have to re-guess in November.`)}
     ${anaSrc('Seasonal multipliers, July = 1.00. Jan–Jul are measured: rebuilt Jul 30 straight from the Service Performance cover totals (Jan–Mar 313.5/day, Apr–Jun 241.8/day, July 156.7/day). That rebuild found the old April–June figure was running 8.0% light — the app said 222.5 covers/day, the export says 241.8 — so spring pars were being set low. Jan–Mar and July were already right to within 0.2%. Aug–Dec have no export at all and are still assumed.')}
     <div class="muted" style="font-size:11.5px;margin-top:6px">
       ${MON.map((nm,i)=>`<span style="display:inline-block;margin:2px 6px 2px 0">${nm} ${((m.seasonal_month_prov||{})[String(i+1)]==='assumed')?'<span class="wx-lab ass">assumed</span>':'<span class="wx-lab meas">measured</span>'}</span>`).join('')}
@@ -10667,7 +10676,7 @@ async function viewAnalytics(){
   <div class="card">
     <h2>2 · Week shape — where the labor should go</h2>
     <div class="muted" style="margin-bottom:8px">Estimated covers per day in ${MON[curM-1]}.</div>
-    ${wdRows.map(r=>anaBar(r.w, r.g, wdMax, r.g===wdMax?'var(--coral)':'var(--teal)', r.g)).join('')}
+    ${wdRows.map(r=>anaBar(r.w, r.g, wdMax, r.g===wdMax?'var(--coral)':'var(--teal)', EXACT()?r.g:gRng(r.g))).join('')}
     ${anaNote(`<b>${wdHi.w}</b> runs <b>${(wdHi.g/Math.max(1,wdLo.g)).toFixed(1)}×</b> a <b>${wdLo.w}</b>. Prep made on ${wdLo.w} for a ${wdLo.w} volume will run out by Friday service; anything with 3+ day shelf life is worth batching mid-week for the weekend instead of prepping it twice.`)}
     ${anaSrc('Weekday index from Service by Weekday, scaled by this month’s seasonal multiplier.')}
   </div>
@@ -10676,7 +10685,7 @@ async function viewAnalytics(){
     <h2>3 · Pressure by hour — covers through the door, per hour</h2>
     <div class="muted" style="margin-bottom:8px">Measured covers per hour on a typical day in the <b>${hSeason?esc(hSeason.label):'current'}</b> window — covers, not percentages. Whole day: <b>${Math.round(hDayTot)}</b> covers.</div>
     ${hRows.map(r=>anaBar(hlabel(r.h), r.v, hMax, r.v/hMax>0.85?'var(--coral)':'var(--teal)',
-        r.v.toFixed(1), monScale!==1&&isFinite(monScale)?('~'+Math.round(r.mv)+' in '+MON[curM-1]):''))
+        r.v.toFixed(1), EXACT()&&monScale!==1&&isFinite(monScale)?('~'+Math.round(r.mv)+' in '+MON[curM-1]):''))
       .join('')}
     ${anaNote(`Two peaks, not one: a <b>lunch spike (12–1pm)</b> and a <b>dinner spike (6–7pm)</b>. In the Kitchen Display data, <b>39.5%</b> of all Expo + Sauté tickets over 15 minutes land in the <b>6:00–7:45pm</b> window — that is the prep-depletion signature. If something runs out, it runs out there. Restock/backup pans should be staged by <b>5:30pm</b>.`)}
     <h3 style="margin-top:16px">The same clock in all three seasons</h3>
@@ -10731,8 +10740,8 @@ async function viewAnalytics(){
   <div class="card">
     <h2>7 · Forecast coverage — which items actually react to volume</h2>
     <div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:10px">
-      ${anaTile('Demand-driven now', liveNow+' / '+kitchen.length, 'at ~'+gToday+' covers')}
-      ${anaTile('At peak Saturday', livePeak+' / '+kitchen.length, '~'+peakSat+' guests, '+peak.nm)}
+      ${anaTile('Demand-driven now', liveNow+' / '+kitchen.length, EXACT()?'at ~'+gToday+' covers':'at '+guestRangeTxt(d)+' guests')}
+      ${anaTile('At peak Saturday', livePeak+' / '+kitchen.length, (EXACT()?'~'+peakSat:gRng(peakSat))+' guests, '+peak.nm)}
       ${anaTile('Not mapped yet', unlinked.length, 'fixed par only')}
     </div>
     <div class="muted" style="margin-bottom:6px">Guest count at which each item's forecast demand passes its minimum par — below that number, the floor par decides.</div>
@@ -10781,7 +10790,7 @@ async function viewAnalytics(){
     ${anaSrc('Your own generated prep lists (prep_lists / prep_list_items). This is real data, not modeled.')}
   </div>
 
-  <div class="card">
+  ${EXACT()?`  <div class="card">
     <h2>11 · Forecast accuracy — is this thing right?</h2>
     ${mape!=null? `
       <div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:10px">
@@ -10807,6 +10816,7 @@ async function viewAnalytics(){
     ${anaSrc('Forecast log (tb_day_forecast) vs. counts you enter here. Actuals come off the Oracle daily KPI / Service Performance report.')}
   </div>
 
+`:''}
   <div class="card">
     <h2>12 · Waste — what actually got thrown out<span class="h2sub">Last 45 days · measured, not modeled</span></h2>
     ${wReal.length? `
@@ -10881,7 +10891,7 @@ function wxAdminCard(){
       <select onchange="wxCfgSet('pct_per_10f',Number(this.value))" ${c.on?'':''} style="max-width:190px">
         ${[0,-2,-4,-6,-8,-10,-12,-15,-20].map(v=>`<option value="${v}"${Number(c.pct_per_10f)===v?' selected':''}>${v===0?'0% — off':(v+'% per 10° hotter')}</option>`).join('')}
       </select>
-      ${e&&Number(c.pct_per_10f)?`<span class="muted" style="font-size:12px">Today is <b>${a.anom>0?'+':''}${a.anom}°</b> vs normal → ${e.from} would become <b>${e.to}</b> covers (${e.pct>0?'+':''}${e.pct}%)</span>`
+      ${e&&Number(c.pct_per_10f)&&EXACT()?`<span class="muted" style="font-size:12px">Today is <b>${a.anom>0?'+':''}${a.anom}°</b> vs normal → ${e.from} would become <b>${e.to}</b> covers (${e.pct>0?'+':''}${e.pct}%)</span>`
         :`<span class="muted" style="font-size:12px">At 0% nothing changes anywhere.</span>`}
     </div>
 
@@ -10999,11 +11009,11 @@ async function viewAdmin(){
   </div>`;})():''}
   ${S.editItem?editorHtml():''}
   ${wxAdminCard()}
-  <div class="card">
+  ${EXACT()?`<div class="card">
     <h2>Forecast model</h2>
     <div class="muted">Weekday guests (summer base): ${Object.entries(S.model.weekday_guests||{}).map(([k,v])=>`${k.slice(0,3)} ${v}`).join(' · ')}</div>
     <div class="muted" style="margin-top:6px">Safety stock: ${(S.model.safety_stock*100).toFixed(0)}% · Season multipliers vs July=1.0 · YoY trend ${(S.model.yoy_trend*100).toFixed(1)}%</div>
-  </div>
+  </div>`:''}
   <div class="card">
     <h2>Background · Fondo<span class="h2sub">this device only · solo este aparato</span></h2>
     <div class="muted" style="font-size:12.5px">A shirt print behind the app, drawn in the same colours as everything else so the cards stay readable. Each screen remembers its own — the tablet on the line can be quiet while your phone is loud. It never prints; paper stays white.<br>
@@ -13818,7 +13828,7 @@ async function viewOrders(){
         :(on?`<span class="pill g" style="font-size:10px">${dy.slice(0,3)}</span>`:'');
     }).join('');
     return `<div style="margin-top:8px;font-size:12px;background:var(--sand);border-radius:8px;padding:8px 10px">
-      <b>Day dial today: ×${(D.f||1).toFixed(2)}</b> — this order covers <b>${first}${D.days&&D.days.length>1?' → '+lastd:''}</b>${D.avg!=null?` (forecast ~${D.avg} covers/day over those days vs ~${D.R} on a typical August day)`:''}.${D.assumed?' <span class="drtag est">assumed</span> No order days are set for this vendor, so the dial assumes each order covers the next 2 days — pick the real days below and it recalculates.':''}
+      <b>Day dial today: ×${(D.f||1).toFixed(2)}</b> — this order covers <b>${first}${D.days&&D.days.length>1?' → '+lastd:''}</b>${D.avg!=null?(EXACT()?` (forecast ~${D.avg} covers/day over those days vs ~${D.R} on a typical August day)`:` (about ${Math.round(D.avg*fcSpan(1).lo)}–${Math.round(D.avg*fcSpan(1).hi)} guests a day over those days)`):''}.${D.assumed?' <span class="drtag est">assumed</span> No order days are set for this vendor, so the dial assumes each order covers the next 2 days — pick the real days below and it recalculates.':''}
       <div style="margin-top:7px"><span class="muted" style="font-size:10.5px;font-weight:700;text-transform:uppercase;letter-spacing:.04em">Order days · Días de pedido</span>
         <div style="display:flex;gap:5px;flex-wrap:wrap;margin-top:4px">${chips}</div>
         ${can('orders.edit')?`<div class="muted" style="font-size:10.5px;margin-top:3px">Tap the days this vendor's order goes in — if the schedule changes, change it here and every suggestion re-figures. No days picked = the dial assumes 2-day coverage.</div>`:''}</div>
@@ -15286,7 +15296,7 @@ const TOURS={
    {el:()=>tq('.cq-queue'), en:'The rest of your list waits below, in order.', es:'El resto de tu lista está abajo, en orden.'},
    {el:()=>tq('.cq-now')?null:tq('#app .card'), when:()=>!tq('.cq-now'), en:'Nothing assigned to you yet? It shows up here once the list is built. Ask your lead.', es:'¿No tienes nada todavía? Aparece aquí cuando se arma la lista. Pregúntale a tu encargado.'}];
   return [
-   {el:()=>tCard('Cover forecast'), en:'The guests this list was built for, and where it came from: which count, who, what time.', es:'Los clientes para los que se hizo la lista, y de dónde salió: qué conteo, quién, a qué hora.'},
+   {el:()=>tCard('Cover forecast')||tCard('Guests expected')||tCard('Your number'), en:'The guests this list was built for, and where it came from: which count, who, what time.', es:'Los clientes para los que se hizo la lista, y de dónde salió: qué conteo, quién, a qué hora.'},
    {el:()=>tCard('Who’s prepping')||tCard("Who's prepping"), when:()=>!tq('.prep-chrome'), en:'No list yet? It builds itself when the count is submitted. You can also pick who’s prepping and generate it here.', es:'¿Aún no hay lista? Se arma sola al enviar el conteo. También puedes escoger quién prepara y generarla aquí.'},
    {el:()=>tq('.prep-chrome'), en:'Print or PDF · change who’s prepping · split evenly · rebuild from the count. Careful: rebuild replaces the list.', es:'Imprimir o PDF · cambiar quién prepara · repartir · rehacer desde el conteo. Ojo: rehacer reemplaza la lista.'},
    {el:()=>tq('.card.print-page'), en:'One card per person. Each line: what to make, what’s on hand, the min par, and batches.', es:'Una tarjeta por persona. Cada línea: qué hacer, cuánto hay, el par mínimo y los lotes.'},
@@ -15337,10 +15347,10 @@ const TOURS={
   {pre:async()=>{ if(S.og.page!=='pick'){ S.og.page='pick'; S.og.vendor=null; await render(); } }, el:()=>tCard('Runs out first'), en:'What runs out first and what’s short at the count — from your own counts.', es:'Lo que se acaba primero y lo que está bajo el par — de tus propios conteos.'}
  ],
  analytics:()=>[
-  {el:()=>tCard('Analytics · Analíticas'), en:'Covers today, this week, next week, and where the season is.', es:'Cubiertos hoy, esta semana, la próxima, y cómo va la temporada.'},
-  {el:()=>tCard('Weekly Reports'), en:'Weekly reports: forecast against what happened, Tuesday to Monday. Tap a week for the detail.', es:'Reportes semanales: pronóstico contra lo que pasó, de martes a lunes. Toca una semana para el detalle.'},
+  {el:()=>tCard('Analytics · Analíticas'), en:()=>can('today.exact')?'Covers today, this week, next week, and where the season is.':'Guests today, this week and next week as likely ranges, and where the season is.', es:()=>can('today.exact')?'Cubiertos hoy, esta semana, la próxima, y cómo va la temporada.':'Clientes hoy, esta semana y la próxima como rangos, y cómo va la temporada.'},
+  {when:()=>can('today.exact'), el:()=>tCard('Weekly Reports'), en:'Weekly reports: forecast against what happened, Tuesday to Monday. Tap a week for the detail.', es:'Reportes semanales: pronóstico contra lo que pasó, de martes a lunes. Toca una semana para el detalle.'},
   {el:()=>tq('#dayrep-card'), en:'Day report: one day start to finish — the count, the list, the waste and what got used.', es:'Reporte del día: un día de principio a fin — el conteo, la lista, la merma y lo que se usó.'},
-  {el:()=>tCard('11 · Forecast accuracy'), en:'Is the forecast right? The average miss, day by day.', es:'¿Acierta el pronóstico? El error promedio, día por día.'},
+  {when:()=>can('today.exact'), el:()=>tCard('11 · Forecast accuracy'), en:'Is the forecast right? The average miss, day by day.', es:'¿Acierta el pronóstico? El error promedio, día por día.'},
   {el:()=>tCard('Monthly report'), en:'End of month: Build report makes a one-page summary for the chef meeting. Print or save as PDF.', es:'Fin de mes: Crear reporte hace un resumen de una página para la junta. Imprime o guarda en PDF.'}
  ],
  admin:()=>[
