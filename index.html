@@ -1266,6 +1266,24 @@
   .t2-hh{font-size:10px;color:var(--muted);margin-top:2px}.t2-ht{font-size:9.5px;font-weight:700;color:#3f5a66}.t2-ht.hot,.t2-hkey .hot{color:#b4452f}
   .t2-hkey{display:flex;gap:10px;flex-wrap:wrap;font-size:10.5px;color:var(--muted);margin-top:6px}.t2-hkey i{display:inline-block;width:9px;height:9px;border-radius:2px;margin-right:3px;vertical-align:-1px;background:var(--coral)}
   .t2-ax{font-size:9px;fill:#8b8676;text-anchor:end}
+  .t2-tx{font-size:10px;color:#8a6a1a;font-variant-numeric:tabular-nums}
+  .t2-sbig{display:flex;justify-content:space-between;align-items:flex-end;margin-top:6px}.t2-sbig i,.t2-sr i{display:block;font-style:normal;font-size:10px;color:var(--muted);text-transform:uppercase}
+  .t2-sbig b{font-size:27px;color:var(--ocean-dark);font-variant-numeric:tabular-nums}.t2-sr{font-size:14px;font-weight:700;color:var(--ocean-dark);text-align:right}
+  .t2-sbar{position:relative;height:62px;margin-top:4px}.t2-sbar .band{position:absolute;top:22px;height:10px;background:#b9dcd8;border-radius:5px}.t2-sbar .band.now{top:36px;height:6px;background:#f3d9a8}
+  .t2-sbar .dot{position:absolute;top:18px;width:4px;height:18px;margin-left:-2px;background:var(--ocean-dark);border-radius:2px}
+  .t2-sbar .tri{position:absolute;top:43px;margin-left:-6px;width:0;height:0;border-left:6px solid transparent;border-right:6px solid transparent;border-bottom:9px solid #c98a1a}
+  .t2-sbar .lab{position:absolute;transform:translateX(-50%);font-size:11px;font-weight:700;white-space:nowrap}.t2-sbar .lab.g{top:0;color:var(--ocean-dark)}.t2-sbar .lab.n{top:52px;color:#8a5a00}
+  .t2-ticks{position:relative;height:13px;font-size:9.5px;color:var(--muted)}.t2-ticks span{position:absolute;transform:translateX(-50%)}
+  .t2-skey{display:flex;gap:10px;flex-wrap:wrap;font-size:10.5px;color:var(--muted);margin-top:3px}.t2-skey i{display:inline-block;width:12px;height:7px;border-radius:3px;margin-right:4px}.t2-skey .k1{background:#b9dcd8}.t2-skey .k2{background:#f3d9a8}
+  .t2-sdays{display:grid;grid-template-columns:repeat(7,1fr);gap:3px;margin-top:8px}.t2-sdays div{background:var(--sand);border-radius:7px;text-align:center;padding:3px 0;font-size:10px}.t2-sdays i{display:block;font-style:normal;color:var(--muted)}
+  .t2-sdays b{display:block;font-size:11px;color:var(--ocean-dark)}.t2-sdays span{display:block;font-size:10px;color:#1d7a55;font-weight:700}.t2-sdays div.in{background:#eaf3ee}
+  .t2-fold .t2-fbody{display:none}.t2-fold.open .t2-fbody{display:block}.t2-fold.open .t2-fshut{display:none}.t2-fshut{font-size:11.5px;float:left;margin-top:5px}
+  .t2-fbtn{display:block;margin-left:auto;border:0;background:none;color:var(--lagoon);font-weight:800;font-size:12.5px;padding:4px 2px;cursor:pointer}.t2-fbtn .o{display:none}.t2-fold.open .t2-fbtn .o{display:inline}.t2-fold.open .t2-fbtn .c{display:none}
+  .t2-fold:after{content:'';display:block;clear:both}.t2-fold:not(.open){padding-top:8px;padding-bottom:8px}
+  .t2-hr.big{font-size:10.5px}.t2-t5v small,.t2-r small{font-size:11px;font-weight:600;color:var(--muted)}
+  .t2-spread{grid-column:1/-1;background:#fff;border:1.5px solid var(--lagoon);border-radius:10px;padding:6px 9px;font-size:12px}
+  details.t2-src{font-size:11.5px;color:var(--muted);margin-top:6px;line-height:1.45}details.t2-src summary{cursor:pointer;color:var(--ocean-dark);font-weight:600}
+  @media print{.t2-fbtn{display:none}.t2-fold .t2-fbody{display:block!important}}
   /* ---- tutorial (Sep 25 2026) ---- */
   .tour-q{margin-left:6px;width:22px;height:22px;border-radius:50%;border:0;background:var(--sand);color:var(--ocean-dark);font-weight:800;font-size:13px;line-height:22px;padding:0;cursor:pointer;vertical-align:middle}
   .tour-ov{position:fixed;inset:0;z-index:10050;touch-action:none;overscroll-behavior:contain}
@@ -1356,7 +1374,7 @@ const SB_KEY='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZ
 const TBID='9f8d7c6b-5a49-4e38-b271-06d5f00dbeef'; // Tommy Bahama tenant inside ChefOpsAI
 // Stamped by publish.sh at upload time. It is the only version label there is now —
 // one address, updated in place, so this tells you which build that address is serving.
-const BUILD='Sep 25, 2026 · Today v3 + recipes ½';
+const BUILD='Sep 25, 2026 · your Today, new look';
 // ---------- IS THIS PHONE EVEN RUNNING THE LATEST BUILD? ----------
 // Sep 3 2026. Three prep fixes shipped and Dan still saw the old behaviour, because the app
 // installs to the home screen and an installed web app does not go back and re-fetch its own
@@ -6732,6 +6750,159 @@ function todayRangeHtml(o){
   let yearCard=''; try{ yearCard=DOLLARS()?yearSalesHtml():yearBarsHtml(avgCheck); }catch(e){ console.warn('year bars',e); }
   return `${todayAlertsHtml(d)}${tilesCard}${busyCard}${topCard}${yearCard}${selCard}${card86(d)}${eventsCard()}${can('admin.import')?dataCard(!!(S.settings||{}).bilingual):''}`;
 }
+// ================= DAN'S TODAY, NEW LOOK (Sep 25 2026 — mockups today-dan + today-dan-sales) =================
+// Dan: "for my screen i want you to have the same tile as the ones we made for everyone else.
+// just keep this part of the old one" (the week summary + scorecard) — "make it hidable. and
+// expand when i click in the bottom corner". Tiles = option A (his exact number big, the range
+// small). Between the tiles and the scorecard: the week's SALES guess as a center point with a
+// range (option 1) — "always estimate a specific number like that, we have a baseline we can
+// contrast". Busy hours and top 20 match everyone else's, with his exact numbers kept.
+const t2Miss=p=>{ const c=Math.abs(p)<=10?'#3d7a52':(Math.abs(p)<=25?'#b78300':'#b23b3b'); return `<b style="color:${c}">${p>0?'+':''}${Math.round(p)}%</b>`; };
+// the sales number we committed to for a day: the morning's frozen v2 number when one was
+// saved, otherwise today's model for that date
+function danSalesGuess(x){
+  const fr=(S.fc2rows||[]).find(r=>String(r.business_date)===x);
+  if(fr&&fr.v2_s!=null&&Number(fr.v2_s)>0) return {v:Number(fr.v2_s), frozen:true};
+  let X=null; try{ X=fcExplain(x); }catch(e){}
+  if(!X||!X.v2s) return null;
+  const R=dayRange(x); return {v:X.v2s*(X.v2g?R.g/X.v2g:1), frozen:false};
+}
+function danSalesModel(x){ let X=null; try{ X=fcExplain(x); }catch(e){} if(!X||!X.v2s) return null; const R=dayRange(x); return X.v2s*(X.v2g?R.g/X.v2g:1); }
+function danWeekHtml(o){
+  const {d, wk, wkFrozen, actualByDate, salesByDate}=o;
+  const T=todayLA(), es=isES();
+  const short=x=>dateObjLA(x).toLocaleDateString(es?'es-MX':'en-US',{month:'short',day:'numeric'});
+  const wdS=x=>t2Wd(x,es);
+  const isCur=wk.includes(T);
+  // ---- tiles (option A)
+  let sumPA=0,sumA=0,sumS=0,nA=0;
+  const tiles=wk.map(x=>{
+    const act=actualByDate[x], frozen=wkFrozen[x]!=null, proj=frozen?wkFrozen[x]:guestPlan(x);
+    const own=(x===T&&x===d&&S.guestsOverride!=null);
+    const R=dayRange(x);
+    if(act!=null){ sumA+=act; sumPA+=proj; nA++; if(salesByDate[x]!=null) sumS+=salesByDate[x]; }
+    const big=act!=null?act:(own?S.guestsOverride:proj), L=busyLv(big), W=t2Wx(x);
+    const sub=act!=null?'real ✓':(own?(es?'tu número':'your number'):(x<T?(es?'falta archivo':'no file yet'):(x===T?(es?'hoy':'today'):(es?'pronóstico':'forecast'))));
+    const extra=act!=null?`proj ${proj} · ${t2Miss((proj-act)/act*100)}`:`${R.lo}–${R.hi}${frozen&&x<=T?(es?' · guardado':' · saved'):''}`;
+    return `<div class="t2-tile lv${L.k}${x===d?' sel':''}" onclick="S.selDate='${x}';S.guestsOverride=null;render()">
+      <div class="t2-lv">${es?L.es:L.en}</div><div class="t2-wx${W&&W.hot?' hot':''}">${W?`${W.ic} ${W.hi}°`:'&nbsp;'}</div><div class="t2-tw">${wdS(x)} <span>${dateObjLA(x).getDate()}</span></div>
+      <div class="t2-tv">${big}</div><div class="t2-ts">${sub}</div><div class="t2-tx">${extra}</div></div>`;
+  }).join('');
+  const tilesCard=`<div class="card t2-days">
+    <div class="rg-hd"><h3 style="margin:0">Day by day · Día por día</h3>
+      <span class="rg-nav no-print"><button onclick="shiftWeek(-1)" aria-label="previous week">‹</button><button onclick="shiftWeek(1)" aria-label="next week">›</button></span></div>
+    <div class="muted" style="font-size:11.5px">${isCur?'':(wk[0]>T?'Week ahead · ':'Past week · ')}${wdS(wk[0])} ${short(wk[0])} – ${wdS(wk[6])} ${short(wk[6])} · ${es?'toca un día — las horas fuertes lo siguen':'tap a day — the busy hours below follow it'}</div>
+    <div class="t2-tiles">${tiles}</div>
+    <div class="t2-leg">${BUSY_LV.map((b,i)=>`<span class="t2-lk lv${b.k}">${es?b.es:b.en}</span> ${i===0?(es?'menos de 140':'under 140'):(i===3?'280+':`${BUSY_LV[i-1].max}–${b.max}`)}`).join(' ')}</div>
+  </div>`;
+  // ---- the week's sales: our guess (center) and its measured range, against what came in
+  let salesCard='';
+  if(GRADES()){
+    const rows=wk.map(x=>{ const g=danSalesGuess(x); return {x, g:g?g.v:null, frozen:g&&g.frozen, real:salesByDate[x]!=null?salesByDate[x]:null, now:danSalesModel(x)}; });
+    if(rows.every(r=>r.g!=null)){
+      const G=rows.reduce((a,r)=>a+r.g,0), sp7=fcSpan(7), LO=G*sp7.lo, HI=G*sp7.hi;
+      const inR=rows.filter(r=>r.real!=null), rest=rows.filter(r=>r.real==null);
+      const realSum=inR.reduce((a,r)=>a+r.real,0), guessIn=inR.reduce((a,r)=>a+r.g,0);
+      const restNow=rest.reduce((a,r)=>a+(r.now!=null?r.now:r.g),0), spR=fcSpan(rest.length);
+      const NOW=realSum+restNow, NLO=realSum+restNow*spR.lo, NHI=realSum+restNow*spR.hi;
+      const kf=v=>'$'+(v/1000).toFixed(1)+'k';
+      const lo=Math.min(LO,inR.length?NLO:LO), hi=Math.max(HI,inR.length?NHI:HI);
+      const step=(hi-lo)>45000?10000:5000;
+      const A0=Math.floor(lo*0.98/step)*step, A1=Math.ceil(hi*1.02/step)*step;
+      const P=v=>Math.max(0,Math.min(100,(v-A0)/(A1-A0)*100));
+      const ticks=[]; for(let v=A0; v<=A1; v+=step) ticks.push(`<span style="left:${P(v).toFixed(1)}%">$${v/1000}k</span>`);
+      const showNow=inR.length>0 && inR.length<7;
+      const ou=(g,r)=>{ const p=Math.round(Math.abs(g-r)/r*100); return p===0?(es?'justo':'right on'):(g<r?(es?`${p}% abajo`:`${p}% under`):(es?`${p}% arriba`:`${p}% over`)); };
+      const note=inR.length===0?(es?'Aún no sube ningún día de esta semana.':'No day of this week is uploaded yet.')
+        :inR.length===7?(es?`La semana hizo <b>${kf(realSum)}</b> — nuestro número era <b>${kf(G)}</b>, ${ou(G,realSum)}.`:`The week came in at <b>${kf(realSum)}</b> — our guess was <b>${kf(G)}</b>, ${ou(G,realSum)}.`)
+        :(es?`${inR.map(r=>t2Wd(r.x,es)).join(' + ')} hizo <b>${kf(realSum)}</b> — nuestro número era <b>${kf(guessIn)}</b>, ${ou(guessIn,realSum)}. Con el resto de la semana como pronóstico, vamos hacia <b>${kf(NOW)}</b> (probable ${kf(NLO)}–${kf(NHI)}).`
+             :`${inR.map(r=>t2Wd(r.x,es)).join(' + ')} came in at <b>${kf(realSum)}</b> — our guess was <b>${kf(guessIn)}</b>, ${ou(guessIn,realSum)}. With the rest of the week as forecast, we're heading for <b>${kf(NOW)}</b> (likely ${kf(NLO)}–${kf(NHI)}).`);
+      salesCard=`<div class="card t2-sales">
+        <h3 style="margin:0">${isCur?'Sales this week · Ventas de la semana':(wk[0]>T?'Sales, week ahead · Ventas, semana que viene':'Sales, past week · Ventas, semana pasada')}</h3>
+        <div class="muted" style="font-size:11.5px">${wdS(wk[0])} ${short(wk[0])} – ${wdS(wk[6])} ${short(wk[6])} · ${es?'solo tú ves esto':'only you see this'}</div>
+        <div class="t2-sbig"><div><i>${es?'Nuestro número':'Our guess'}</i><b>${kf(G)}</b></div><div class="t2-sr"><i>${es?'probable':'likely'}</i>${kf(LO)} – ${kf(HI)}</div></div>
+        <div class="t2-sbar"><div class="band" style="left:${P(LO).toFixed(1)}%;width:${Math.max(1,P(HI)-P(LO)).toFixed(1)}%"></div>
+          ${showNow?`<div class="band now" style="left:${P(NLO).toFixed(1)}%;width:${Math.max(1,P(NHI)-P(NLO)).toFixed(1)}%"></div><div class="tri" style="left:${P(NOW).toFixed(1)}%"></div><span class="lab n" style="left:${Math.min(88,Math.max(12,P(NOW))).toFixed(1)}%">${es?'vamos hacia':'heading for'} ${kf(NOW)}</span>`:''}
+          <div class="dot" style="left:${P(G).toFixed(1)}%"></div><span class="lab g" style="left:${Math.min(88,Math.max(12,P(G))).toFixed(1)}%">${es?'nuestro':'guess'} ${kf(G)}</span></div>
+        <div class="t2-ticks">${ticks.join('')}</div>
+        <div class="t2-skey"><span><i class="k1"></i>${es?'rango probable de nuestro número':'our guess’s likely range'}</span>${showNow?`<span><i class="k2"></i>${es?'hacia dónde vamos (lo real + el resto)':'where we’re heading (real so far + the rest)'}</span>`:''}</div>
+        <div class="t2-note">${note}</div>
+        <div class="t2-sdays">${rows.map(r=>`<div class="${r.real!=null?'in':''}"><i>${wdS(r.x)}</i><b>${kf(r.g)}</b><span>${r.real!=null?kf(r.real)+' ✓':'&nbsp;'}</span></div>`).join('')}</div>
+        <div class="muted" style="font-size:10.5px;margin-top:4px">${es?'arriba = nuestro número del día · ✓ = lo que entró. El número de cada día es el de la mañana en que se mostró por primera vez; los días que aún no se muestran usan el modelo de hoy.':'top = our guess for the day · ✓ = what really came in. Each day’s guess is the number from the morning it was first shown; days not shown yet use today’s model.'}</div>
+      </div>`;
+    }
+  }
+  // ---- the old week summary, folded (Dan: "make it hidable. and expand when i click in the bottom corner")
+  let fold='';
+  if(nA>0){
+    let open=false; try{ open=localStorage.getItem('tb_wkfold_open')==='1'; }catch(e){}
+    const scStart=shiftDay(wk[0],1), scEnd=shiftDay(wk[0],7);
+    fold=`<div class="card t2-fold${open?' open':''}" id="t2-fold">
+      <div class="t2-fshut muted">${es?'Proyectado vs real · error de la semana · ventas · reporte':'Projected vs real · week miss · net sales · scorecard'}</div>
+      <div class="t2-fbody">
+        <div class="wksum">
+          <div><i>Projected</i><b>${sumPA.toLocaleString()}</b>${nA<7?`<i style="display:block;margin-top:1px">on the ${nA} uploaded day${nA===1?'':'s'}</i>`:''}</div>
+          <div><i>Real covers</i><b>${sumA.toLocaleString()}</b></div>
+          ${GRADES()?`<div><i>Week miss</i><b>${(sumPA-sumA)/sumA*100>0?'+':''}${Math.round((sumPA-sumA)/sumA*100)}%</b></div>`:''}
+          ${can('analytics.money')&&sumS?`<div><i>Net sales</i><b>$${Math.round(sumS).toLocaleString()}</b></div>`:''}
+        </div>
+        <div class="muted" style="font-size:10.5px;margin-top:5px">${nA} of 7 days uploaded${nA<7?' — days without an Oracle upload show the plan only, never a filled-in guess':''}. “Projected” is the number frozen that morning where one was saved, otherwise today's model recomputing that date.</div>
+        ${GRADES()?`<button class="wkbtn" onclick="goToWeekReport('${scEnd}')">Full week scorecard · ${short(scStart)} – ${short(scEnd)} →</button>
+        <div class="muted" style="font-size:10.5px;margin-top:4px;text-align:center">The scorecard runs Tue–Mon, so its window sits one day later than this strip.</div>`:''}
+      </div>
+      <button class="t2-fbtn" onclick="wkFold()"><span class="c">${es?'Reporte de la semana ▾':'Week scorecard ▾'}</span><span class="o">▴ ${es?'ocultar':'hide'}</span></button>
+    </div>`;
+  }
+  return tilesCard+salesCard+fold;
+}
+window.wkFold=()=>{ const el=document.getElementById('t2-fold'); if(!el) return; const open=!el.classList.contains('open'); el.classList.toggle('open',open); try{ localStorage.setItem('tb_wkfold_open',open?'1':'0'); }catch(e){} };
+// ---- busy hours, Dan's version: exact covers per hour, same look as everyone else's
+function danBusyHtml(o){
+  const {d, hrs, guests, ww, shp, LA, actD, lateClose}=o;
+  const es=isES(), T=todayLA();
+  const mxH=Math.max(...hrs.map(x=>x.g),1);
+  const hl=h=>{const x=h%12===0?12:h%12; return x+(h<12?'am':'pm');};
+  const pk=hrs.slice().sort((a,b)=>b.g-a.g); const p1=pk[0]; const p2=pk.find(x=>Math.abs(x.h-(p1?p1.h:0))>1 && x.g>=mxH*0.8);
+  const busiest=p1?`${hl(p1.h)}–${hl(p1.h+1)}${p2?` ${es?'y':'and'} ${hl(p2.h)}–${hl(p2.h+1)}`:''}`:'';
+  const R=dayRange(d), kk=R.g?guests/R.g:1;
+  const W=t2Wx(d), wh=wxHours(d);
+  const hv=h=>{ const x=wh&&wh.h?wh.h[String(h)]:null; if(x==null) return null; const v=typeof x==='object'?(x.t!=null?x.t:x.a):x; return v!=null?Math.round(Number(v)):null; };
+  const dial=ww&&hrs.some(x=>x.base!==x.g);
+  const chips=`<div class="t2-chips">
+    <div class="t2-chip"><span>${es?'Pronóstico de cubiertos':'Cover forecast'}</span><b>${guests}</b><i>${es?'probable':'likely'} ${Math.round(R.lo*kk)}–${Math.round(R.hi*kk)}</i></div>
+    ${actD!=null?`<div class="t2-chip"><span>${es?'Cubiertos reales':'Real covers'}</span><b>${actD}</b></div>`:''}
+    ${LA?`<div class="t2-chip ly"><span>${es?'El año pasado':'Last year'} · ${esc(LA.short||LA.label)}</span><b>$${Math.round(LA.sales).toLocaleString()}</b><i>${LA.est?'~':''}${LA.guests} ${es?'clientes':'guests'}${LA.est?(es?' (estimados)':' (estimated)'):''}</i></div>`:''}
+    ${W?`<div class="t2-chip"><span>${es?'Clima':'Weather'}</span><b>${W.ic} ${W.hi}°${W.lo!=null?` / ${W.lo}°`:''}</b></div>`:''}</div>`;
+  const src=`${seasonSrc(shp.season)} Scaled to today's forecast of <b>${guests}</b> covers. Red = peak pressure hours.${shp.season&&shp.season.dayVol?` A typical day in the <b>${esc(shp.season.label)}</b> window measured <b>${Math.round(shp.season.dayVol)}</b> covers; the shape is reused, the size comes from your forecast.`:''}${dial?` <b>Your timing dial is on</b> — it moved covers toward the hours whose feels-like is at or under ${ww.line}°, keeping the day's total the same. Before the dial: ${hrs.map(x=>`${hl(x.h)} ${x.base}`).join(' · ')}. The shift size is <span class="wx-lab mine">your call</span>; the ${ww.src==='monthnorm'?'month-average':ww.src} hourly temperatures behind it are ${ww.src==='forecast'?'<span class="wx-lab fc">forecast</span>':'<span class="wx-lab meas">measured</span>'}.`:''}`;
+  return `<div class="card t2-busy">
+    <h3 style="margin:0">When it gets busy · Horas fuertes</h3>
+    <div class="muted" style="font-size:11.5px">${fmtDate(d)}${d===T?(es?' · hoy':' · today'):''} · ${es?'cubiertos proyectados por hora':'projected covers per hour'}${busiest?` · ${es?'lo más fuerte':'busiest'} ${busiest}`:''} · ${lateClose?'11am–9pm':'11am–8pm'}</div>
+    ${chips}
+    <div class="t2-hrs">${hrs.map(x=>{ const t=hv(x.h);
+      return `<div class="t2-hc"${dial&&x.base!==x.g?` title="before your timing dial: ${x.base}"`:''}><span class="t2-hr big">${x.g}</span><div class="t2-hb${x.g/mxH>0.8?' pk':''}" style="height:${Math.round(x.g/mxH*70)}px"></div><span class="t2-hh">${hl(x.h).replace('am','a').replace('pm','p')}</span>${t!=null?`<span class="t2-ht${t>=100?' hot':''}">${t}°</span>`:''}</div>`; }).join('')}</div>
+    <div class="t2-hkey"><span>${es?'arriba = cubiertos proyectados esa hora':'top = projected covers that hour'}</span><span><i></i>${es?'presión pico':'peak pressure'}</span>${wh?`<span>${es?'abajo = temperatura':'bottom = temperature'}${wh.src==='monthnorm'?(es?' (normal del mes)':' (the month’s normal)'):''} · <b class="hot">100°+</b></span>`:''}</div>
+    <details class="t2-src"><summary>${es?'De dónde sale esta forma ▸':'Where this shape comes from ▸'}</summary><div>${src}</div></details>
+  </div>`;
+}
+window.t2Spread=fi=>{ const el=document.getElementById('ih-'+fi); if(el) el.style.display=el.style.display==='none'?'block':'none'; };
+// ---- top 20, Dan's version: exact plates, typical miss, % of covers, tap for the hourly spread
+function danTopHtml(o){
+  const {d, guests, hrs, swing, realN}=o; const es=isES(), T=todayLA();
+  const fams=S.families.filter(f=>(f.category==='food'||f.category==='dessert')&&f.active!==false).slice(0,20);
+  if(!fams.length) return '';
+  const est=f=>Math.round(f.attach_rate*guests);
+  const sw=f=>swing[f.id]?{n:Math.max(1,Math.round(swing[f.id].frac*f.attach_rate*guests)), p:Math.round(swing[f.id].frac*100), days:swing[f.id].n}:null;
+  const spread=(f,fi)=>`<div class="t2-spread" id="ih-${fi}" style="display:none"><b>${esc(t2Fam(f,es))}</b> — ${es?'por hora':'hour by hour'}${itemHoursHtml(f,guests,hrs)}</div>`;
+  const big=fams.slice(0,5).map((f,fi)=>{ const s=sw(f); return `<div class="t2-t5i" style="cursor:pointer" onclick="t2Spread(${fi})"${s?` title="measured over ${s.days} real days"`:''}><div class="t2-t5n">▸ ${esc(t2Fam(f,es))}</div><div class="t2-t5v">${est(f)}${s?` <small>± ${s.n}</small>`:''}</div><div class="t2-t5p">${(f.attach_rate*100).toFixed(1)}% ${es?'de cubiertos':'of covers'}${s?` · ${es?'normalmente ±':'usually within ±'}${s.p}%`:''}</div></div>${spread(f,fi)}`; }).join('');
+  const rest=fams.slice(5).map((f,j)=>{ const fi=j+5, s=sw(f); return `<div class="t2-r" style="cursor:pointer" onclick="t2Spread(${fi})"${s?` title="measured over ${s.days} real days · usually within ±${s.p}%"`:''}><span>▸ ${esc(t2Fam(f,es))}</span><b>${est(f)}${s?` <small>±${s.n}</small>`:''}</b></div>${spread(f,fi)}`; }).join('');
+  return `<div class="card t2-top">
+    <h3 style="margin:0">Top 20 sellers · Lo más vendido</h3>
+    <div class="muted" style="font-size:11.5px">${fmtDate(d)}${d===T?(es?' · hoy':' · today'):''} · ${es?'platos proyectados · error típico · toca uno para ver sus horas':'projected plates · typical miss · tap one for its hourly spread'}</div>
+    <div class="t2-t5">${big}</div>
+    <div class="t2-r15">${rest}</div>
+    <div class="muted" style="font-size:11px;margin-top:6px">Sources: attach rates from the item mix in <b>System Financial 2026</b> (regular + Island Time combined) × today's forecast. <b>± / usually within</b> is measured from your <b>${realN} real Oracle day${realN===1?'':'s'}</b> — each family's actual daily miss against the model at that day's real covers, scaled to today's forecast. A family with fewer than 5 measured days shows no ±.</div>
+  </div>`;
+}
 async function viewToday(){
   const d=S.selDate||todayLA(); S.selDate=d;
   // Sep 24 speed pass: the order-day card and the 86 list start loading NOW, in parallel with
@@ -6750,7 +6921,7 @@ async function viewToday(){
   // as its own line, never folded in silently. With the dial off, adj is exactly baseGuests.
   const adjGuests=wxf?Math.round(baseGuests*wxf.f):baseGuests;
   const guests = S.guestsOverride ?? adjGuests;
-  const wkDays=weekOf(d);
+  const wkDays=weekMonSun(d);   // Sep 25 2026: Mon–Sun, same week as everyone's tiles
   // last-year same-day actuals from daily history (synthetic until real exports land), fallback to model estimate
   // The LY day header line keeps its query; the old per-item LY column is gone (Dan, Aug 26 —
   // it leaned on sample item rows anyway). In its place: the measured swing, fetched as every
@@ -6828,63 +6999,9 @@ async function viewToday(){
   }
   let inner=`
   ${todayAlertsHtml(d)}
-  ${(()=>{
-    // ---- the week strip, now walkable (mockup Reading B, Dan's pick Aug 26) ----
-    // Arrows move the SELECTED DAY by seven, so the strip, the day report and everything
-    // else on this screen stay in step — there is no second notion of "which week" to drift.
-    // A day that already happened shows the plan and the reality side by side; a day with no
-    // Oracle upload shows a dash, never a filled-in guess.
-    const money=can('analytics.money');
-    const thisWk=weekOf(todayLA()), isCurWk=wkDays[0]===thisWk[0];
-    const past=[], future=wkDays[0]>thisWk[0];
-    let sumP=0,sumPA=0,sumA=0,sumS=0,nA=0;   // sumPA = projected on the days that HAVE a real number
-    const tiles=wkDays.map(x=>{
-      const isSel=x===d;
-      const frozen=wkFrozen[x]!=null;
-      const proj=frozen?wkFrozen[x]:guestPlan(x);
-      const act=actualByDate[x];
-      const sales=salesByDate[x];
-      sumP+=proj;
-      if(act!=null){ sumA+=act; sumPA+=proj; nA++; past.push(x); if(sales!=null) sumS+=sales; }
-      const lab=dateObjLA(x).toLocaleDateString('en-US',{weekday:'short',day:'numeric'});
-      const tap=`onclick="S.selDate='${x}';S.guestsOverride=null;render()"`;
-      const border=isSel?'border-color:var(--teal);border-width:2px':'';
-      if(act==null) return `<div class="fc-day" style="${border};cursor:pointer" ${tap}>
-        <div class="d">${lab}${isSel?' ●':''}</div>
-        <div class="g">${proj}</div><div class="d">covers${frozen?' · saved':''}</div></div>`;
-      return `<div class="fc-day" style="${border};cursor:pointer" ${tap}>
-        <div class="d">${lab}${isSel?' ●':''}</div>
-        <div class="fc-split">
-          <div class="fc-half"><div class="fc-val">${proj}</div><div class="fc-lab">proj</div></div>
-          <div class="fc-half fc-real"><div class="fc-val fc-real">${act}</div><div class="fc-lab">real</div></div>
-        </div>
-        ${fvaChip((proj-act)/act*100)}</div>`;
-    }).join('');
-    const anyReal=nA>0;
-    // The scorecard runs Tue–Mon while this strip runs Sun–Sat, so the button says which
-    // window it is actually about to open instead of pretending they are the same seven days.
-    const scStart=shiftDay(wkDays[0],2), scEnd=shiftDay(wkDays[0],8);
-    const shortD=x=>dateObjLA(x).toLocaleDateString('en-US',{month:'short',day:'numeric'});
-    return `<div class="card">
-    <h2 style="margin-bottom:6px">${isCurWk?'This week · Esta semana':(future?'Week ahead · Semana':'Past week · Semana pasada')}<span class="h2sub">Sun → Sat, projected covers${anyReal?' vs what really happened':''}</span></h2>
-    <div class="wknav">
-      <button onclick="shiftWeek(-1)" title="previous week">◀</button>
-      <div class="wkcur">${fmtDate(wkDays[0])} – ${fmtDate(wkDays[6])}<s>${isCurWk?'this week':(future?'not here yet':'tap a day to open it')}</s></div>
-      <button onclick="shiftWeek(1)" title="next week">▶</button>
-    </div>
-    ${anyReal&&!isCurWk?'<span class="wkpast">PAST WEEK · showing real results</span>':''}
-    <div class="fc-grid">${tiles}</div>
-    ${anyReal?`<div class="wksum">
-      <div><i>Projected</i><b>${sumPA.toLocaleString()}</b>${nA<7?`<i style="display:block;margin-top:1px">on the ${nA} uploaded day${nA===1?'':'s'}</i>`:''}</div>
-      <div><i>Real covers</i><b>${sumA.toLocaleString()}</b></div>
-      <div><i>Week miss</i><b>${(sumPA-sumA)/sumA*100>0?'+':''}${Math.round((sumPA-sumA)/sumA*100)}%</b></div>
-      ${money&&sumS?`<div><i>Net sales</i><b>$${Math.round(sumS).toLocaleString()}</b></div>`:''}
-    </div>
-    <div class="muted" style="font-size:10.5px;margin-top:5px">${nA} of 7 days uploaded${nA<7?' — days without an Oracle upload show the plan only, never a filled-in guess':''}. “Projected” is the number frozen that morning where one was saved, otherwise today's model recomputing that date.</div>
-    <button class="wkbtn" onclick="goToWeekReport('${scEnd}')">Full week scorecard · ${shortD(scStart)} – ${shortD(scEnd)} →</button>
-    <div class="muted" style="font-size:10.5px;margin-top:4px;text-align:center">The scorecard runs Tue–Mon, so its window sits two days later than this strip.</div>`
-    :`<div class="muted" style="margin-top:8px;font-size:11.5px">Source: weekday pattern from <b>Service by Weekday</b> + seasonal curve from <b>Service Performance</b> (2026 YTD / Q2 / July weeks).</div>`}
-  </div>`;})()}
+  ${danWeekHtml({d, wk:wkDays, wkFrozen, actualByDate, salesByDate})}
+  ${danBusyHtml({d, hrs, guests, ww, shp, LA, actD:actualByDate[d], lateClose})}
+  ${danTopHtml({d, guests, hrs, swing, realN:realDays.length})}
   <div class="card">
     <div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap">
       <input type="date" value="${d}" style="max-width:170px" onchange="S.selDate=this.value;S.guestsOverride=null;S.editPlan=false;render()">
@@ -6912,31 +7029,7 @@ async function viewToday(){
       📅 <b>Same day last year${lyRow?` (${esc(lyRow.label)})`:' (estimate)'}:</b> ${lyRow?'':'~'}${ly.guests} guests${can('analytics.money')?` · ${lyRow?'':'~'}$${ly.sales.toLocaleString()} net sales`:''}
       <span style="font-size:11.5px">— source: <b>${lyRow?'daily history table'+(ly.syn?' (sample data — replaced automatically when your Oracle exports upload)':''):'System Financial 2025 totals × season × weekday'}</b></span></div>`:''}
   </div>
-  ${card86(d)}
-  <div class="card">
-    <h2>Day report · Reporte del día</h2>
-    <h3 style="margin-top:4px">When it gets busy (projected covers per hour)</h3>
-    ${hrs.map(x=>`<div style="display:flex;align-items:center;gap:8px;margin:3px 0">
-      <span class="muted" style="width:42px;font-size:12px;text-align:right">${hlabel(x.h)}</span>
-      <div style="flex:1;background:var(--sand-dark);border-radius:5px;height:16px;overflow:hidden;position:relative">
-        <div style="width:${Math.round(x.g/maxH*100)}%;height:100%;background:${x.g/maxH>0.8?'var(--coral)':'var(--teal)'};border-radius:5px"></div>
-        ${ww&&x.base!==x.g?`<div title="before your timing dial" style="position:absolute;top:0;left:${Math.round(x.base/maxH*100)}%;width:2px;height:100%;background:#7a6a55"></div>`:''}
-      </div>
-      ${ww&&x.base!==x.g?`<span class="muted" style="width:52px;font-size:11px;text-align:right;font-variant-numeric:tabular-nums">${x.base} →</span>`:''}
-      <b style="width:34px;font-size:13px;text-align:right">${x.g}</b></div>`).join('')}
-    <div class="muted" style="font-size:11.5px;margin:6px 0 14px">${seasonSrc(shp.season)} Scaled to today's forecast of <b>${guests}</b> covers. Red = peak pressure hours.${shp.season&&shp.season.dayVol?` <span style="color:var(--muted)">A typical day in the <b>${esc(shp.season.label)}</b> window measured <b>${Math.round(shp.season.dayVol)}</b> covers; the shape is reused, the size comes from your forecast.</span>`:''}${ww?` <b>The grey tick and the left number are the curve before your timing dial</b> — the dial moved covers toward the hours whose feels-like is at or under ${ww.line}°, keeping the day's total the same. The shift size is <span class="wx-lab mine">your call</span>; the ${ww.src==='monthnorm'?'month-average':ww.src} hourly temperatures behind it are ${ww.src==='forecast'?'<span class="wx-lab fc">forecast</span>':'<span class="wx-lab meas">measured</span>'}.`:''}</div>
-    <h3>Top 20 food sellers — projected units today · typical miss<span class="h2sub">Kitchen only · tap a row for its hourly spread</span></h3>
-    <div style="overflow-x:auto;-webkit-overflow-scrolling:touch"><table><tr><th>Menu item family</th><th class="num">% of covers</th><th class="num">Today est.</th><th class="num">usually within</th></tr>
-      ${S.families.filter(f=>f.category==='food'||f.category==='dessert').slice(0,20).map((f,fi)=>`<tr style="cursor:pointer" onclick="toggleItemHours(${fi})"><td>▸ ${f.name}</td>
-        <td class="num">${(f.attach_rate*100).toFixed(1)}%</td>
-        <td class="num"><b>${Math.round(f.attach_rate*guests)}</b></td>
-        <td class="num" ${swing[f.id]?`title="measured over ${swing[f.id].n} real days"`:''}>${swing[f.id]
-          ?`<b style="color:#8a4a30">± ${Math.max(1,Math.round(swing[f.id].frac*f.attach_rate*guests))}</b> <span class="muted" style="font-size:10.5px">±${Math.round(swing[f.id].frac*100)}%</span>`
-          :'<span class="muted">—</span>'}</td></tr>
-        <tr id="ih-${fi}" style="display:none"><td colspan="4" style="background:var(--sand);border-radius:8px">${itemHoursHtml(f,guests,hrs)}</td></tr>`).join('')}
-    </table></div>
-    <div class="muted" style="font-size:11.5px;margin-top:6px">Sources: attach rates from the item mix in <b>System Financial 2026</b> (regular + Island Time combined) × today's forecast. <b>usually within</b> is measured from your <b>${realDays.length} real Oracle day${realDays.length===1?'':'s'}</b> — each family's actual daily miss against the model at that day's real covers, scaled to today's forecast. It tightens as more exports upload; a family with fewer than 5 measured days shows — instead of a guess.</div>
-  </div>`;
+  ${card86(d)}`;
   inner += eventsCard();
   inner += dataCard(!!(S.settings||{}).bilingual);
   shell(inner);
