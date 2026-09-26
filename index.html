@@ -1347,7 +1347,7 @@ const SB_KEY='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZ
 const TBID='9f8d7c6b-5a49-4e38-b271-06d5f00dbeef'; // Tommy Bahama tenant inside ChefOpsAI
 // Stamped by publish.sh at upload time. It is the only version label there is now —
 // one address, updated in place, so this tells you which build that address is serving.
-const BUILD='Sep 25, 2026 · Today v2';
+const BUILD='Sep 25, 2026 · grades: Dan only';
 // ---------- IS THIS PHONE EVEN RUNNING THE LATEST BUILD? ----------
 // Sep 3 2026. Three prep fixes shipped and Dan still saw the old behaviour, because the app
 // installs to the home screen and an installed web app does not go back and re-fetch its own
@@ -2641,6 +2641,26 @@ function staffMap(e){
             active:e.status==='active'};
   }
 
+// Sep 25 2026 — Dan: "dont use the guest and try to estimate guest based of the sales."
+// Oracle's guest count on these days is wrong. The database row stays exactly as Oracle sent it;
+// the app reads the day's guests as net sales ÷ the normal check of the same weekday (median of
+// the 4 weeks either side, holidays and closed days left out), and marks it as estimated.
+const DH_GUEST_FIX={'2025-09-29':'Oracle guest count wrong: 38 guests on $17,191 (Dan, Sep 25 2026)'};
+function dhFixBuild(rows){
+  const by={}; (rows||[]).forEach(r=>{ by[String(r.business_date)]=r; });
+  const out={};
+  Object.keys(DH_GUEST_FIX).forEach(d=>{
+    const r=by[d]; if(!r||!(Number(r.net_sales)>0)) return;
+    const c=[]; for(const k of [-4,-3,-2,-1,1,2,3,4]){ const x=shiftDay(d,7*k), q=by[x]; if(!q||DH_GUEST_FIX[x]||fcHol(x)) continue;
+      const g=Number(q.guests), sl=Number(q.net_sales); if(g>=10&&sl>=500) c.push(sl/g); }
+    if(c.length<2) return;
+    c.sort((a,b)=>a-b); const m=c.length>>1, chk=c.length%2?c[m]:(c[m-1]+c[m])/2;
+    out[d]={est:Math.round(Number(r.net_sales)/chk), orig:(r.guests_orig!=null?r.guests_orig:Number(r.guests)), chk:Math.round(chk*100)/100, why:DH_GUEST_FIX[d]};
+  });
+  S.dhFix=out; return out;
+}
+function dhFix(rows){ const F=S.dhFix||{}; (rows||[]).forEach(r=>{ const f=r&&F[String(r.business_date)]; if(f&&!r.guests_est){ r.guests_orig=r.guests; r.guests=f.est; r.guests_est=true; } }); return rows; }
+const dhFixQ=r=>{ if(r&&r.data) dhFix(Array.isArray(r.data)?r.data:[r.data]); return r; };
 // ---------- data layer (ChefOpsAI schema) ----------
 async function loadAll(){
   // Sep 24 2026 speed pass: the event calendar loads in the SAME round trip as everything else
@@ -2663,6 +2683,7 @@ async function loadAll(){
     db.from('tb_vendor_rules').select('*'),
   ]);
   S.scores=fsq.data||[];
+  dhFixBuild(dhq.data||[]); dhFix(dhq.data||[]);          // Dan's guest-count fixes, before anything reads the days
   fcHistLoad(dhq.data||[]); S.dhRows=dhq.data||[]; S.fc2rows=f2q.data||[]; S.vrules=vrq.data||[];
   await loadEvents();                 // already loaded above in the same trip; this returns at once
   S.corr=corrCompute(S.scores);
@@ -3013,8 +3034,8 @@ async function writePrepList(d, guests, rows, meta, overridden){
 // day on file. Returns null when no real day has both a cover count and net sales — the
 // callers all treat null as "say so", never as a zero.
 async function measuredAvgCheck(){
-  const {data}=await db.from('tb_daily_history').select('net_sales,guests').eq('synthetic',false);
-  const rs=(data||[]).filter(r=>Number(r.guests)>0 && r.net_sales!=null);
+  const {data}=await db.from('tb_daily_history').select('business_date,net_sales,guests').eq('synthetic',false);
+  const rs=dhFix(data||[]).filter(r=>Number(r.guests)>0 && r.net_sales!=null);
   const g=rs.reduce((a,r)=>a+Number(r.guests),0), n=rs.reduce((a,r)=>a+Number(r.net_sales),0);
   return g>0 ? n/g : null;
 }
@@ -5036,7 +5057,7 @@ async function loadDayReport(d){
     db.from('prep_lists').select('*').eq('restaurant_id',TBID).eq('date',d).order('created_at',{ascending:false}).limit(1),
     db.from('waste_records').select('*').eq('restaurant_id',TBID).eq('date',d),
     db.from('tb_day_forecast').select('*').eq('business_date',d).maybeSingle(),
-    db.from('tb_daily_history').select('*').eq('business_date',d).maybeSingle(),
+    db.from('tb_daily_history').select('*').eq('business_date',d).maybeSingle().then(dhFixQ),
     db.from('tb_daily_item_history').select('*').eq('business_date',d),
   ]);
   const cs=cq.data||[];
@@ -5179,7 +5200,7 @@ function dayReportHtml(R){
     ${!can('analytics.money')?'':anaTile('Net sales', hist&&hist.net_sales!=null?('$'+Math.round(hist.net_sales).toLocaleString()):'—',
         hist? (hist.synthetic!==false?'MODELED, not real':'from an Oracle export') : 'no history row')}
   </div>
-  ${!EXACT()?'':gAct!=null && gFore>0
+  ${!GRADES()?'':gAct!=null && gFore>0
     ? `<div class="muted" style="font-size:12.5px">Forecast missed by <b style="color:${Math.abs(gAct-gFore)/gFore>0.15?'var(--coral)':'var(--palm)'}">${gAct>=gFore?'+':''}${Math.round((gAct-gFore)/gFore*100)}%</b> (${Math.round(gFore)} predicted, ${Math.round(gAct)} covers recorded). Every par below was built against the forecast, not the actual — so on a day the forecast was low, running out is expected and is not a par problem.</div>`
     : `<div class="muted" style="font-size:12.5px">No actual cover count was ever entered for this day, so there is nothing to check the forecast against. You can add it in card 11 below · No se registró el número real de cubiertos.</div>`}
   ${sold.length? `<h4 style="margin:12px 0 4px">What sold that day · Lo que se vendió</h4>
@@ -6296,6 +6317,10 @@ function dayRange(x){
 }
 // Sep 25 2026 — Dan: ranges "anywhere it appears on the app" for everyone but him.
 const EXACT=()=>can('today.exact');
+// Sep 25 2026 — Dan: "you know how you grade our forecast. that should only be able to be seen
+// by me. no one else." Locked to the admin role in code, NOT a switch on the permissions
+// screen, so giving someone exact numbers can never also hand them the grades.
+const GRADES=()=>{ const u=pu(); return !!u && pRole(u)==='admin'; };
 function guestRangeTxt(d, g){ const R=dayRange(d); const k=(g!=null&&R.g)?g/R.g:1; return `${Math.round(R.lo*k)}–${Math.round(R.hi*k)}`; }
 function sumRange(days){   // guests over several days: real where Oracle has the day, measured spread for the rest
   const act={}; (S.dhRows||[]).forEach(r=>{ if(Number(r.guests)>0) act[String(r.business_date)]=Number(r.guests); });
@@ -6316,7 +6341,7 @@ async function lyAligned(d){
   if(!a) return null;
   const dates=a.date?[a.date]:(a.dates||[]); if(!dates.length) return null;
   const q=await db.from('tb_daily_history').select('business_date,guests,net_sales,synthetic').in('business_date',dates);
-  const rows=(q.data||[]).filter(r=>Number(r.guests)>0);
+  const rows=dhFix(q.data||[]).filter(r=>Number(r.guests)>0);
   if(!rows.length) return null;
   const avg=k=>Math.round(rows.reduce((t,r)=>t+Number(r[k]||0),0)/rows.length);
   const dl=x=>dateObjLA(x).toLocaleDateString('en-US',{weekday:'short',month:'short',day:'numeric',year:'numeric'});
@@ -6325,7 +6350,9 @@ async function lyAligned(d){
   else if(a.how==='median'){ label=`average of ${rows.map(r=>dl(r.business_date)).join(' and ')} — last year's matching day was a holiday or closed`;
     es=`promedio de ${rows.map(r=>dl(r.business_date)).join(' y ')}`; }
   else { label=dl(rows[0].business_date); es=label; }
-  return {guests:avg('guests'), sales:avg('net_sales'), syn:rows.some(r=>r.synthetic), how:a.how, label, es};
+  const est=rows.some(r=>r.guests_est);
+  if(est){ label+=' · guests estimated from sales (Oracle’s count was wrong)'; es+=' · clientes estimados por las ventas'; }
+  return {guests:avg('guests'), sales:avg('net_sales'), syn:rows.some(r=>r.synthetic), how:a.how, label, es, est};
 }
 // ================= TODAY v2 (Sep 26 2026 — mockup today-v2, approved by Dan) =================
 // Everyone but Dan. Top to bottom, in Dan's order:
@@ -6543,7 +6570,7 @@ function todayRangeHtml(o){
     const v=act!=null?act:(own?guests:(R.lo+R.hi)/2), L=busyLv(v);
     const val=act!=null?act:(own?guests:`${R.lo}–${R.hi}`);
     const sub=act!=null?'real ✓':(own?(es?'tu número':'your number'):(x<T?(es?'falta archivo':'no file yet'):(x===T?(es?'hoy':'today'):(es?'probable':'likely'))));
-    let ly=null; if(money){ try{ const q=fcLy(x,'g'); if(q&&q.v>0) ly=Math.round(q.v); }catch(e){} }
+    let ly=null; if(money){ try{ const q=fcLy(x,'g'); if(q&&q.v>0) ly=((q.date&&S.dhFix&&S.dhFix[q.date])?'~':'')+Math.round(q.v); }catch(e){} }
     return `<div class="t2-tile lv${L.k}${x===d?' sel':''}" onclick="S.selDate='${x}';S.guestsOverride=null;render()">
       <div class="t2-lv">${es?L.es:L.en}</div><div class="t2-tw">${wdS(x)} <span>${dateObjLA(x).getDate()}</span></div>
       <div class="t2-tv">${val}</div><div class="t2-ts">${sub}</div>${ly!=null?`<div class="t2-tly">${es?'año ant.':'LY'} ${ly}</div>`:''}</div>`;
@@ -6651,7 +6678,7 @@ async function viewToday(){
   // real days it stays null and the tile says so plainly instead of guessing a dollar figure.
   // Same real days loadAll already fetched for the forecast — no second trip (speed pass Sep 24).
   const realHistRows=(S.dhRows&&S.dhRows.length)? S.dhRows
-    : ((await db.from('tb_daily_history').select('business_date,net_sales,guests').eq('synthetic',false)).data||[]);
+    : dhFix((await db.from('tb_daily_history').select('business_date,net_sales,guests').eq('synthetic',false)).data||[]);
   const realDays=(realHistRows).filter(r=>Number(r.guests)>0 && r.net_sales!=null);
   const realGuestsSum=realDays.reduce((a,r)=>a+Number(r.guests),0);
   const realSalesSum=realDays.reduce((a,r)=>a+Number(r.net_sales),0);
@@ -7273,7 +7300,7 @@ function oracleReceiptMsg(info){
     const bits=[`Oracle Daily Operations · ${fmtDate(info.businessDate)}`];
     if(info.historyMsg) bits.push(info.historyMsg); else bits.push('Guest Count column was off in this export — day totals not loaded');
     if(info.itemsLoaded || info.itemsSkipped) bits.push(`${info.itemsLoaded} item line(s) matched to a kitchen family${info.itemsSkipped?`, ${info.itemsSkipped} not mapped yet`:''}`);
-    if(info.score){
+    if(info.score && GRADES()){
       if(info.score.noForecast) bits.push('no saved forecast for this date to score');
       else bits.push(`forecast accuracy ${info.score.pct}% (${info.score.forecast} forecast → ${info.score.actual} actual)`);
     }
@@ -7754,7 +7781,7 @@ window.showZipReport=async()=>{
   S.zipUp={...S.zipUp, stage:'done', receipt};
   render();
 };
-window.goToWeekReport=(weekEnd)=>{ S.pendingWeekOpen=weekEnd; go('analytics'); };
+window.goToWeekReport=(weekEnd)=>{ if(!GRADES()) return; S.pendingWeekOpen=weekEnd; go('analytics'); };
 // Walk the Today screen a week at a time. Moving the selected day (not a separate offset)
 // keeps the strip, the day report, the prep numbers and the weather all describing the same
 // date — one source of truth for "which day am I looking at".
@@ -7820,10 +7847,10 @@ function weeklyZipCard(bil){
       ${R.dates&&R.dates.length?`<div class="rstat">
         <div><b>${R.guests.toLocaleString()}</b><i>Covers</i></div>
         <div><b>$${R.sales.toLocaleString(undefined,{maximumFractionDigits:0})}</b><i>Net Sales</i></div>
-        <div><b>${R.misses}</b><i>Forecast Misses</i></div>
+        ${GRADES()?`<div><b>${R.misses}</b><i>Forecast Misses</i></div>`:''}
       </div>`:`<div class="muted" style="font-size:12px;margin-top:6px">No Daily Operations files in this batch, so there's no cover/sales total to show — everything else is stored and listed below.</div>`}
       ${R.failed?`<div style="color:#a33;font-size:12px;margin-top:4px">${R.failed} file(s) failed — see the list below for details.</div>`:''}
-      ${weeks.map(ws=>`<button class="btn-primary" style="width:100%;justify-content:center;margin-top:8px" onclick="goToWeekReport('${shiftDay(ws,6)}')">Weekly report: ${fmtDate(ws)} – ${fmtDate(shiftDay(ws,6))} →</button>`).join('')}
+      ${GRADES()?weeks.map(ws=>`<button class="btn-primary" style="width:100%;justify-content:center;margin-top:8px" onclick="goToWeekReport('${shiftDay(ws,6)}')">Weekly report: ${fmtDate(ws)} – ${fmtDate(shiftDay(ws,6))} →</button>`).join(''):''}
       <div class="muted" style="font-size:11px;margin-top:8px">This summary stays right here until you start a new batch. · Este resumen se queda aquí.</div>
     </div>
     <button class="btn-ghost btn-sm" style="margin-top:10px" onclick="startNewZipBatch()">Start a new upload batch · Nuevo lote</button>`;
@@ -10145,8 +10172,8 @@ function reportHtml(){
     ${FRESH_CUTS_ON?`    <div class="muted" style="font-size:12.5px;margin-top:6px"><b>Fresh cuts tossed at night:</b> ${D.fcAnswers? D.fcAnswers+' answer'+(D.fcAnswers===1?'':'s')+' across '+D.fcNights+' night'+(D.fcNights===1?'':'s')+'. Most over-cut: '+esc(D.fcTop.map(x=>x[0]+' ('+x[1].tossed+' of '+x[1].n+' nights)').join(', '))+'.' : 'nothing logged this month.'}
     <span style="opacity:.8">Counted separately from the waste entries above and never added to them — a tap on the cuts card and a logged container are not the same unit.</span></div>`:''}
 
-    ${!EXACT()?'':`<h3>3 · Forecast vs reality ${repLab('derived','est')}</h3>`}
-    ${!EXACT()?'':D.scored.length? `
+    ${!GRADES()?'':`<h3>3 · Forecast vs reality ${repLab('derived','est')}</h3>`}
+    ${!GRADES()?'':D.scored.length? `
       <div class="muted" style="font-size:12.5px">Scored on the <b>${D.scored.length}</b> day${D.scored.length===1?'':'s'} where somebody typed the real cover count (${D.actualsEntered} day${D.actualsEntered===1?'':'s'} had actuals entered).
       <b>${D.within15}</b> of ${D.scored.length} landed within ±15%. Average miss <b>${Math.round(D.avgMiss*100)}%</b>.
       ${D.worst? ` Biggest miss: ${fmtDate(D.worst.d)} (${D.worst.miss>0?'+':''}${Math.round(D.worst.miss*100)}% — forecast ${Math.round(D.worst.f)}, walked in ${Math.round(D.worst.a)}).`:''}</div>`
@@ -10558,6 +10585,7 @@ function weeklyReportsListHtml(weeks, currentEnd){
 // S.pendingWeekOpen and switches tabs; viewAnalytics() calls this itself once its own
 // fresh load finishes, so a deep link always opens onto up-to-date data.
 window.openWeekReport=(weekEnd)=>{
+  if(!GRADES()) return;                       // the grades are Dan's only (Sep 25 2026)
   if(!S._anaHist) return; // Analytics hasn't loaded its history yet in this session
   const cur=S._anaHist.currentEnd===weekEnd;
   const F=cur ? (S.weekReport&&S.weekReport.F&&S.weekReport.weekEnd===weekEnd ? S.weekReport.F
@@ -10756,7 +10784,7 @@ async function viewAnalytics(){
     db.from('prep_lists').select('id,date,notes').eq('restaurant_id',TBID).gte('date',sinceStr).order('date',{ascending:false}),
     db.from('tb_day_forecast').select('*').order('business_date',{ascending:false}).limit(60),
     db.from('waste_records').select('*').eq('restaurant_id',TBID).gte('date',sinceStr).order('date',{ascending:false}),
-    db.from('tb_daily_history').select('business_date,guests,net_sales').eq('synthetic',false).order('business_date',{ascending:false}).limit(90),
+    db.from('tb_daily_history').select('business_date,guests,net_sales').eq('synthetic',false).order('business_date',{ascending:false}).limit(90).then(dhFixQ),
     db.from('tb_attach_scores').select('*').order('week_end',{ascending:false}).limit(240)
   ]);
   const fva=fvaCompute(dhq.data||[], fcq.data||[], ihq.data||[], S.families, S.scores);
@@ -10868,7 +10896,7 @@ async function viewAnalytics(){
   if(S.report&&S.report.data){ shell(reportHtml()); return; }
   shell(`
   ${reportBuilderCard()}
-  ${EXACT()?fcLedgerCardHtml():''}
+  ${GRADES()?fcLedgerCardHtml():''}
   ${timingCardHtml()}
   <div class="card">
     <h2 style="margin-bottom:8px">Analytics · Analíticas</h2>
@@ -10882,7 +10910,7 @@ async function viewAnalytics(){
     ${anaSrc('Model: weekday pattern (Service by Weekday) × seasonal curve — Jan–Jul + Sep–Dec now <b>measured</b> from your Oracle month exports; Aug still assumed. Every forecast is an <b>estimate</b> — it sharpens each time you upload a real export.')}
   </div>
 
-  ${EXACT()?weeklyReportsListHtml(weeks, fva?fva.end:null):''}
+  ${GRADES()?weeklyReportsListHtml(weeks, fva?fva.end:null):''}
 
   <div class="card" id="dayrep-card">
     <h2>Day report · Reporte del día<span class="h2sub">one day, start to finish</span></h2>
@@ -11024,7 +11052,7 @@ async function viewAnalytics(){
     ${anaSrc('Your own generated prep lists (prep_lists / prep_list_items). This is real data, not modeled.')}
   </div>
 
-  ${EXACT()?`  <div class="card">
+  ${GRADES()?`  <div class="card">
     <h2>11 · Forecast accuracy — is this thing right?</h2>
     ${mape!=null? `
       <div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:10px">
@@ -15584,9 +15612,9 @@ const TOURS={
  ],
  analytics:()=>[
   {el:()=>tCard('Analytics · Analíticas'), en:()=>can('today.exact')?'Covers today, this week, next week, and where the season is.':'Guests today, this week and next week as likely ranges, and where the season is.', es:()=>can('today.exact')?'Cubiertos hoy, esta semana, la próxima, y cómo va la temporada.':'Clientes hoy, esta semana y la próxima como rangos, y cómo va la temporada.'},
-  {when:()=>can('today.exact'), el:()=>tCard('Weekly Reports'), en:'Weekly reports: forecast against what happened, Tuesday to Monday. Tap a week for the detail.', es:'Reportes semanales: pronóstico contra lo que pasó, de martes a lunes. Toca una semana para el detalle.'},
+  {when:()=>GRADES(), el:()=>tCard('Weekly Reports'), en:'Weekly reports: forecast against what happened, Tuesday to Monday. Tap a week for the detail.', es:'Reportes semanales: pronóstico contra lo que pasó, de martes a lunes. Toca una semana para el detalle.'},
   {el:()=>tq('#dayrep-card'), en:'Day report: one day start to finish — the count, the list, the waste and what got used.', es:'Reporte del día: un día de principio a fin — el conteo, la lista, la merma y lo que se usó.'},
-  {when:()=>can('today.exact'), el:()=>tCard('11 · Forecast accuracy'), en:'Is the forecast right? The average miss, day by day.', es:'¿Acierta el pronóstico? El error promedio, día por día.'},
+  {when:()=>GRADES(), el:()=>tCard('11 · Forecast accuracy'), en:'Is the forecast right? The average miss, day by day.', es:'¿Acierta el pronóstico? El error promedio, día por día.'},
   {el:()=>tCard('Monthly report'), en:'End of month: Build report makes a one-page summary for the chef meeting. Print or save as PDF.', es:'Fin de mes: Crear reporte hace un resumen de una página para la junta. Imprime o guarda en PDF.'}
  ],
  admin:()=>[
