@@ -1257,6 +1257,15 @@
   .t2-year svg{display:block;margin-top:6px}.t2-sd{font-size:10px;text-anchor:middle;fill:#6b6b60}.t2-thr{font-size:9.5px;fill:#d9644a}.t2-here{font-size:9.5px;fill:#2a8c8c;text-anchor:middle;font-weight:700}
   .t2-key{display:flex;gap:12px;flex-wrap:wrap;font-size:11px;color:var(--muted);margin-top:3px}.t2-key i{display:inline-block;width:10px;height:10px;border-radius:2px;margin-right:4px;vertical-align:-1px}
   .t2-note{font-size:12.5px;line-height:1.45;margin-top:6px}
+  .t2-wx{font-size:10.5px;font-weight:700;color:#3f5a66;padding:2px 0;border-bottom:1px solid var(--sand-dark);background:var(--white)}.t2-wx.hot{color:#b4452f}
+  .t2-chips{display:flex;flex-wrap:wrap;gap:6px;margin-top:8px}.t2-chip{background:var(--sand);border-radius:10px;padding:5px 9px;font-size:11px;color:var(--muted)}
+  .t2-chip b{display:block;font-size:15px;color:var(--ocean-dark);font-variant-numeric:tabular-nums}.t2-chip.ly b{color:#8a6a1a}.t2-chip i{display:block;font-style:normal;font-size:10px}
+  .t2-hrs{display:flex;align-items:flex-end;gap:3px;height:132px;margin-top:8px}.t2-hc{flex:1;min-width:0;display:flex;flex-direction:column;align-items:center;justify-content:flex-end;height:100%}
+  .t2-hb{width:100%;background:#b9dcd8;border-radius:4px 4px 0 0}.t2-hb.pk{background:var(--coral)}
+  .t2-hr{font-size:9px;font-weight:700;color:var(--ocean-dark);margin-bottom:2px;white-space:nowrap;letter-spacing:-.3px;font-variant-numeric:tabular-nums}
+  .t2-hh{font-size:10px;color:var(--muted);margin-top:2px}.t2-ht{font-size:9.5px;font-weight:700;color:#3f5a66}.t2-ht.hot,.t2-hkey .hot{color:#b4452f}
+  .t2-hkey{display:flex;gap:10px;flex-wrap:wrap;font-size:10.5px;color:var(--muted);margin-top:6px}.t2-hkey i{display:inline-block;width:9px;height:9px;border-radius:2px;margin-right:3px;vertical-align:-1px;background:var(--coral)}
+  .t2-ax{font-size:9px;fill:#8b8676;text-anchor:end}
   /* ---- tutorial (Sep 25 2026) ---- */
   .tour-q{margin-left:6px;width:22px;height:22px;border-radius:50%;border:0;background:var(--sand);color:var(--ocean-dark);font-weight:800;font-size:13px;line-height:22px;padding:0;cursor:pointer;vertical-align:middle}
   .tour-ov{position:fixed;inset:0;z-index:10050;touch-action:none;overscroll-behavior:contain}
@@ -1347,7 +1356,7 @@ const SB_KEY='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZ
 const TBID='9f8d7c6b-5a49-4e38-b271-06d5f00dbeef'; // Tommy Bahama tenant inside ChefOpsAI
 // Stamped by publish.sh at upload time. It is the only version label there is now —
 // one address, updated in place, so this tells you which build that address is serving.
-const BUILD='Sep 25, 2026 · grades: Dan only';
+const BUILD='Sep 25, 2026 · Today v3 + recipes ½';
 // ---------- IS THIS PHONE EVEN RUNNING THE LATEST BUILD? ----------
 // Sep 3 2026. Three prep fixes shipped and Dan still saw the old behaviour, because the app
 // installs to the home screen and an installed web app does not go back and re-fetch its own
@@ -2509,6 +2518,9 @@ const PERM_CAPS=[
   // Sep 25 2026 — Dan: "admin would be the only one that keeps the today that already exists
   // … I want to be seeing exact numbers." Everyone without this switch gets Today as ranges.
   ['today.exact','Today with exact forecast numbers (off = ranges)','Hoy con números exactos (apagado = rangos)'],
+  // Sep 25 2026 — Dan: last year's sales on Today and the year chart in dollars: "everyone for
+  // now. but give me the option to turn off to some people". Off = the same cards in guests.
+  ['today.dollars','Today: last year’s sales + the year chart in dollars','Hoy: ventas del año pasado + la gráfica del año en dólares'],
   ['admin.staff','Add, edit & remove people','Agregar y quitar gente'],
   ['admin.pin','Reset somebody’s PIN','Reiniciar un PIN'],
   ['admin.import','Upload Oracle files','Subir archivos de Oracle'],
@@ -2533,13 +2545,13 @@ function permDefaults(){
              caps:off(CK, CK.filter(c=>!['pars.approve','admin.perms','dev.board','today.exact'].includes(c)))},
     lead:   {label:'Management', es:'Gerencia', rank:2,
              sections:off(SK,['today','count','prep','checklist','recipes','waste','orders']),
-             caps:off(CK,['count.start','prep.generate','prep.assign','prep.check','prep.print','logs.view','checklist.do','checklist.results','waste.log','cuts.log','86.log','orders.edit','dev.report'])},
+             caps:off(CK,['count.start','prep.generate','prep.assign','prep.check','prep.print','logs.view','checklist.do','checklist.results','waste.log','cuts.log','86.log','orders.edit','dev.report','today.dollars'])},
     line:   {label:'Line cook', es:'Cocinero de línea', rank:3,
              sections:off(SK,['today','prep','checklist','recipes','waste']),
-             caps:off(CK,['prep.check','checklist.do','waste.log','cuts.log','86.log','dev.report'])},
+             caps:off(CK,['prep.check','checklist.do','waste.log','cuts.log','86.log','dev.report','today.dollars'])},
     cook:   {label:'Prep cook', es:'Cocinero de prep', rank:3,
              sections:off(SK,['today','prep','checklist','recipes','waste']),
-             caps:off(CK,['prep.check','prep.print','checklist.do','waste.log','dev.report'])} }};
+             caps:off(CK,['prep.check','prep.print','checklist.do','waste.log','dev.report','today.dollars'])} }};
 }
 // Saved switches win; defaults only fill in a role or a switch that shipped after the save,
 // so an update never silently flips something Dan set on purpose.
@@ -2645,7 +2657,11 @@ function staffMap(e){
 // Oracle's guest count on these days is wrong. The database row stays exactly as Oracle sent it;
 // the app reads the day's guests as net sales ÷ the normal check of the same weekday (median of
 // the 4 weeks either side, holidays and closed days left out), and marks it as estimated.
-const DH_GUEST_FIX={'2025-09-29':'Oracle guest count wrong: 38 guests on $17,191 (Dan, Sep 25 2026)'};
+const DH_GUEST_FIX={
+  '2025-09-29':'Oracle guest count wrong: 38 guests on $17,191 (Dan, Sep 25 2026)',
+  '2025-02-25':'Oracle guest count low: 212 guests on $23,897 (Dan, Sep 25 2026)',
+  '2026-02-20':'Oracle guest count low: 176 guests on $20,598 (Dan, Sep 25 2026)',
+  '2026-05-29':'Oracle guest count low: 177 guests on $17,125 (Dan, Sep 25 2026)'};
 function dhFixBuild(rows){
   const by={}; (rows||[]).forEach(r=>{ by[String(r.business_date)]=r; });
   const out={};
@@ -6317,6 +6333,7 @@ function dayRange(x){
 }
 // Sep 25 2026 — Dan: ranges "anywhere it appears on the app" for everyone but him.
 const EXACT=()=>can('today.exact');
+const DOLLARS=()=>can('today.dollars');
 // Sep 25 2026 — Dan: "you know how you grade our forecast. that should only be able to be seen
 // by me. no one else." Locked to the admin role in code, NOT a switch on the permissions
 // screen, so giving someone exact numbers can never also hand them the grades.
@@ -6351,8 +6368,10 @@ async function lyAligned(d){
     es=`promedio de ${rows.map(r=>dl(r.business_date)).join(' y ')}`; }
   else { label=dl(rows[0].business_date); es=label; }
   const est=rows.some(r=>r.guests_est);
+  const dls=x=>dateObjLA(x).toLocaleDateString('en-US',{weekday:'short',month:'short',day:'numeric',year:'numeric'});
+  const short=a.how==='median'?'average of 2 days':(a.how==='holiday'?`${(fcHol(d)||{}).name||'holiday'} · ${dls(rows[0].business_date)}`:dls(rows[0].business_date));
   if(est){ label+=' · guests estimated from sales (Oracle’s count was wrong)'; es+=' · clientes estimados por las ventas'; }
-  return {guests:avg('guests'), sales:avg('net_sales'), syn:rows.some(r=>r.synthetic), how:a.how, label, es, est};
+  return {guests:avg('guests'), sales:avg('net_sales'), syn:rows.some(r=>r.synthetic), how:a.how, label, es, est, short};
 }
 // ================= TODAY v2 (Sep 26 2026 — mockup today-v2, approved by Dan) =================
 // Everyone but Dan. Top to bottom, in Dan's order:
@@ -6504,7 +6523,7 @@ function bigDayRealHtml(){
 const TODAY_ALERTS=[ d=>gsCardHtml(), d=>bigDayAlertHtml(), d=>bigDayRealHtml(), d=>orCardHtml(d) ];
 function todayAlertsHtml(d){
   const parts=TODAY_ALERTS.map(f=>{ try{ return f(d)||''; }catch(e){ return ''; } }).filter(x=>x.trim());
-  if(!parts.length) return '';
+  if(!parts.some(x=>x.replace('<div id="gs-card"></div>','').trim())) return parts.join('');   // nothing to show (keeps the gs placeholder)
   return `<div class="t2-alerts"><div class="t2-alh">Alerts &amp; notices · Avisos</div>${parts.join('')}</div>`;
 }
 // ---- the year, month by month: last year grey, this year solid, coming months as a likely range
@@ -6555,6 +6574,65 @@ function yearBarsHtml(avgCheck){
     <div class="t2-key"><span><i style="background:#d9d1c1"></i>${es?'año pasado':'last year'}</span><span><i style="background:#0b4a4f"></i>${es?'este año':'this year'}</span><span><i style="background:#b9dcd8"></i>${es?'lo que viene (rango probable)':'coming (likely range)'}</span></div>
     ${note?`<div class="t2-note">${note}</div>`:''}</div>`;
 }
+// the day's weather as the tile and chart show it: sun or rain, the high, the low
+function t2Wx(x){
+  const w=(S.wx&&S.wx.byDate||{})[x]; if(!w||w.tmax_f==null) return null;
+  const rain=Number(w.precip_mm||0)>=1||Number(w.precip_prob||0)>=50;
+  const hi=Math.round(Number(w.tmax_f));
+  return {ic:rain?'🌧️':'☀️', hi, lo:w.tmin_f!=null?Math.round(Number(w.tmin_f)):null, hot:hi>=100, rain};
+}
+// Sep 25 2026 — Dan: "make sure you mark the vertical size show by 5k and have it reach up to
+// 30k … that bar should be the average sales a day for that month." Real days only; closed days
+// out; the coming months are the forecast's sales a day × the measured 30-day spread.
+function yearSalesHtml(){
+  const T=todayLA(), es=isES(), Y=Number(T.slice(0,4)), cm=Number(T.slice(5,7));
+  const mk=(y,m)=>`${y}-${String(m).padStart(2,'0')}`;
+  const key='$|'+T+'|'+FC2.dates.length+'|'+((S.settings||{}).fc_engine||'')+'|'+(S.wx&&S.wx.loaded?1:0);
+  let D=(S._t2ys&&S._t2ys.key===key)?S._t2ys.D:null;
+  if(!D){
+    const b={}; FC2.dates.forEach(x=>{ if(x>=T||fcClosed(x)) return; const k=x.slice(0,7); (b[k]=b[k]||{s:0,n:0}); b[k].s+=FC2.hist[x].s; b[k].n++; });
+    const avg=k=>(b[k]&&b[k].n)?Math.round(b[k].s/b[k].n):null;
+    const sp=fcSpan(30);
+    const fcM=(y,m)=>{ const n=new Date(y,m,0).getDate(); let s2=0,c=0;
+      for(let i=1;i<=n;i++){ const x=`${mk(y,m)}-${String(i).padStart(2,'0')}`; if(x<=T) continue;
+        let X=null; try{ X=fcExplain(x); }catch(e){} if(!X||!X.v2s) continue; const R=dayRange(x); s2+=X.v2s*(X.v2g?R.g/X.v2g:1); c++; }
+      if(!c) return null; const a=s2/c; return {mid:Math.round(a), lo:Math.round(a*sp.lo), hi:Math.round(a*sp.hi)}; };
+    const ny=cm===12?Y+1:Y, nm=cm%12+1;
+    D={ly:[], ty:[], fc:[], cm, nm, lyCur:avg(mk(Y-1,cm)), lyNext:avg(mk(ny-1,nm)), tyCur:avg(mk(Y,cm)), next:fcM(ny,nm)};
+    for(let m=1;m<=12;m++){ D.ly.push(avg(mk(Y-1,m))); D.ty.push(m<=cm?avg(mk(Y,m)):null); D.fc.push(m>cm?fcM(Y,m):null); }
+    S._t2ys={key, D};
+  }
+  const vals=[...D.ly,...D.ty,...D.fc.map(f=>f&&f.hi)].filter(v=>v>0);
+  if(!vals.length) return '';
+  const W=340,H=200,X0=36, MX=Math.max(30000, Math.ceil(Math.max(...vals)/5000)*5000);
+  const Yp=v=>H-18-(v/MX)*(H-30), step=(W-X0-4)/12, bw=step*0.36;
+  const kf=v=>'$'+(v/1000).toFixed(1)+'k';
+  const ML=es?['E','F','M','A','M','J','J','A','S','O','N','D']:['J','F','M','A','M','J','J','A','S','O','N','D'];
+  let g='';
+  for(let v=0;v<=MX;v+=5000) g+=`<line x1="${X0-4}" x2="${W}" y1="${Yp(v).toFixed(1)}" y2="${Yp(v).toFixed(1)}" stroke="${v?'#ebe3d3':'#cfc6b4'}" stroke-width="1"/><text x="${X0-7}" y="${(Yp(v)+3).toFixed(1)}" class="t2-ax">${v?'$'+v/1000+'k':'$0'}</text>`;
+  for(let i=0;i<12;i++){
+    const x=X0+i*step+step*0.12, m=i+1;
+    if(D.ly[i]) g+=`<rect x="${x.toFixed(1)}" y="${Yp(D.ly[i]).toFixed(1)}" width="${bw.toFixed(1)}" height="${(Yp(0)-Yp(D.ly[i])).toFixed(1)}" fill="#d9d1c1" rx="2"/>`;
+    if(D.ty[i]) g+=`<rect x="${(x+bw+1).toFixed(1)}" y="${Yp(D.ty[i]).toFixed(1)}" width="${bw.toFixed(1)}" height="${(Yp(0)-Yp(D.ty[i])).toFixed(1)}" fill="${m===D.cm?'#2a8c8c':'#0b4a4f'}" rx="2"/>`;
+    const f=D.fc[i]; if(f) g+=`<rect x="${(x+bw+1).toFixed(1)}" y="${Yp(f.lo).toFixed(1)}" width="${bw.toFixed(1)}" height="${(Yp(0)-Yp(f.lo)).toFixed(1)}" fill="#b9dcd8" rx="2"/><rect x="${(x+bw+1).toFixed(1)}" y="${Yp(f.hi).toFixed(1)}" width="${bw.toFixed(1)}" height="${Math.max(1,Yp(f.lo)-Yp(f.hi)).toFixed(1)}" fill="#b9dcd8" opacity=".55" rx="2" stroke="#2a8c8c" stroke-dasharray="2 2"/>`;
+    g+=`<text x="${(x+bw).toFixed(1)}" y="${H-4}" class="t2-sd">${ML[i]}</text>`;
+  }
+  g+=`<line x1="${X0-4}" x2="${W}" y1="${Yp(BIG_DAY).toFixed(1)}" y2="${Yp(BIG_DAY).toFixed(1)}" stroke="#d9644a" stroke-dasharray="4 3" stroke-width="1.3"/><text x="${W}" y="${(Yp(BIG_DAY)-4).toFixed(1)}" class="t2-thr" text-anchor="end">${es?'día de $15k':'$15k day'}</text>`;
+  if(D.ty[D.cm-1]){ const xc=X0+(D.cm-1)*step+step*0.12+bw+1+bw/2; g+=`<text x="${xc.toFixed(1)}" y="${(Yp(D.ty[D.cm-1])-5).toFixed(1)}" class="t2-here">${es?'hoy':'now'}</text>`; }
+  const MN=m=>new Date(2000,m-1,15).toLocaleDateString(es?'es-MX':'en-US',{month:'long'});
+  const cur=MN(D.cm), nxt=MN(D.nm); let note='';
+  if(D.tyCur) note+=es?`${cur[0].toUpperCase()+cur.slice(1)} va <b>${kf(D.tyCur)}</b> al día${D.lyCur?` (el año pasado ${kf(D.lyCur)})`:''}. `:`${cur} so far <b>${kf(D.tyCur)}</b> a day${D.lyCur?` (last year ${kf(D.lyCur)})`:''}. `;
+  if(D.lyCur&&D.lyNext){ const up=D.lyNext>D.lyCur*1.08, dn=D.lyNext<D.lyCur*0.92;
+    note+=es?`El año pasado ${nxt} ${up?'subió':dn?'bajó':'se quedó igual'}: <b>${kf(D.lyCur)} → ${kf(D.lyNext)}</b>. `:`Last year ${nxt} ${up?'jumped':dn?'dropped':'held'}: <b>${kf(D.lyCur)} → ${kf(D.lyNext)}</b>. `; }
+  if(D.next) note+=es?`Este ${nxt}: probable <b>${kf(D.next.lo)}–${kf(D.next.hi)}</b>.`:`This ${nxt}: likely <b>${kf(D.next.lo)}–${kf(D.next.hi)}</b>.`;
+  const base=D.tyCur||D.lyCur, dir=(D.next&&base)?D.next.mid/base:1;
+  const title=dir>1.1?'Heading into season · Llega la temporada':dir<0.9?'Season winding down · Se va la temporada':'The year, month by month · El año, mes a mes';
+  return `<div class="card t2-year"><h3 style="margin:0">${title}</h3>
+    <div class="muted" style="font-size:11.5px">${es?'ventas promedio al día, cada mes':'average sales a day, each month'}</div>
+    <svg viewBox="0 0 ${W} ${H}" width="100%" role="img" aria-label="${es?'ventas por mes':'sales by month'}">${g}</svg>
+    <div class="t2-key"><span><i style="background:#d9d1c1"></i>${es?'año pasado':'last year'}</span><span><i style="background:#0b4a4f"></i>${es?'este año':'this year'}</span><span><i style="background:#b9dcd8"></i>${es?'lo que viene (rango probable)':'coming (likely range)'}</span></div>
+    ${note?`<div class="t2-note">${note}</div>`:''}</div>`;
+}
 function todayRangeHtml(o){
   const {d, hrs, swing, actualByDate, LA, range, ww, wxf, guests, avgCheck}=o;
   const T=todayLA(), es=isES();
@@ -6570,15 +6648,15 @@ function todayRangeHtml(o){
     const v=act!=null?act:(own?guests:(R.lo+R.hi)/2), L=busyLv(v);
     const val=act!=null?act:(own?guests:`${R.lo}–${R.hi}`);
     const sub=act!=null?'real ✓':(own?(es?'tu número':'your number'):(x<T?(es?'falta archivo':'no file yet'):(x===T?(es?'hoy':'today'):(es?'probable':'likely'))));
-    let ly=null; if(money){ try{ const q=fcLy(x,'g'); if(q&&q.v>0) ly=((q.date&&S.dhFix&&S.dhFix[q.date])?'~':'')+Math.round(q.v); }catch(e){} }
+    const W=t2Wx(x);
     return `<div class="t2-tile lv${L.k}${x===d?' sel':''}" onclick="S.selDate='${x}';S.guestsOverride=null;render()">
-      <div class="t2-lv">${es?L.es:L.en}</div><div class="t2-tw">${wdS(x)} <span>${dateObjLA(x).getDate()}</span></div>
-      <div class="t2-tv">${val}</div><div class="t2-ts">${sub}</div>${ly!=null?`<div class="t2-tly">${es?'año ant.':'LY'} ${ly}</div>`:''}</div>`;
+      <div class="t2-lv">${es?L.es:L.en}</div><div class="t2-wx${W&&W.hot?' hot':''}">${W?`${W.ic} ${W.hi}°`:'&nbsp;'}</div><div class="t2-tw">${wdS(x)} <span>${dateObjLA(x).getDate()}</span></div>
+      <div class="t2-tv">${val}</div><div class="t2-ts">${sub}</div></div>`;
   }).join('');
   const tilesCard=`<div class="card t2-days">
     <div class="rg-hd"><h3 style="margin:0">Day by day · Día por día</h3>
       <span class="rg-nav no-print"><button onclick="shiftWeek(-1)" aria-label="previous week">‹</button><button onclick="shiftWeek(1)" aria-label="next week">›</button></span></div>
-    <div class="muted" style="font-size:11.5px">${isCur?'':(wk[0]>T?(es?'Semana que viene · ':'Week ahead · '):(es?'Semana pasada · ':'Past week · '))}${wdS(wk[0])} ${short(wk[0])} – ${wdS(wk[6])} ${short(wk[6])} · ${es?'toca un día para ver sus detalles':'tap a day for its details'}</div>
+    <div class="muted" style="font-size:11.5px">${isCur?'':(wk[0]>T?(es?'Semana que viene · ':'Week ahead · '):(es?'Semana pasada · ':'Past week · '))}${wdS(wk[0])} ${short(wk[0])} – ${wdS(wk[6])} ${short(wk[6])} · ${es?'toca un día — las horas fuertes lo siguen':'tap a day — the busy hours below follow it'}</div>
     <div class="t2-tiles">${tiles}</div>
     <div class="t2-leg">${BUSY_LV.map((b,i)=>`<span class="t2-lk lv${b.k}">${es?b.es:b.en}</span> ${i===0?(es?'menos de 140':'under 140'):(i===3?'280+':`${BUSY_LV[i-1].max}–${b.max}`)}`).join(' ')}</div>
   </div>`;
@@ -6592,10 +6670,24 @@ function todayRangeHtml(o){
   const hl=h=>{const x=h%12===0?12:h%12; return x+(h<12?'am':'pm');};
   const pk=hrs.slice().sort((a,b)=>b.g-a.g); const p1=pk[0]; const p2=pk.find(x=>Math.abs(x.h-(p1?p1.h:0))>1 && x.g>=mxH*0.8);
   const busiest=p1?`${hl(p1.h)}–${hl(p1.h+1)}${p2?` ${es?'y':'and'} ${hl(p2.h)}–${hl(p2.h+1)}`:''}`:'';
+  // Dan, Sep 25: guests and last year's sales "should connect into the hour by hour busy chart".
+  // Each hour: the likely guests that hour on top (the day's range × that hour's share — the
+  // same shape the prep list uses) and the temperature underneath.
+  const sumG=hrs.reduce((a,x)=>a+x.g,0)||1;
+  const dLo=actD!=null?actD:(own?guests:R.lo), dHi=actD!=null?actD:(own?guests:R.hi);
+  const wh=wxHours(d), hv=h=>{ const x=wh&&wh.h?wh.h[String(h)]:null; if(x==null) return null; const v=typeof x==='object'?(x.t!=null?x.t:x.a):x; return v!=null?Math.round(Number(v)):null; };
+  const Wd=t2Wx(d);
+  const dollars=DOLLARS();
+  const lyChip=LA?`<div class="t2-chip ly"><span>${es?'El año pasado':'Last year'} · ${esc(LA.short||LA.label)}</span><b>${dollars?`$${(LA.sales/1000).toFixed(1)}k`:`${LA.est?'~':''}${LA.guests} ${es?'clientes':'guests'}`}</b>${dollars&&LA.est?`<i>${es?'clientes estimados':'guests estimated'}</i>`:''}</div>`:'';
   const busyCard=`<div class="card t2-busy">
     <h3 style="margin:0">When it gets busy · Horas fuertes</h3>
     <div class="muted" style="font-size:11.5px">${dayName}${busiest?` · ${es?'lo más fuerte':'busiest'} ${busiest}`:''}</div>
-    <div class="rg-hrs">${hrs.map(x=>`<div class="rg-hc"><div class="rg-hb${x.g/mxH>0.8?' pk':''}" style="height:${Math.round(x.g/mxH*64)}px"></div><span>${hl(x.h).replace('am','a').replace('pm','p')}</span></div>`).join('')}</div>
+    <div class="t2-chips"><div class="t2-chip"><span>${actD!=null?(es?'Clientes reales':'Real guests'):(es?'Clientes':'Guests')}</span><b>${actD!=null?actD:(own?guests:`${R.lo}–${R.hi}`)}</b></div>${lyChip}${Wd?`<div class="t2-chip"><span>${es?'Clima':'Weather'}</span><b>${Wd.ic} ${Wd.hi}°${Wd.lo!=null?` / ${Wd.lo}°`:''}</b></div>`:''}</div>
+    <div class="t2-hrs">${hrs.map(x=>{ const sh=x.g/sumG, t=hv(x.h);
+      const lab=actD!=null||own?`~${Math.round(dLo*sh)}`:`${Math.round(dLo*sh)}–${Math.round(dHi*sh)}`;
+      return `<div class="t2-hc"><span class="t2-hr">${lab}</span><div class="t2-hb${x.g/mxH>0.8?' pk':''}" style="height:${Math.round(x.g/mxH*70)}px"></div><span class="t2-hh">${hl(x.h).replace('am','a').replace('pm','p')}</span>${t!=null?`<span class="t2-ht${t>=100?' hot':''}">${t}°</span>`:''}</div>`; }).join('')}</div>
+    <div class="t2-hkey"><span>${es?'arriba = clientes probables esa hora':'top = likely guests that hour'}</span><span><i></i>${es?'lo más fuerte':'busiest'}</span>${wh?`<span>${es?'abajo = temperatura':'bottom = temperature'}${wh.src==='monthnorm'?(es?' (normal del mes)':' (the month’s normal)'):''} · <b class="hot">100°+</b></span>`:''}</div>
+    ${LA&&dollars?`<div class="muted" style="font-size:11px;margin-top:4px">${es?'Las ventas del año pasado son del día completo — las ventas por hora empiezan el 1 de agosto de 2026.':'Last year’s sales are for the whole day — hour-by-hour sales only start Aug 1, 2026.'}</div>`:''}
   </div>`;
   // ---- 3 · top 20 sellers, option C: likely plates = share of guests × the day's guest range
   // (a day that is already real uses its real guests and the measured item swing instead)
@@ -6637,7 +6729,7 @@ function todayRangeHtml(o){
     ${lyBlock}
     ${wxCard(d, range, ww, wxf, true)}
   </div>`;
-  let yearCard=''; try{ yearCard=yearBarsHtml(avgCheck); }catch(e){ console.warn('year bars',e); }
+  let yearCard=''; try{ yearCard=DOLLARS()?yearSalesHtml():yearBarsHtml(avgCheck); }catch(e){ console.warn('year bars',e); }
   return `${todayAlertsHtml(d)}${tilesCard}${busyCard}${topCard}${yearCard}${selCard}${card86(d)}${eventsCard()}${can('admin.import')?dataCard(!!(S.settings||{}).bilingual):''}`;
 }
 async function viewToday(){
@@ -6735,7 +6827,7 @@ async function viewToday(){
     return;
   }
   let inner=`
-  ${orCardHtml(d)}
+  ${todayAlertsHtml(d)}
   ${(()=>{
     // ---- the week strip, now walkable (mockup Reading B, Dan's pick Aug 26) ----
     // Arrows move the SELECTED DAY by seven, so the strip, the day report and everything
@@ -8002,18 +8094,79 @@ function rcNiceQty(v){
 // multiplier and the unit converter, so all three read "1/2 cup" the same way.
 function rcLeadNum(q){
   q=String(q).trim(); let m;
+  if((m=q.match(/^(\d+)\s*([¼½¾⅓⅔⅛⅜⅝⅞])\s*(.*)$/))) return {val:+m[1]+RC_UFRAC[m[2]], rest:m[3]};   // "1½", "1 ½" (Sep 25 2026: was read as 1 + "½ tsp")
   if((m=q.match(/^([¼½¾⅓⅔⅛⅜⅝⅞])\s*(.*)$/))) return {val:RC_UFRAC[m[1]], rest:m[2]};
   if((m=q.match(/^(\d+)\s+(\d+)\s*\/\s*(\d+)\s*(.*)$/))) return {val:+m[1]+(+m[2]/+m[3]), rest:m[4]};
   if((m=q.match(/^(\d+)\s*\/\s*(\d+)\s*(.*)$/))) return {val:+m[1]/+m[2], rest:m[3]};
   if((m=q.match(/^(\d*\.?\d+)\s*(.*)$/))) return {val:parseFloat(m[1]), rest:m[2]};
   return null;
 }
+// ---- measurement-aware scaling (Sep 25 2026) ----
+// Dan: "i want the app to be able to go .5 batches at a time. also double check that the math
+// on each recipe is accurate to the type of measurement". Every amount is scaled as a NUMBER in
+// its own unit, then written back the way that unit is really measured: teaspoons to the ⅛,
+// tablespoons to the ½ (the rest in tsp), cups only in real measuring-cup sizes (¼ ⅓ ½ ⅔ ¾, the
+// rest in tbsp), ounces to the ⅛, pounds as lb + oz, quarts as qt + cups. Counts (ea, bunch,
+// packets, #10 can) stay counts. Ranges ("12–14 oz wt") and split additions ("2+2 Tbl") scale
+// both numbers. The audit that found the old problems is in the Sep 25 worklog.
+const RC_UNITS=[
+  {k:'tsp',  re:/^(?:tsps?|teaspoons?)\.?(?![a-z])/i},
+  {k:'tbsp', re:/^(?:tbls?|tbsps?|tablespoons?)\.?(?![a-z])/i},
+  {k:'floz', re:/^(?:oz\.?\s*fl|t?fl\.?\s*oz)\.?(?![a-z])/i},
+  {k:'ozwt', re:/^(?:oz\.?\s*wt|ozs?)\.?(?![a-z])/i},
+  {k:'lb',   re:/^(?:lbs?|pounds?)\.?(?![a-z])/i},
+  {k:'cup',  re:/^cups?(?![a-z])/i},
+  {k:'qt',   re:/^(?:qts?|quarts?)(?![a-z])/i},
+  {k:'gal',  re:/^(?:gals?|gallons?)(?![a-z])/i}
+];
+const RC_8=['','⅛','¼','⅜','½','⅝','¾','⅞'];
+function rc8(v){ let e=Math.round(v*8); if(v>0&&e<1) e=1; const w=Math.floor(e/8), f=e%8; return (w?String(w):'')+RC_8[f]||'0'; }
+// the unit word, singular when the amount is 1 or less ("1 qts" → "1 qt"), otherwise as written
+function rcWord(word,v){ return (v<=1.0001 && /[a-z]s$/i.test(word) && !/^oz\s/i.test(word)) ? word.replace(/s$/i,'') : word; }
+function rcFmtUnit(v,k,word){
+  const W=x=>rcWord(word,x);
+  const snap=(x,list,tol)=>{ const w=Math.floor(x+1e-9), f=x-w;
+    for(const [a,g] of list){ if(Math.abs(f-a)<=tol) return (w?String(w):'')+g||'0'; }
+    if(Math.abs(f-1)<=tol) return String(w+1); return null; };
+  if(k==='tsp') return `${rc8(v)} ${W(v)}`;
+  if(k==='tbsp'){ const h=Math.round(v*2)/2; if(Math.abs(v-h)<0.03) return `${rcNiceQty(h)} ${W(h)}`;
+    const w=Math.floor(v+1e-9); return (w?`${w} ${W(w)} + `:'')+`${rc8((v-w)*3)} tsp`; }
+  if(k==='cup'){ const c=snap(v,[[0,''],[.25,'¼'],[1/3,'⅓'],[.5,'½'],[2/3,'⅔'],[.75,'¾']],0.012); if(c) return `${c} ${W(v)}`;
+    const q=Math.floor(v*4+1e-9)/4; return (q>0?`${rcNiceQty(q)} ${W(q)} + `:'')+rcFmtUnit((v-q)*16,'tbsp','tbsp'); }
+  if(k==='floz'||k==='ozwt') return `${rc8(v)} ${word}`;
+  if(k==='lb'){ const c=snap(v,[[0,''],[.25,'¼'],[.5,'½'],[.75,'¾']],0.004); if(c) return `${c} ${W(v)}`;
+    let w=Math.floor(v+1e-9), oz=Math.round((v-w)*16*4)/4; if(oz>=16){ w++; oz=0; }
+    return (w?`${w} ${W(w)}`:'')+(oz?`${w?' ':''}${rcNiceQty(oz)} oz`:''); }
+  if(k==='qt'){ const c=snap(v,[[0,''],[.25,'¼'],[.5,'½'],[.75,'¾']],0.01); if(c) return `${c} ${W(v)}`;
+    const w=Math.floor(v+1e-9); return (w?`${w} ${W(w)} + `:'')+rcFmtUnit((v-w)*4,'cup','cups'); }
+  if(k==='gal'){ const c=snap(v,[[0,''],[.25,'¼'],[.5,'½'],[.75,'¾']],0.01); if(c) return `${c} ${W(v)}`;
+    const w=Math.floor(v+1e-9); return (w?`${w} ${W(w)} + `:'')+rcFmtUnit((v-w)*4,'qt','qt'); }
+  return `${rcNiceQty(v)} ${word}`;
+}
+// the number alone, at the precision its unit is measured in (used for ranges)
+function rcNumFor(v,k){ return (k==='tsp'||k==='floz'||k==='ozwt')?rc8(v):rcNiceQty(v); }
+function rcUnitOf(rest){
+  const rt=String(rest||'').trim();
+  for(const u of RC_UNITS){ const x=rt.match(u.re); if(x) return {k:u.k, word:x[0], tail:rt.slice(x[0].length).trim()}; }
+  return {k:null, word:'', tail:rt};
+}
 function rcScaleQty(q,f){
   q=String(q||'').trim();
   if(!q||!(f>0)) return {txt:q,scaled:false};
-  const ld=rcLeadNum(q);
-  if(!ld||isNaN(ld.val)) return {txt:q,scaled:false};
-  return {txt:rcNiceQty(ld.val*f)+(ld.rest?' '+ld.rest:''), scaled:true};
+  const a=rcLeadNum(q);
+  if(!a||isNaN(a.val)) return {txt:q,scaled:false};
+  if(Math.abs(f-1)<1e-9) return {txt:q,scaled:true};
+  let rest=a.rest, b=null, op=null;
+  const mm=String(rest).match(/^\s*([–—-]|\+)\s*/);
+  if(mm){ const b0=rcLeadNum(String(rest).slice(mm[0].length)); if(b0&&!isNaN(b0.val)){ b=b0.val; op=mm[1]==='+'?'+':'–'; rest=b0.rest; } }
+  const U=rcUnitOf(rest);
+  const one=v=>U.k?rcFmtUnit(v,U.k,U.word):`${rcNiceQty(v)}${U.tail?'':''}`;
+  let txt;
+  if(op==='–') txt=`${rcNumFor(a.val*f,U.k)}–${rcNumFor(b*f,U.k)}${U.word?' '+rcWord(U.word,b*f):''}`;
+  else if(op==='+') txt=U.k?`${one(a.val*f)} + ${one(b*f)}`:`${rcNiceQty(a.val*f)}+${rcNiceQty(b*f)}`;
+  else txt=one(a.val*f);
+  if(U.tail) txt+=' '+U.tail;
+  return {txt, scaled:true};
 }
 window.openScaled=(taskId)=>{
   const t=S.tasks.find(x=>x.id===taskId); if(!t) return;
@@ -9698,7 +9851,9 @@ async function viewWaste(){
 function scaleQty(q,m){
   if(!q||m===1) return q;
   const s0=String(q);
-  if(!(/[–—-]\s*\d|["″]|\d\s*x\s*\d/i.test(s0))){
+  // two amounts in one line ("22 fl oz liquid / 1.5 lbs veg") — each side scales on its own
+  if(/[a-z]\s\/\s\d/i.test(s0)) return s0.split(/(?<=[a-z])\s\/\s(?=\d)/i).map(x=>scaleQty(x,m)).join(' / ');
+  if(!(/["″]|\d\s*x\s*\d/i.test(s0))){
     const s=rcScaleQty(s0,m); if(s.scaled) return s.txt;
   }
   return s0.replace(/(?<!\/)(?<!\/\d)(?<!\/\d\d)\d+(?:\.\d+)?(?!(?:\.\d+)?\s*["″x])(?!\d*\/)/g, n=>{
@@ -9706,7 +9861,7 @@ function scaleQty(q,m){
     return (Math.round(v*100)/100).toString();
   });
 }
-window.setMult=v=>{ S.batchMult=Math.max(1,Math.min(20,v)); render(); };
+window.setMult=v=>{ S.batchMult=Math.max(0.5,Math.min(20,Math.round(v*2)/2)); render(); };   // ½-batch steps (Dan, Sep 25 2026)
 window.setUnits=m=>{ S.unitMode=m; render(); };
 // ---- unit conversion (display only) ----
 function niceNum(v){
@@ -9783,6 +9938,22 @@ function displayQty(q, mode){
   if(!out || normMeasure(out)===normMeasure(q)) return q;
   return `${out} <span style="color:var(--muted);font-weight:400;font-size:12px">(${q})</span>`;
 }
+// Sep 25 2026: converts from the recipe's own amount × batches. Re-reading an already-formatted
+// "1 cup + 2 tbsp" or "1 lb 2 oz" would drop the second part.
+function displayQtyScaled(q, mult, mode){
+  const sc=scaleQty(q,mult);
+  if(mode==='orig') return sc;
+  const p=parseQty(q); if(!p) return sc;
+  const f=mult||1; let out=null;
+  if(p.kind==='wt'){ const oz=p.oz*f;
+    if(mode==='big' && oz>=16){ let lb=Math.floor(oz/16), r=Math.round((oz-lb*16)*4)/4; if(r>=16){ lb++; r=0; } out=r>0?`${lb} lb ${rcNiceQty(r)} oz`:`${lb} lb${lb>1?'s':''}`; } }
+  else if(p.kind==='vol'){ const fl=p.floz*f;
+    if(mode==='big' && !p.spoon && fl>=32){ const qt=Math.floor(fl/32), r=Math.round((fl-qt*32)*4)/4; out=r>0?`${qt} qt ${rcNiceQty(r)} oz fl`:`${qt} qt${qt>1?'s':''}`; }
+    else if(mode==='cups') out=kitchenVol(fl); }
+  if(out&&p.rest) out+=' '+p.rest;
+  if(!out || normMeasure(out)===normMeasure(sc)) return sc;
+  return `${out} <span style="color:var(--muted);font-weight:400;font-size:12px">(${sc})</span>`;
+}
 window.openFull=id=>{ S.fullRecipe=id; S.batchMult=1; render(); };
 window.closeFull=()=>{ S.fullRecipe=null; render(); };
 // Everything the card itself printed that isn't the ingredient list or the procedure.
@@ -9827,16 +9998,16 @@ function fullRecipeHtml(){
     </div>
     <div style="display:flex;gap:6px;flex-wrap:wrap;margin:10px 0 2px">
       ${m.yield?`<span class="st"><i>Yield (1 batch)</i><b>${m.yield}</b></span>`:''}
-      ${mult>1&&m.yield?`<span class="st hl"><i>Yield ×${mult}</i><b>${scaleQty(m.yield,mult)}</b></span>`:''}
+      ${mult!==1&&m.yield?`<span class="st hl"><i>Yield ×${rcNiceQty(mult)}</i><b>${scaleQty(m.yield,mult)}</b></span>`:''}
       ${rcpChips(r,m)}
     </div>
     <div class="mult no-print">
       <span class="muted" style="font-size:13px">Batches ·<br>Lotes</span>
-      <button onclick="setMult(${mult-1})">−</button>
-      <span class="val">×${mult}</span>
-      <button onclick="setMult(${mult+1})">+</button>
+      <button onclick="setMult(${mult-0.5})"${mult<=0.5?' disabled':''}>−</button>
+      <span class="val">×${rcNiceQty(mult)}</span>
+      <button onclick="setMult(${mult+0.5})">+</button>
       <span style="width:8px"></span>
-      ${[1,2,3,4].map(n=>`<button class="${mult===n?'on':''}" onclick="setMult(${n})">${n}x</button>`).join('')}
+      ${[0.5,1,2,3,4].map(n=>`<button class="${mult===n?'on':''}" onclick="setMult(${n})">${rcNiceQty(n)}x</button>`).join('')}
       <span class="muted" style="font-size:12px;margin-left:auto">ingredients update automatically</span>
     </div>
     <div class="mult no-print">
@@ -9844,8 +10015,8 @@ function fullRecipeHtml(){
       ${[['orig','As written'],['big','Lbs & Quarts'],['cups','Cups · Tbsp · Tsp']].map(([k,l])=>`<button class="${(S.unitMode||'orig')===k?'on':''}" onclick="setUnits('${k}')">${l}</button>`).join('')}
       <span class="muted" style="font-size:11.5px;margin-left:auto">weights (oz wt / lb) can't become cups — density varies per ingredient — so they stay as written</span>
     </div>
-    ${(r.ingredients||[]).length?`<div class="card"><h2>Ingredients${mult>1?` — for ×${mult} batches`:''}</h2>
-      <table>${r.ingredients.map(i=>`<tr class="ing-row"><td style="width:170px;color:var(--teal-dark)"><b>${displayQty(scaleQty(i.qty,mult), S.unitMode||'orig')}</b></td><td>${i.item}</td></tr>`).join('')}</table></div>`:''}
+    ${(r.ingredients||[]).length?`<div class="card"><h2>Ingredients${mult!==1?` — for ×${rcNiceQty(mult)} batch${mult>1?'es':''}`:''}</h2>
+      <table>${r.ingredients.map(i=>`<tr class="ing-row"><td style="width:170px;color:var(--teal-dark)"><b>${displayQtyScaled(i.qty, mult, S.unitMode||'orig')}</b></td><td>${i.item}</td></tr>`).join('')}</table></div>`:''}
     ${(r.instructions||[]).length?`<div class="card"><h2>Procedure</h2>
       <ol style="margin:4px 0;padding-left:22px">${r.instructions.map(s=>`<li style="margin:8px 0;font-size:15.5px">${s}</li>`).join('')}</ol></div>`:''}
     ${m.note?`<div class="card" style="border-left:4px solid var(--coral)"><b>Note:</b> ${m.note}</div>`:''}
@@ -15522,10 +15693,10 @@ const TOURS={
  today:()=>[
   {when:()=>!!tq('.t2-alerts'), el:()=>tq('.t2-alerts'), en:'Alerts from the rest of the app land here first: a $15k day coming, an order day, your getting-started list.', es:'Los avisos del resto de la app salen aquí primero: un día de $15k que viene, un día de pedido, tu lista para empezar.'},
   {when:()=>!!tq('#t2-big'), el:()=>tq('#t2-big'), en:'When a $15k day is coming, this card shows up. Tap it: how much to prep, what to order and by when, and when to staff up.', es:'Cuando viene un día de $15k, sale esta tarjeta. Tócala: cuánto preparar, qué pedir y para cuándo, y cuándo poner más gente.'},
-  {el:()=>tq('.t2-days'), en:'Each day this week, Monday to Sunday: the likely range of guests and how busy it will be. ✓ means the real number is in. Tap a day to see it below. ‹ › changes the week.', es:'Cada día de la semana, de lunes a domingo: el rango probable de clientes y qué tan movido va a estar. ✓ quiere decir que ya está el número real. Toca un día para verlo abajo. ‹ › cambia de semana.'},
-  {el:()=>tq('.t2-busy'), en:'When the rush hits on the day you picked. The orange bars are the busiest hours.', es:'Cuándo pega la hora pico el día que escogiste. Las barras naranjas son las horas más fuertes.'},
+  {el:()=>tq('.t2-days'), en:'Each day this week, Monday to Sunday: the weather, the likely range of guests and how busy it will be. ✓ means the real number is in. Tap a day and everything below follows it. ‹ › changes the week.', es:'Cada día de la semana, de lunes a domingo: el clima, el rango probable de clientes y qué tan movido va a estar. ✓ quiere decir que ya está el número real. Toca un día y todo lo de abajo lo sigue. ‹ › cambia de semana.'},
+  {el:()=>tq('.t2-busy'), en:'The day you picked, hour by hour: likely guests on top of each bar, the temperature under it. Orange = the rush. Up top: the day’s guests, last year, and the weather.', es:'El día que escogiste, hora por hora: los clientes probables arriba de cada barra y la temperatura abajo. Naranja = la hora pico. Arriba: los clientes del día, el año pasado y el clima.'},
   {el:()=>tq('.t2-top'), en:'The 20 plates that sell most, as a likely range for that day. The top 5 are the big ones.', es:'Los 20 platos que más se venden, como rango probable para ese día. Los 5 de arriba son los grandes.'},
-  {when:()=>!!tq('.t2-year'), el:()=>tq('.t2-year'), en:'The year, month by month: last year in grey, this year in dark green, the coming months as a likely range. The dashed line is a $15k day.', es:'El año, mes por mes: el año pasado en gris, este año en verde oscuro, los meses que vienen como rango probable. La línea punteada es un día de $15k.'},
+  {when:()=>!!tq('.t2-year'), el:()=>tq('.t2-year'), en:()=>DOLLARS()?'The year, month by month: average sales a day. Last year in grey, this year in dark green, the coming months as a likely range. The dashed line is a $15k day.':'The year, month by month: last year in grey, this year in dark green, the coming months as a likely range. The dashed line is a $15k day.', es:()=>DOLLARS()?'El año, mes por mes: ventas promedio al día. El año pasado en gris, este año en verde oscuro, los meses que vienen como rango probable. La línea punteada es un día de $15k.':'El año, mes por mes: el año pasado en gris, este año en verde oscuro, los meses que vienen como rango probable. La línea punteada es un día de $15k.'},
   {el:()=>tq('#t2-day'), en:'The day you picked: how many guests to expect. The prep list is built from the app’s number inside this range.', es:'El día que escogiste: cuántos clientes esperar. La lista de prep se arma con el número de la app dentro de este rango.'},
   {when:()=>can('today.override'), el:()=>tq('#app input.qty[placeholder="edit"]'), en:'Know something the app doesn’t, like a party of 40? Type it here. Today’s prep list uses your number.', es:'¿Sabes algo que la app no, como un grupo de 40? Escríbelo aquí. La lista de hoy usa tu número.'},
   {when:()=>can('analytics.money'), el:()=>tq('.rg-ly'), en:'Same day last year, Friday against Friday. The gold dot shows where last year lands in this year’s range.', es:'El mismo día del año pasado, viernes contra viernes. El punto dorado muestra dónde cae el año pasado en el rango de este año.'},
