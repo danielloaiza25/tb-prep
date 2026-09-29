@@ -1267,6 +1267,20 @@
   .t2-hkey{display:flex;gap:10px;flex-wrap:wrap;font-size:10.5px;color:var(--muted);margin-top:6px}.t2-hkey i{display:inline-block;width:9px;height:9px;border-radius:2px;margin-right:3px;vertical-align:-1px;background:var(--coral)}
   .t2-ax{font-size:9px;fill:#8b8676;text-anchor:end}
   .t2-tx{font-size:10px;color:#8a6a1a;font-variant-numeric:tabular-nums}
+  .t2-fcblock{margin-top:12px;padding-top:12px;border-top:1px solid var(--sand-dark)}
+  /* Sep 29 2026 — R365 plates, side by side */
+  .st.plates{background:#eef3fb;border-color:#b9c9e6}.st.plates i{color:#3b5a8c}.st.plates b{color:#23426f}
+  .st.plates.none{opacity:.6}.st.plates.mism{background:#fff4e5;border-color:#f0cf99}.st.plates.mism i,.st.plates.mism b{color:#8a5a00}
+  .plates-note{font-size:12px;background:#eef3fb;border-left:3px solid #6f8fc4;border-radius:0 8px 8px 0;padding:7px 10px;margin:8px 0;line-height:1.35}
+  .plates-also .pa-row{display:flex;justify-content:space-between;gap:10px;padding:6px 0;border-bottom:1px solid var(--sand-dark);font-size:13px}
+  .plates-also .pa-row span{text-align:right}.plates-also em.pl,.st.plates em.pl{display:block;font-style:normal;font-size:10.5px;opacity:.8}
+  .pl-plate{border-bottom:1px solid var(--sand-dark);padding:2px 0}.pl-tag{font-size:10.5px;border-radius:8px;padding:1px 6px;margin-left:4px;white-space:nowrap}
+  .pl-tag.guess{background:#fff4e5;color:#8a5a00}.pl-tag.dan{background:#e6f3ea;color:var(--palm)}.pl-tag.prep{background:#eaf2f4;color:var(--teal-dark);cursor:pointer}
+  .pl-ing td{padding:3px 4px;font-size:13.5px;vertical-align:top}.pl-ing td.q{width:92px;color:var(--teal-dark);font-variant-numeric:tabular-nums;white-space:nowrap}
+  .pl-sub{margin:2px 0 6px 14px;padding-left:8px;border-left:2px solid var(--sand-dark)}
+  .rc-mode{display:flex;gap:6px;margin-top:10px}.rc-mode button{flex:1}
+  .avt-t td,.avt-t th{padding:5px 4px;font-size:12.5px;border-bottom:1px solid var(--sand-dark);text-align:right}.avt-t td:first-child,.avt-t th:first-child{text-align:left}
+  .avt-badge{font-size:10.5px;border-radius:8px;padding:1px 6px;background:var(--sand-dark);color:var(--muted);white-space:nowrap}
   .t2-sbig{display:flex;justify-content:space-between;align-items:flex-end;margin-top:6px}.t2-sbig i,.t2-sr i{display:block;font-style:normal;font-size:10px;color:var(--muted);text-transform:uppercase}
   .t2-sbig b{font-size:27px;color:var(--ocean-dark);font-variant-numeric:tabular-nums}.t2-sr{font-size:14px;font-weight:700;color:var(--ocean-dark);text-align:right}
   .t2-sbar{position:relative;height:62px;margin-top:4px}.t2-sbar .band{position:absolute;top:22px;height:10px;background:#b9dcd8;border-radius:5px}.t2-sbar .band.now{top:36px;height:6px;background:#f3d9a8}
@@ -1374,7 +1388,7 @@ const SB_KEY='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZ
 const TBID='9f8d7c6b-5a49-4e38-b271-06d5f00dbeef'; // Tommy Bahama tenant inside ChefOpsAI
 // Stamped by publish.sh at upload time. It is the only version label there is now —
 // one address, updated in place, so this tells you which build that address is serving.
-const BUILD='Sep 25, 2026 · your Today, new look';
+const BUILD='Sep 29, 2026 · R365 plates';
 // ---------- IS THIS PHONE EVEN RUNNING THE LATEST BUILD? ----------
 // Sep 3 2026. Three prep fixes shipped and Dan still saw the old behaviour, because the app
 // installs to the home screen and an installed web app does not go back and re-fetch its own
@@ -2498,6 +2512,114 @@ function splitTasks(rows, staffIds){
     const id=staffIds.reduce((a,b)=>load[a]<=load[b]?a:b);
     r.assigned_to=id; load[id]+=r.minutes;
   }
+}
+
+// ---- R365 PLATE BUILDS — Sep 29 2026 --------------------------------------------------------
+// Dan sent R365's recipe export (Sep 28). It was narrowed to the plates Palm Springs sells and
+// the recipes inside them, matched to Oracle's item names, and broken down to OUR preps in OUR
+// containers: per[plate][prep] = how many of that prep's containers ONE plate uses.
+// Two big sellers have no R365 recipe and carry Dan's own builds (Sep 29):
+//   Duo of Dips — chips, guac and salsa, "about 3-5oz of each" → 4 oz each is used.
+//   IT Ahi Mini Tacos — 3 oz tuna, 4 wonton shells, slaw, wasabi lime avo, red bell pepper,
+//   bias scallions, poke dressing (amounts from the regular Ahi Tuna Tacos).
+// Dan: "for the first week do the side by side" — NOTHING here changes the list's own number.
+// Five batch sizes disagree with R365. Dan: "for now lets have them side by side. in the bug
+// feature ill let you know which one is the correct." — both are shown; neither is picked.
+// Coconut shrimp: R365 counts 5 a plate (4 on Island Time) but how many fill a 200 pan is not
+// known yet, so that line is a shrimp count, never a batch number.
+const R365_BOOK={"v":1,"src":"R365 recipe export Sep 28 2026 (Palm Springs subset) + Dan Sep 29","plates":{"BLACKENED MAHI MAHI TACOS":["MI MB Blackened Mahi Mahi Tacos","high","Marlin Bar (MB) version picked"],"WORLD FAMOUS COCONUT SHRIMP":["MI MB Coconut Shrimp","high","Marlin Bar (MB) version picked"],"AHI POKE BOWL":["MI Ahi Poke Bowl","high",""],"IT BLACKENED MAHI MAHI TACO":["MI IT Blackened Mahi Taco","high",""],"GRILLED CHICKEN & MANGO SALAD":["MI Grilled Chicken & Mango Salad","high",""],"AHI TUNA TACOS":["MI Ahi Tuna Tacos","high",""],"DUO OF DIPS":["DAN Duo of Dips","dan","Dan, Sep 29: chips, guac and salsa, about 3–5 oz each — using 4 oz"],"ALL-AMERICAN BURGER SINGLE":["MI MB All-American Burger Single","high","Marlin Bar (MB) version picked"],"CORN DIP":["MI Street Corn Dip","high",""],"JERK CHICKEN SANDWICH":["MI Jerk Chicken Sandwich","high",""],"BLACKENED SHRIMP CHOPPED SALAD":["MI Blackened Shrimp Chopped Salad","high",""],"IT WORLD FAMOUS COCONUT SHRIMP":["MI IT World Famous Coconut Shrimp","high",""],"BACON SMOKEHOUSE BURGER SINGLE":["MI BBQ Smokehouse Burger Single","check","R365 calls it BBQ Smokehouse"],"SM KEY LIME PIE":["MI Small Key Lime Pie","check","SM = small? there are 3 key lime pie recipes"],"IT AHI TUNA MINI TACOS":["DAN IT Ahi Tuna Mini Tacos","dan","Dan, Sep 29: 3 oz tuna, 4 wonton shells, slaw, wasabi lime avo, red bell pepper, bias scallions, poke dressing — amounts from the regular Ahi Tuna Tacos"],"AVOCADO TACO SALAD CHICKEN":["MI Avocado Taco Salad w/ Chicken","high",""],"STEAK FLATBREAD":["MI Steak Flatbread","high",""],"IT BURGER SINGLE EACH":["MI IT Bar Burger Slider","check","guessing the IT slider"],"IT GUAC & SALSA":["MI IT Guacamole & Fire Roasted Salsa","high",""],"CRISPY LEMON CHICKEN":["MI Crispy Lemon Chicken","high",""],"IT CORN DIP":["MI IT Street Corn Dip","high",""],"CHICKEN FAJITAS":["MI Chicken Fajitas","high",""],"CHICKEN & PESTO FLATBREAD":["MI Chicken Pesto Flatbread","high",""],"MARGHERITA FLATBREAD":["MI Margherita Flatbread","high",""],"BACON SMOKEHOUSE BURGER DOUBLE":["MI BBQ Smokehouse Burger Double","check","R365 calls it BBQ Smokehouse"],"STEAK FAJITAS":["MI Steak Fajitas","high",""],"IT FRIES":["MI IT Cajun Crinkle Cut Fries","high",""],"FRIES":["MI Cajun Crinkle Cut Fries","check","the app line build is Cajun crinkle fries"],"KID PASTA":["MI Kids Pasta w/ Butter","check","4 kids pasta recipes (butter / marinara / mac)"],"ALL-AMERICAN BURGER DOUBLE":["MI MB All-American Burger Double","high","Marlin Bar (MB) version picked"],"IT STEAK FLATBREAD":["MI Steak Flatbread","check","no IT version — same flatbread?"],"KID CHEESEBURGER":["MI Kids Cheeseburger","high",""],"AVOCADO TACO SALAD SHRIMP":["MI Avocado Taco Salad w/ Shrimp","high",""],"STRAWBERRY & CREAM CROFFLE":["MI Strawberry Croffle","check",""],"KALE & BRUSSEL CAESAR W/CHICKEN":["MI Kale & Brussel Caesar","check","salad only — the chicken add is separate"],"SNICKER CROFFLE":["MI Snickers Croffle","high",""],"IT MARGHERITA FLATBREAD":["MI Margherita Flatbread","check","no IT version — same flatbread?"],"SHRIMP FAJITAS":["MI Shrimp Fajitas","high",""],"AVOCADO TACO SALAD":["MI Avocado Taco Salad","high",""],"GRILLED CHIX BREAST":["MI Add Grilled Chicken Entree","check","entree or app size?"],"IT CHICKEN & PESTO FLATBREAD":["MI IT Chicken Pesto Flatbread","high",""],"BLACKENED CHIX BREAST":["MI Add Blackened Chicken Entree","check","entree or app size?"],"KID PEPPERONI FLATBREAD":["MI Kid Pepperoni Flatbread","high",""],"KID CHEESE FLATBREAD":["MI Kid Cheese Flatbread","high",""],"KALE & BRUSSEL CAESAR W/ SHRIMP":["MI Kale & Brussel Caesar","check","salad only — the shrimp add is separate"],"KID CHICKEN TACO":["MI Kids Chicken Taco","high",""],"RICE":[null,"none","no recipe (small seller)"],"LARGE GUACAMOLE":[null,"none","no recipe (small seller)"],"SIDE FAJITA TORTILLA":[null,"none","no recipe (small seller)"],"VEGGIE KALE & BRUSSEL CAESAR":["MI Kale & Brussel Caesar","check",""],"ISLAND SLAW":[null,"none","no recipe (small seller)"],"ROASTED VEGGIES":[null,"none","no recipe (small seller)"],"SIDE CHIPS":["MI Side Chips & Salsa","check",""],"CHIPS & SALSA":["MI Side Chips & Salsa","check",""],"SIDE PITA":[null,"none","no recipe (small seller)"],"STEAK TACOS":[null,"none","no recipe (small seller)"],"VEGGIE FAJITAS":[null,"none","no recipe (small seller)"],"VEGGIE TUNA BOWL":[null,"none","no recipe (small seller)"],"SMALL GUACAMOLE":[null,"none","no recipe (small seller)"],"VEGGIE CHOP SALAD":[null,"none","no recipe (small seller)"],"VEGGIE MANGO SALAD":[null,"none","no recipe (small seller)"],"LARGE SALSA":[null,"none","no recipe (small seller)"]},"per":{"BLACKENED MAHI MAHI TACOS":{"Chipotle Aioli":0.02344,"Fire Roasted Salsa":0.01953,"Island Slaw":0.00692,"Lime Sour Cream":0.03125,"Tomato Relish":0.02094,"Blackening Marinade":0.025},"WORLD FAMOUS COCONUT SHRIMP":{"Coco Spray":0.00422,"Island Slaw":0.01037,"Lime Vinaigrette":0.01571,"Mango Chutney":0.02083},"AHI POKE BOWL":{"Island Slaw":0.01037,"Lime Vinaigrette":0.03143,"Pickled Pickles & Onions":0.01136,"Poke Dressing":0.01591,"Orange Sweet Soy Reduction":0.00781,"Sriracha Aioli":0.03125,"Ahi Tuna 4oz — Poke":1.0},"IT BLACKENED MAHI MAHI TACO":{"Chipotle Aioli":0.01172,"Island Slaw":0.00346,"Lime Sour Cream":0.01172,"Tomato Relish":0.00785,"Blackening Marinade":0.0125},"GRILLED CHICKEN & MANGO SALAD":{"Lemon Basil Vinaigrette":0.04688,"Mango Salsa":0.05891,"Chicken Marinade":0.00281},"AHI TUNA TACOS":{"Island Slaw":0.01037,"Poke Dressing":0.01591,"Wasabi Lime Avocado":0.01042,"Ahi Tuna 3oz — Tacos":1.0},"DUO OF DIPS":{"Guacamole":0.08313,"Fire Roasted Salsa":0.05208},"ALL-AMERICAN BURGER SINGLE":{"Baja Tartar Sauce":0.02083},"CORN DIP":{"Chipotle Aioli":0.01562,"Corn Dip":0.03125,"Roasted Corn Salsa":0.01734},"JERK CHICKEN SANDWICH":{"Garlic Aioli":0.01562,"Jerk Sauce":0.01562,"Chicken Marinade":0.00241},"BLACKENED SHRIMP CHOPPED SALAD":{"Blackening Marinade":0.03139,"Roasted Corn Salsa":0.026,"Herb Buttermilk Dressing":0.04688,"Island Slaw":0.00346,"Lime Vinaigrette":0.00524,"Tomato Relish":0.02094},"IT WORLD FAMOUS COCONUT SHRIMP":{"Coco Spray":0.00422,"Island Slaw":0.01037,"Mango Chutney":0.02083},"BACON SMOKEHOUSE BURGER SINGLE":{"Garlic Aioli":0.01562,"BBQ Sauce":0.02344},"SM KEY LIME PIE":{"Key Lime Pie":0.125,"Whipped Cream":0.04167},"IT AHI TUNA MINI TACOS":{"Island Slaw":0.01037,"Wasabi Lime Avocado":0.01042,"Poke Dressing":0.01591,"Ahi Tuna 3oz — Tacos":1.0},"AVOCADO TACO SALAD CHICKEN":{"Chipotle Aioli":0.01562,"Roasted Corn Salsa":0.03467,"Guacamole":0.06234,"Island Slaw":0.00865,"Lime Vinaigrette":0.04714,"Chicken Marinade":0.00241,"Tomato Relish":0.01047},"STEAK FLATBREAD":{"Garlic Aioli":0.0625,"Honey Onion":0.02167,"Steak & Portobello Marinade":0.00313},"IT BURGER SINGLE EACH":{"Honey Onion":0.00521},"IT GUAC & SALSA":{"Fire Roasted Salsa":0.05208,"Guacamole":0.08313},"CRISPY LEMON CHICKEN":{"Caesar Dressing":0.03125,"Breaded Lemon Chicken":1.0,"Lemon Caper Base & Sauce":0.06225},"IT CORN DIP":{"Chipotle Aioli":0.01562,"Corn Dip":0.03125,"Roasted Corn Salsa":0.01734},"CHICKEN FAJITAS":{"Beer Chimichurri":0.04231,"Fire Roasted Salsa":0.01953,"Guacamole":0.03203,"Chicken Marinade":0.00241,"Rajas":1.0,"Tomato Relish":0.01484},"CHICKEN & PESTO FLATBREAD":{"Cilantro Pesto":0.11111,"Garlic Aioli":0.01562,"Chicken Marinade":0.00121},"MARGHERITA FLATBREAD":{"Marinara":0.04156},"BACON SMOKEHOUSE BURGER DOUBLE":{"Garlic Aioli":0.01562,"BBQ Sauce":0.02344},"STEAK FAJITAS":{"Beer Chimichurri":0.04231,"Fire Roasted Salsa":0.01953,"Guacamole":0.03203,"Rajas":1.0,"Tomato Relish":0.01484},"IT FRIES":{"Chipotle Aioli":0.0625},"FRIES":{"Chipotle Aioli":0.0625},"KID PASTA":{},"ALL-AMERICAN BURGER DOUBLE":{"Baja Tartar Sauce":0.02083},"IT STEAK FLATBREAD":{"Garlic Aioli":0.0625,"Honey Onion":0.02167,"Steak & Portobello Marinade":0.00313},"KID CHEESEBURGER":{},"AVOCADO TACO SALAD SHRIMP":{"Blackening Marinade":0.03139,"Lime Vinaigrette":0.02095,"Roasted Corn Salsa":0.03467,"Island Slaw":0.00692},"STRAWBERRY & CREAM CROFFLE":{"Strawberry Sauce":0.05789,"Whipped Cream":0.02083},"KALE & BRUSSEL CAESAR W/CHICKEN":{"Caesar Dressing":0.07812,"Croutons":0.08418},"SNICKER CROFFLE":{"Chocolate Whipped Ricotta":0.08333},"IT MARGHERITA FLATBREAD":{"Marinara":0.04156},"SHRIMP FAJITAS":{"Beer Chimichurri":0.04231,"Blackening Marinade":0.03767,"Fire Roasted Salsa":0.01953,"Guacamole":0.03203,"Rajas":1.0,"Tomato Relish":0.01484},"AVOCADO TACO SALAD":{"Chipotle Aioli":0.01562,"Roasted Corn Salsa":0.03467,"Guacamole":0.06234,"Island Slaw":0.00865,"Lime Vinaigrette":0.04714,"Tomato Relish":0.01047},"GRILLED CHIX BREAST":{"Chicken Marinade":0.00281},"IT CHICKEN & PESTO FLATBREAD":{"Cilantro Pesto":0.11111,"Garlic Aioli":0.01562,"Chicken Marinade":0.00121},"BLACKENED CHIX BREAST":{"Chicken Marinade":0.00281},"KID PEPPERONI FLATBREAD":{"Marinara":0.02078},"KID CHEESE FLATBREAD":{"Marinara":0.02078},"KALE & BRUSSEL CAESAR W/ SHRIMP":{"Caesar Dressing":0.07812,"Croutons":0.08418},"KID CHICKEN TACO":{"Fire Roasted Salsa":0.01953,"Lime Sour Cream":0.04688},"VEGGIE KALE & BRUSSEL CAESAR":{"Caesar Dressing":0.07812,"Croutons":0.08418},"SIDE CHIPS":{"Fire Roasted Salsa":0.01953},"CHIPS & SALSA":{"Fire Roasted Salsa":0.01953}},"pieces":{"WORLD FAMOUS COCONUT SHRIMP":{"Coco Shrimp":5.0},"IT WORLD FAMOUS COCONUT SHRIMP":{"Coco Shrimp":4.0}},"builds":{"DAN Duo of Dips":[["PREP Tortilla Chips",4.0,"OZ-wt"],["PREP Guacamole",4.0,"OZ-wt"],["PREP Fire Roasted Salsa",4.0,"OZ-fl"]],"DAN IT Ahi Tuna Mini Tacos":[["SEA Tuna Ahi Poke",3.0,"OZ-wt"],["PREP Wonton Taco",4.0,"Each"],["PREP Island Slaw",3.0,"OZ-wt"],["PREP Wasabi Avocado",2.0,"tsp"],["YIELD Bell Pepper Red Brunoise",0.25,"OZ-wt"],["YIELD Green Onions Prepped",1.0,"tsp"],["PREP Poke Dressing",1.0,"Tbsp"]],"MI Add Blackened Chicken Entree":[["PREP Marinated Chicken",7.0,"OZ-wt"]],"MI Add Grilled Chicken Entree":[["PREP Marinated Chicken",7.0,"OZ-wt"]],"MI Ahi Poke Bowl":[["OTHER FOOD Furikake",0.5,"OZ-wt"],["OTHER FOOD Seed Sesame",1.0,"tsp"],["PREP Fried Wonton Strips",0.5,"OZ-wt"],["PREP Island Slaw",3.0,"OZ-wt"],["PREP Lime Vinaigrette",1.0,"OZ-fl"],["PREP Pickled Cucumbers & Onions",1.0,"OZ-wt"],["PREP Poke Dressing",1.0,"Tbsp"],["PREP Soy Reduction",0.5,"Tbsp"],["PREP Sriracha Aioli",1.0,"OZ-fl"],["PREP Sushi Rice",4.0,"OZ-wt"],["PROD Bean Edamame",1.0,"OZ-wt"],["PROD Wakame",0.5,"OZ-wt"],["SEA Tuna Ahi Poke",4.0,"OZ-wt"],["YIELD Avocado Prepped",1.25,"OZ-wt"],["YIELD Green Onions Prepped",0.25,"OZ-wt"]],"MI Ahi Tuna Tacos":[["OTHER FOOD Capers",0.5,"Tbsp"],["OTHER FOOD Seed Sesame",0.5,"tsp"],["PREP Island Slaw",3.0,"OZ-wt"],["PREP Poke Dressing",1.0,"Tbsp"],["PREP Wasabi Avocado",2.0,"tsp"],["PREP Wonton Taco",4.0,"Each"],["SEA Tuna Ahi Poke",3.0,"OZ-wt"],["YIELD Banana Leaf",1.0,"Each"],["YIELD Bell Pepper Red Brunoise",0.25,"OZ-wt"],["YIELD Cilantro Leaves",0.25,"tsp"],["YIELD Green Onions Prepped",1.0,"tsp"]],"MI Avocado Taco Salad":[["BREAD Tortilla Corn",2.0,"Each"],["DAIRY Cheese Cotija",1.0,"Tbsp"],["OTHER FOOD Spice House S&P",0.5,"tsp"],["PREP Black Beans",3.0,"OZ-wt"],["PREP Chipotle Aioli",1.0,"Tbsp"],["PREP Corn Salsa",2.0,"OZ-wt"],["PREP Guacamole",3.0,"OZ-wt"],["PREP Island Slaw",2.5,"OZ-wt"],["PREP Lime Vinaigrette",1.5,"OZ-fl"],["PREP Tomato Relish",1.0,"Tbsp"],["PROD Lettuce Romaine",1.0,"OZ-wt"],["YIELD Avocado Prepped",1.25,"OZ-wt"],["YIELD Green Onions Prepped",0.5,"Tbsp"]],"MI Avocado Taco Salad w/ Chicken":[["BREAD Tortilla Corn",2.0,"Each"],["DAIRY Cheese Cotija",1.0,"Tbsp"],["OTHER FOOD Spice House S&P",0.5,"tsp"],["PREP Black Beans",3.0,"OZ-wt"],["PREP Chipotle Aioli",1.0,"Tbsp"],["PREP Corn Salsa",2.0,"OZ-wt"],["PREP Guacamole",3.0,"OZ-wt"],["PREP Island Slaw",2.5,"OZ-wt"],["PREP Lime Vinaigrette",1.5,"OZ-fl"],["PREP Marinated Chicken",6.0,"OZ-wt"],["PREP Tomato Relish",1.0,"Tbsp"],["PROD Lettuce Romaine",1.0,"OZ-wt"],["YIELD Avocado Prepped",1.25,"OZ-wt"],["YIELD Green Onions Prepped",0.5,"Tbsp"]],"MI Avocado Taco Salad w/ Shrimp":[["DAIRY Cheese Cotija",1.0,"Tbsp"],["OTHER FOOD Spice House S&P",0.5,"tsp"],["PREP Black Beans",2.0,"OZ-wt"],["PREP Blackened Shrimp",5.0,"Each"],["PREP Cilantro Lime Vin",2.0,"OZ-fl"],["PREP Corn Salsa",2.0,"OZ-wt"],["PREP Crispy Flour Tortillas",1.0,"OZ-wt"],["PREP Island Slaw",2.0,"OZ-wt"],["PROD Lettuce Romaine",3.0,"OZ-wt"],["PROD Radish",0.5,"OZ-wt"],["PROD Tomato Campari",1.5,"Each"],["YIELD Avocado Prepped",2.5,"OZ-wt"]],"MI BBQ Smokehouse Burger Double":[["BREAD Burger Bun",1.0,"Each"],["DAIRY Butter Clarified",0.5,"OZ-fl"],["DAIRY Cheese Cheddar White",1.0,"OZ-wt"],["MEAT Beef Ground Patty",2.0,"Each"],["OTHER FOOD Ketchup Bulk",1.5,"OZ-wt"],["OTHER FOOD Onion Rings FRZ",1.5,"OZ-wt"],["OTHER FOOD Spice French Fry",0.125,"tsp"],["OTHER FOOD Spice House S&P",0.25,"tsp"],["PREP Garlic Aioli",1.0,"Tbsp"],["PREP No Cook BBQ Sauce",1.5,"Tbsp"],["PROD Potato French Fry",5.0,"OZ-wt"],["YIELD Bacon Cooked",1.5,"Each"],["YIELD Chives",0.25,"tsp"]],"MI BBQ Smokehouse Burger Single":[["BREAD Burger Bun",1.0,"Each"],["DAIRY Butter Clarified",0.5,"OZ-fl"],["DAIRY Cheese Cheddar White",1.0,"OZ-wt"],["MEAT Beef Ground Patty",1.0,"Each"],["OTHER FOOD Ketchup Bulk",1.5,"OZ-wt"],["OTHER FOOD Onion Rings FRZ",1.5,"OZ-wt"],["OTHER FOOD Spice French Fry",0.125,"tsp"],["OTHER FOOD Spice House S&P",0.25,"tsp"],["PREP Garlic Aioli",1.0,"Tbsp"],["PREP No Cook BBQ Sauce",1.5,"Tbsp"],["PROD Potato French Fry",5.0,"OZ-wt"],["YIELD Bacon Cooked",1.5,"Each"],["YIELD Chives",0.25,"tsp"]],"MI Blackened Shrimp Chopped Salad":[["DAIRY Butter Clarified",1.0,"OZ-fl"],["DAIRY Cheese Feta",1.0,"OZ-wt"],["DAIRY Egg Hardcooked",1.5,"OZ-wt"],["OTHER FOOD Spice House S&P",0.25,"tsp"],["PREP Blackened Shrimp",5.0,"Each"],["PREP Corn Salsa",1.5,"OZ-wt"],["PREP Herb Buttermilk Dressing",1.5,"OZ-fl"],["PREP Island Slaw",1.0,"OZ-wt"],["PREP Lime Vinaigrette",1.0,"tsp"],["PREP Tomato Relish",2.0,"Tbsp"],["PROD Lettuce Romaine",3.0,"OZ-wt"],["YIELD Avocado Prepped",0.5,"Each"],["YIELD Bacon Cooked",1.0,"OZ-wt"]],"MI Cajun Crinkle Cut Fries":[["OTHER FOOD Spice Cajun TB",0.5,"Tbsp"],["OTHER FOOD Spice French Fry",0.5,"tsp"],["PREP Chipotle Aioli",2.0,"OZ-fl"],["PROD Potato French Fry",8.0,"OZ-wt"]],"MI Chicken Fajitas":[["BREAD Tortilla Flour",3.0,"Each"],["DAIRY Cheese Queso Fresco",0.5,"OZ-wt"],["DAIRY Sour Cream",1.5,"OZ-fl"],["OTHER FOOD Spice Cajun TB",0.5,"tsp"],["OTHER FOOD Spice House S&P",0.5,"tsp"],["PREP Beer Chimichurri",2.0,"OZ-fl"],["PREP Fire Roasted Salsa",1.5,"OZ-fl"],["PREP Grilled Portobello",1.0,"Each"],["PREP Grilled Roma Tomatoes",2.0,"Each"],["PREP Guacamole",1.5,"OZ-fl"],["PREP Marinated Chicken",6.0,"OZ-wt"],["PREP Rajas",4.0,"OZ-wt"],["PREP Tomato Relish",1.0,"OZ-wt"],["YIELD Banana Leaf",1.0,"Each"]],"MI Chicken Pesto Flatbread":[["BREAD Crust Pizza",1.0,"Each"],["OTHER FOOD Spice House S&P",0.25,"OZ-wt"],["PREP Cilantro/Basil Pesto",2.0,"OZ-fl"],["PREP Garlic Aioli",0.5,"OZ-fl"],["PREP Marinated Chicken",3.0,"OZ-wt"],["PREP Pizza Cheese",2.0,"OZ-wt"],["YIELD Bacon Cooked",0.5,"OZ-wt"],["YIELD Chives",1.0,"tsp"],["YIELD RomaTomato Diced",1.0,"OZ-wt"]],"MI Crispy Lemon Chicken":[["DAIRY Cheese Parmesan Grated",1.0,"Tbsp"],["OTHER FOOD Nut Pine",0.25,"OZ-wt"],["OTHER FOOD Spice House S&P",0.25,"OZ-wt"],["PREP Caesar Dressing",2.0,"Tbsp"],["PREP Chicken Breading Procedure",1.0,"Each"],["PREP Lemon Caper Sauce",3.0,"OZ-fl"],["PROD Lemon",0.5,"Each"],["PROD Lettuce Arugula",0.5,"OZ-wt"],["YIELD Celery Prepped",2.5,"OZ-wt"],["YIELD Parsley Leaves",1.0,"tsp"]],"MI Grilled Chicken & Mango Salad":[["DAIRY Cheese Feta",2.0,"Tbsp"],["OTHER FOOD Blueberry Dried",1.0,"Tbsp"],["OTHER FOOD Nut Almond",1.0,"Tbsp"],["OTHER FOOD Nut Macadamia",1.0,"Tbsp"],["OTHER FOOD Spice House S&P",0.25,"tsp"],["PREP Crispy Pepitas",0.5,"Tbsp"],["PREP Lemon Basil Vinaigrette",1.5,"OZ-fl"],["PREP Mango Salsa",2.0,"OZ-wt"],["PREP Marinated Chicken",7.0,"OZ-wt"],["PREP Salad Lettuce Mix",3.0,"OZ-wt"],["YIELD RomaTomato Diced",2.0,"OZ-wt"]],"MI IT Bar Burger Slider":[["BREAD Burger Slider Bun",1.0,"Each"],["DAIRY Cheese American Sliced",0.25,"OZ-wt"],["MEAT Beef Ground Patty Slider",3.0,"OZ-wt"],["OTHER FOOD Oil Blend",0.25,"OZ-fl"],["OTHER FOOD Spice House S&P",0.25,"tsp"],["PREP Garlic Butter",1.0,"tsp"],["PREP Happy Sauce",0.5,"Tbsp"],["PREP Honey Onions",0.25,"OZ-fl"],["PREP House Brined Pickles",1.0,"Each"]],"MI IT Blackened Mahi Taco":[["BREAD Tortilla Corn Flour Blend",1.0,"Each"],["DAIRY Butter Clarified",0.5,"OZ-fl"],["PREP Chipotle Aioli",0.75,"Tbsp"],["PREP Island Slaw",1.0,"OZ-wt"],["PREP Lime Sour Cream",0.75,"Tbsp"],["PREP Tomato Relish",0.75,"Tbsp"],["SEA Mahi Mahi FRZ",2.0,"OZ-wt"],["YIELD Lime Wedge",1.0,"Each"]],"MI IT Cajun Crinkle Cut Fries":[["OTHER FOOD Spice Cajun TB",0.5,"Tbsp"],["OTHER FOOD Spice French Fry",0.5,"tsp"],["PREP Chipotle Aioli",2.0,"OZ-fl"],["PROD Potato French Fry",8.0,"OZ-wt"]],"MI IT Chicken Pesto Flatbread":[["BREAD Crust Pizza",1.0,"Each"],["OTHER FOOD Spice House S&P",0.25,"OZ-wt"],["PREP Cilantro/Basil Pesto",2.0,"OZ-fl"],["PREP Garlic Aioli",0.5,"OZ-fl"],["PREP Marinated Chicken",3.0,"OZ-wt"],["PREP Pizza Cheese",2.0,"OZ-wt"],["YIELD Bacon Cooked",0.5,"OZ-wt"],["YIELD Chives",1.0,"tsp"],["YIELD RomaTomato Diced",1.0,"OZ-wt"]],"MI IT Guacamole & Fire Roasted Salsa":[["PREP Fire Roasted Salsa",4.0,"OZ-fl"],["PREP Guacamole",4.0,"OZ-wt"],["PREP Tortilla Chips",4.0,"OZ-wt"],["PROD Banana/Ti/Bamboo Leaf",2.0,"Each"]],"MI IT Street Corn Dip":[["DAIRY Cheese Cotija",0.5,"OZ-wt"],["PREP Chile Butter",0.5,"OZ-wt"],["PREP Chipotle Aioli",0.5,"OZ-fl"],["PREP Corn Dip",8.0,"OZ-wt"],["PREP Corn Salsa",1.0,"OZ-wt"],["PREP Tortilla Chips",3.0,"OZ-wt"],["YIELD Banana Leaf",1.0,"Each"],["YIELD Cilantro Leaves",1.0,"tsp"],["YIELD Lime Wedge",1.0,"Each"]],"MI IT World Famous Coconut Shrimp":[["PREP Coco Spray",0.25,"OZ-fl"],["PREP Coconut Shrimp",4.0,"Each"],["PREP Island Slaw",3.0,"OZ-wt"],["PREP Mango Chutney",4.0,"tsp"]],"MI Jerk Chicken Sandwich":[["BREAD Burger Bun",1.0,"Each"],["DAIRY Butter Clarified",1.0,"Tbsp"],["DAIRY Cheese Monterey Jack Shredded",1.0,"OZ-wt"],["OTHER FOOD Ketchup Bulk",1.5,"OZ-fl"],["OTHER FOOD Onion Rings FRZ",1.25,"OZ-wt"],["OTHER FOOD Spice House S&P",0.25,"tsp"],["PREP Garlic Aioli",1.0,"Tbsp"],["PREP Jerk Sauce",1.0,"Tbsp"],["PREP Marinated Chicken",6.0,"OZ-wt"],["PROD Potato French Fry",5.0,"OZ-wt"],["YIELD Chives",0.25,"tsp"]],"MI Kale & Brussel Caesar":[["DAIRY Cheese Parmesan Grated",1.0,"Tbsp"],["PREP Caesar Dressing",2.5,"OZ-fl"],["PREP Caesar Salad Mix",5.0,"OZ-wt"],["PREP Croutons",1.0,"OZ-wt"],["PROD Lemon",1.0,"Each"]],"MI Kid Cheese Flatbread":[["BREAD Crust Pizza",0.5,"Each"],["PREP Marinara",1.0,"OZ-fl"],["PREP Pizza Cheese",1.0,"OZ-wt"]],"MI Kid Pepperoni Flatbread":[["BREAD Crust Pizza",0.5,"Each"],["MEAT Pepperoni Sliced",0.5,"OZ-wt"],["PREP Marinara",1.0,"OZ-fl"],["PREP Pizza Cheese",1.0,"OZ-wt"]],"MI Kids Cheeseburger":[["BREAD Burger Bun",1.0,"Each"],["DAIRY Butter Clarified",1.0,"OZ-fl"],["DAIRY Cheese American Sliced",1.0,"Each"],["MEAT Beef Ground Patty",4.0,"OZ-wt"],["OTHER FOOD Ketchup Bulk",1.5,"OZ-fl"],["OTHER FOOD Spice French Fry",0.25,"tsp"],["OTHER FOOD Spice House S&P",0.25,"tsp"],["PROD Potato French Fry",5.0,"OZ-wt"]],"MI Kids Chicken Taco":[["BREAD Tortilla Flour",2.0,"Each"],["DAIRY Butter Clarified",1.0,"OZ-fl"],["DAIRY Cheese Monterey Jack Shredded",0.5,"OZ-wt"],["PLTRY Chicken Breast",3.0,"OZ-wt"],["PREP Fire Roasted Salsa",1.5,"OZ-fl"],["PREP Lime Sour Cream",1.5,"OZ-fl"],["PREP Tortilla Chips",1.0,"OZ-wt"],["YIELD Boston Lettuce",0.25,"OZ-wt"],["YIELD RomaTomato Diced",2.0,"Tbsp"]],"MI Kids Pasta w/ Butter":[["DAIRY Cheese Parmesan Grated",1.0,"OZ-wt"],["OTHER FOOD Pasta Cavatappi",7.0,"OZ-wt"]],"MI MB All-American Burger Double":[["BREAD Burger Bun",1.0,"Each"],["DAIRY Butter Clarified",0.5,"OZ-fl"],["DAIRY Cheese American Sliced",2.0,"Each"],["MEAT Beef Ground Patty",2.0,"Each"],["OTHER FOOD Ketchup Bulk",1.5,"OZ-fl"],["OTHER FOOD Spice House S&P",0.375,"tsp"],["PREP Baja Tartar Sauce",2.0,"Tbsp"],["PREP House Brined Pickles",2.5,"Each"],["PROD Potato French Fry",5.0,"OZ-wt"],["YIELD Boston Lettuce",1.0,"OZ-wt"],["YIELD Prepped Red Onions",0.5,"OZ-wt"],["YIELD tomato 4 x 5 sliced",1.0,"Each"]],"MI MB All-American Burger Single":[["BREAD Burger Bun",1.0,"Each"],["DAIRY Butter Clarified",0.5,"OZ-fl"],["DAIRY Cheese American Sliced",1.0,"Each"],["MEAT Beef Ground Patty",1.0,"Each"],["OTHER FOOD Ketchup Bulk",1.5,"OZ-fl"],["OTHER FOOD Spice House S&P",0.375,"tsp"],["PREP Baja Tartar Sauce",2.0,"Tbsp"],["PREP House Brined Pickles",2.5,"Each"],["PROD Potato French Fry",5.0,"OZ-wt"],["YIELD Boston Lettuce",1.0,"OZ-wt"],["YIELD Prepped Red Onions",0.5,"OZ-wt"],["YIELD tomato 4 x 5 sliced",1.0,"Each"]],"MI MB Blackened Mahi Mahi Tacos":[["BREAD Tortilla Corn Flour Blend",2.0,"Each"],["DAIRY Butter Clarified",1.0,"OZ-fl"],["PREP Chipotle Aioli",1.5,"Tbsp"],["PREP Fire Roasted Salsa",1.5,"OZ-fl"],["PREP Island Slaw",2.0,"OZ-wt"],["PREP Lime Sour Cream",2.0,"Tbsp"],["PREP Tomato Relish",2.0,"Tbsp"],["PREP Tortilla Chips",1.5,"OZ-wt"],["SEA Mahi Mahi FRZ",4.0,"OZ-wt"],["YIELD Lime Wedge",1.0,"Each"]],"MI MB Coconut Shrimp":[["PREP Coco Spray",0.25,"OZ-fl"],["PREP Coconut Shrimp",5.0,"Each"],["PREP Fried Wonton Strips",0.5,"OZ-wt"],["PREP Island Slaw",3.0,"OZ-wt"],["PREP Lime Vinaigrette",0.5,"OZ-fl"],["PREP Mango Chutney",4.0,"tsp"]],"MI Margherita Flatbread":[["BREAD Crust Pizza",1.0,"Each"],["DAIRY Cheese Mozzarella Fresh",1.5,"OZ-wt"],["DAIRY Cheese Parmesan Grated",0.12,"OZ-wt"],["OTHER FOOD Spice House S&P",0.25,"tsp"],["Prep Cilantro Pesto",1.0,"OZ-fl"],["PREP Marinara",2.0,"OZ-fl"],["PREP Pizza Cheese",1.0,"OZ-wt"],["PROD Tomato Campari",1.5,"OZ-wt"],["YIELD Basil",0.12,"OZ-wt"]],"MI Shrimp Fajitas":[["BREAD Tortilla Flour",3.0,"Each"],["DAIRY Butter Clarified",1.0,"OZ-fl"],["DAIRY Cheese Queso Fresco",0.5,"OZ-wt"],["DAIRY Sour Cream",1.5,"OZ-fl"],["OTHER FOOD Spice House S&P",0.5,"tsp"],["PREP Beer Chimichurri",2.0,"OZ-fl"],["PREP Blackened Shrimp",6.0,"Each"],["PREP Fire Roasted Salsa",1.5,"OZ-fl"],["PREP Grilled Portobello",1.0,"Each"],["PREP Grilled Roma Tomatoes",2.0,"Each"],["PREP Guacamole",1.5,"OZ-fl"],["PREP Rajas",4.0,"OZ-wt"],["PREP Tomato Relish",1.0,"OZ-wt"]],"MI Side Chips & Salsa":[["PREP Fire Roasted Salsa",1.5,"OZ-fl"],["PREP Tortilla Chips",2.0,"OZ-wt"]],"MI Small Key Lime Pie":[["PREP Key Lime Pie",0.125,"Each"],["PREP Whipped Cream",2.0,"OZ-wt"],["YIELD Lime Zest",0.25,"tsp"]],"MI Snickers Croffle":[["OTHER FOOD Candy Snickers",0.5,"OZ-wt"],["OTHER FOOD Dough Croissant",1.0,"Each"],["OTHER FOOD Nut Peanut",0.5,"OZ-wt"],["PREP Caramel Sauce",1.5,"OZ-fl"],["PREP Chocolate Whipped Ricotta",2.0,"OZ-wt"]],"MI Steak Fajitas":[["BREAD Tortilla Flour",3.0,"Each"],["DAIRY Cheese Queso Fresco",0.5,"OZ-wt"],["DAIRY Sour Cream",1.5,"OZ-fl"],["MEAT Beef Denver Steak",6.0,"OZ-wt"],["OTHER FOOD Spice House S&P",0.5,"tsp"],["PREP Beer Chimichurri",2.0,"OZ-fl"],["PREP Fire Roasted Salsa",1.5,"OZ-fl"],["PREP Grilled Portobello",1.0,"Each"],["PREP Grilled Roma Tomatoes",2.0,"Each"],["PREP Guacamole",1.5,"OZ-fl"],["PREP Rajas",4.0,"OZ-wt"],["PREP Tomato Relish",1.0,"OZ-wt"]],"MI Steak Flatbread":[["BREAD Crust Pizza",1.0,"Each"],["DAIRY Cheese Parmesan Grated",0.17,"OZ-wt"],["OTHER FOOD Oil Truffle White",1.0,"tsp"],["OTHER FOOD Spice House S&P",0.25,"tsp"],["PREP Garlic Aioli",2.0,"OZ-fl"],["PREP Honey Onions",1.04,"OZ-fl"],["PREP Marinated Filet",2.0,"OZ-wt"],["PREP Pizza Cheese",2.0,"OZ-wt"],["PREP Roasted Mushrooms",2.0,"OZ-wt"],["PROD Lettuce Arugula",0.25,"OZ-wt"]],"MI Strawberry Croffle":[["OTHER FOOD Dough Croissant",1.0,"Each"],["OTHER FOOD Sugar Confectioner",1.0,"tsp"],["PREP Strawberry Sauce",1.5,"OZ-fl"],["PREP Whipped Cream",1.0,"OZ-wt"],["PROD Strawberry",2.0,"Each"],["YIELD Mint Leaves",2.0,"Each"]],"MI Street Corn Dip":[["DAIRY Cheese Cotija",0.5,"OZ-wt"],["PREP Chile Butter",0.5,"OZ-wt"],["PREP Chipotle Aioli",0.5,"OZ-fl"],["PREP Corn Dip",8.0,"OZ-wt"],["PREP Corn Salsa",1.0,"OZ-wt"],["PREP Tortilla Chips",3.0,"OZ-wt"],["YIELD Banana Leaf",1.0,"Each"],["YIELD Cilantro Leaves",1.0,"tsp"],["YIELD Lime Wedge",1.0,"Each"]],"PREP Black Beans":[["BEER BTLCAN Corona Extra",12.0,"OZ-fl"],["OTHER FOOD Bean Black Dried",1.0,"LB"],["OTHER FOOD Oil Blend",2.0,"OZ-fl"],["OTHER FOOD Oil Blend",2.0,"OZ-fl"],["OTHER FOOD Salt Kosher",2.0,"Tbsp"],["OTHER FOOD Salt Kosher",3.0,"Tbsp"],["OTHER FOOD Spice Bay Leaf",2.0,"Each"],["OTHER FOOD Spice Bay Leaf",2.0,"Each"],["OTHER FOOD Spice Chile Powder",1.0,"tsp"],["OTHER FOOD Spice Chile Powder",1.0,"tsp"],["OTHER FOOD Spice Cumin Ground",1.0,"Tbsp"],["OTHER FOOD Spice Cumin Ground",1.0,"Tbsp"],["OTHER FOOD Spice House S&P",1.0,"Tbsp"],["PREP Chorizo Cooking Procedure",4.0,"OZ-wt"],["PREP Garlic Minced",1.0,"OZ-wt"],["PROD Garlic Peeled",1.0,"OZ-wt"],["PROD Pepper Jalapeno",1.0,"Each"],["PROD Pepper Jalapeno",1.0,"Each"],["YIELD Chorizo Cooked",4.0,"OZ-wt"],["YIELD Onion Yellow Prepped",6.0,"OZ-wt"],["YIELD Onion Yellow Prepped",6.0,"OZ-wt"],["YIELD Oregano",1.0,"Tbsp"],["YIELD Oregano",1.0,"Tbsp"]],"PREP Blackened Shrimp":[["PREP Blackening Marinade",2.0,"Cup"],["SEA Shrimp 16/20",10.0,"LB"]],"PREP Blackening Marinade":[["OTHER BAR Juice Lime",0.25,"Cup"],["OTHER FOOD Oil Blend",1.0,"Cup"],["OTHER FOOD Salt Kosher",1.0,"Tbsp"],["OTHER FOOD Salt Kosher",1.0,"Tbsp"],["OTHER FOOD Spice Cajun TB",1.0,"Cup"],["OTHER FOOD Spice Cajun TB",1.0,"Cup"]],"PREP Caesar Dressing":[["DAIRY Cheese Parmesan Grated",6.0,"OZ-wt"],["DAIRY Egg Yolk Liquid",4.0,"OZ-fl"],["OTHER BAR Juice Lime",6.0,"OZ-fl"],["OTHER FOOD Caper",4.0,"OZ-wt"],["OTHER FOOD Mustard Dijon",4.0,"OZ-fl"],["OTHER FOOD Oil Blend",0.75,"Gallon"],["OTHER FOOD Salt Kosher",3.0,"OZ-wt"],["OTHER FOOD Sauce Tabasco",1.0,"OZ-fl"],["OTHER FOOD Sauce Worcestershire",3.0,"OZ-fl"],["OTHER FOOD Spice Mustard Powder",2.0,"OZ-wt"],["OTHER FOOD Spice Pepper White Ground",0.13,"OZ-wt"],["OTHER FOOD Vinegar Red Wine",8.0,"OZ-fl"],["OTHER FOOD Vinegar Rice Wine",8.0,"OZ-fl"],["PREP Garlic Minced",8.0,"OZ-wt"],["SEA Anchovy",8.0,"OZ-wt"]],"PREP Caramel Sauce":[["DAIRY Butter",3.0,"OZ-wt"],["DAIRY Cream Heavy",1.5,"Cup"],["OTHER FOOD Extract Vanilla Pure",2.0,"tsp"],["OTHER FOOD Salt Hawaiian",0.75,"tsp"],["OTHER FOOD Sugar Granulated",2.0,"Cup"],["RUM Myers Dark",2.0,"OZ-fl"]],"PREP Chicken Marinade":[["OTHER FOOD Base Chicken",8.0,"OZ-wt"],["OTHER FOOD Oil Olive Blend",1.0,"Gallon"],["OTHER FOOD Spice Chile Red Crushed",1.0,"Tbsp"],["OTHER FOOD Spice Pepper Black Coarse Ground",3.0,"Tbsp"],["PREP Garlic Puree",2.0,"Cup"],["PROD Herb Basil",4.0,"OZ-wt"],["PROD Herb Parsley",2.0,"OZ-wt"],["PROD Herb Rosemary",8.0,"OZ-wt"],["PROD Juice Lemon",1.0,"Quart"]],"PREP Chile Butter":[["DAIRY Butter",1.0,"LB"],["OTHER FOOD Spice Ancho Powder",2.0,"Tbsp"],["OTHER FOOD Spice House S&P",1.5,"tsp"],["OTHER FOOD Spice Pepper Cayenne",2.0,"tsp"],["OTHER FOOD Spice Pepper Red Crushed",1.0,"tsp"],["PREP Garlic Puree",1.5,"OZ-wt"],["PROD Juice Lemon",1.0,"Tbsp"],["YIELD Basil",1.0,"Tbsp"],["YIELD Parsley Leaves",1.0,"Tbsp"]],"PREP Chipotle Aioli":[["OTHER BAR Juice Lime",1.5,"Cup"],["OTHER FOOD Mayo Bulk",1.0,"Quart"],["OTHER FOOD Mustard Dijon",1.0,"Cup"],["OTHER FOOD Pepper Chipotle",0.5,"Cup"],["OTHER FOOD Salt Kosher",1.0,"tsp"]],"PREP Chipotle Remoulade":[["OTHER BAR Juice Lime",2.0,"OZ-fl"],["OTHER FOOD Capers",3.0,"OZ-wt"],["OTHER FOOD Mayo Bulk",2.0,"LB"],["OTHER FOOD Pepper Chipotle",2.0,"OZ-wt"],["OTHER FOOD Salt Kosher",2.0,"tsp"],["PREP House Brined Pickles",6.0,"OZ-wt"],["YIELD Cilantro Leaves",2.0,"OZ-wt"],["YIELD Jalapeno Prepped",3.0,"OZ-wt"],["YIELD Prepped Red Onions",3.0,"OZ-wt"]],"PREP Cilantro Lime Vin":[["Prep Cilantro Pesto",16.0,"OZ-fl"],["PREP Lime Vinaigrette",8.0,"OZ-fl"]],"PREP Cilantro/Basil Pesto":[["DAIRY Cheese Parmesan Grated",1.0,"OZ-wt"],["OTHER BAR Juice Lime",4.0,"OZ-fl"],["OTHER FOOD Nut Pine",1.0,"OZ-wt"],["OTHER FOOD Oil Blend",8.0,"OZ-fl"],["OTHER FOOD Spice House S&P",1.0,"tsp"],["YIELD Basil",2.0,"OZ-wt"],["YIELD Cilantro Leaves",2.0,"OZ-wt"],["YIELD Jalapeno Prepped",1.0,"OZ-wt"],["YIELD Prepped Red Onions",2.0,"OZ-wt"]],"PREP Coco Shrimp Batter":[["DAIRY Egg Yolk Liquid",8.0,"OZ-fl"],["OTHER FOOD Flour AP",13.0,"OZ-wt"],["OTHER FOOD Kitchen Beer",32.0,"OZ-fl"],["OTHER FOOD Salt Kosher",1.0,"Tbsp"],["OTHER FOOD Spice Pepper Black Coarse Ground",2.0,"tsp"],["OTHER FOOD Sugar Granulated",1.75,"OZ-wt"]],"PREP Coco Spray":[["OTHER BAR Coco Lopez",60.0,"OZ-fl"],["OTHER FOOD Coconut Milk",14.0,"OZ-fl"]],"PREP Coconut Shrimp":[["OTHER FOOD Coconut Shredded",0.5,"OZ-wt"],["OTHER FOOD Flour AP",0.5,"Tbsp"],["PREP Coco Shrimp Batter",0.5,"OZ-fl"],["SEA Shrimp 16/20 Butterfly",1.0,"Each"]],"PREP Corn Dip":[["DAIRY Cheese Cream Cheese Loaf",0.75,"LB"],["DAIRY Cheese Monterey Jack Shredded",6.0,"OZ-wt"],["DAIRY Sour Cream",4.0,"OZ-wt"],["OTHER FOOD Oil Blend",1.0,"OZ-fl"],["OTHER FOOD Salt Kosher",2.0,"Tbsp"],["OTHER FOOD Spice Ancho Powder",0.5,"Tbsp"],["OTHER FOOD Spice House S&P",1.0,"tsp"],["OTHER FOOD Spice Pepper Cayenne",0.5,"tsp"],["PREP Garlic Puree",1.0,"OZ-wt"],["PROD Corn",2.0,"LB"],["YIELD Onion Yellow Prepped",6.0,"OZ-wt"]],"PREP Corn Salsa":[["OTHER FOOD Salt Kosher",2.0,"Tbsp"],["OTHER FOOD Spice Ancho Powder",1.0,"tsp"],["OTHER FOOD Spice Cumin Ground",1.0,"tsp"],["PREP Lime Vinaigrette",2.0,"OZ-fl"],["PREP Tomato Relish",4.0,"OZ-wt"],["YIELD Cilantro Leaves",1.0,"tsp"],["YIELD Corn Prepped",21.0,"OZ-wt"],["YIELD Jalapeno Prepped",4.0,"OZ-wt"],["YIELD Prepped Red Onions",8.0,"OZ-wt"]],"PREP Crispy Flour Tortillas":[["BREAD Tortilla Flour",1.0,"LB"],["OTHER BAR Seasoning Tajin",1.0,"tsp"],["OTHER FOOD Spice French Fry",1.0,"tsp"]],"PREP Crispy Pepitas":[["OTHER FOOD Pepita",1.0,"LB"],["OTHER FOOD Salt Kosher",0.75,"tsp"]],"PREP Croutons":[["BREAD Cuban",1.0,"LB"],["DAIRY Cheese Parmesan Grated",4.0,"OZ-wt"],["OTHER FOOD Oil Olive Extra Virgin",6.0,"OZ-fl"],["OTHER FOOD Spice House S&P",3.0,"tsp"],["PREP Garlic Butter",4.0,"OZ-wt"],["PREP Garlic Minced",2.0,"OZ-wt"],["YIELD Parsley Leaves",1.0,"OZ-wt"]],"PREP Fire Roasted Salsa":[["OTHER BAR Juice Lime",8.0,"OZ-fl"],["OTHER FOOD Oil Blend",4.0,"OZ-fl"],["OTHER FOOD Salt Kosher",5.0,"tsp"],["OTHER FOOD Spice Paprika",3.0,"Tbsp"],["PROD Garlic Peeled",3.0,"OZ-wt"],["YIELD Bell Pepper Green Prepped",2.0,"LB"],["YIELD Bell Peppers Red Prepped",2.0,"LB"],["YIELD Cilantro Leaves",4.0,"OZ-wt"],["YIELD Jalapeno Prepped",6.0,"OZ-wt"],["YIELD Onion Yellow Prepped",2.0,"LB"],["YIELD RomaTomato Diced",6.0,"LB"]],"PREP Fried Wonton Strips":[["OTHER FOOD Spice French Fry",2.0,"tsp"],["OTHER FOOD Wonton Wrapper",5.0,"LB"]],"PREP Garlic Aioli":[["BREAD Cuban",16.0,"OZ-wt"],["DAIRY Egg Yolk Liquid",12.0,"OZ-fl"],["DAIRY Milk",24.0,"OZ-fl"],["OTHER FOOD Mustard Dijon",3.0,"OZ-fl"],["OTHER FOOD Oil Canola",2.0,"Quart"],["OTHER FOOD Salt Kosher",2.0,"OZ-wt"],["OTHER FOOD Vinegar Red Wine",4.0,"OZ-fl"],["PREP Garlic Minced",6.0,"OZ-wt"],["PROD Juice Lemon",4.0,"OZ-fl"]],"PREP Garlic Butter":[["DAIRY Butter",2.5,"LB"],["DAIRY Butter Blend",2.5,"LB"],["OTHER FOOD Salt Kosher",0.75,"OZ-wt"],["OTHER FOOD Spice Pepper Black Coarse Ground",0.25,"OZ-wt"],["OTHER FOOD Spice Pepper Red Crushed",0.75,"tsp"],["PREP Garlic Puree",6.0,"OZ-wt"],["PROD Juice Lemon",1.5,"OZ-fl"],["YIELD Basil",1.0,"OZ-wt"],["YIELD Parsley Leaves",1.0,"OZ-wt"]],"PREP Garlic Minced":[["PROD Garlic Peeled",5.0,"LB"]],"PREP Garlic Puree":[["OTHER FOOD Oil Canola",6.0,"Cup"],["PROD Garlic Peeled",5.0,"Each"]],"PREP Guacamole":[["OTHER BAR Juice Lime",4.0,"OZ-fl"],["OTHER FOOD Spice House S&P",2.0,"Tbsp"],["OTHER FOOD Spice Pepper Cayenne",0.5,"tsp"],["PREP Tomato Relish",0.75,"Quart"],["YIELD Avocado Prepped",10.0,"Each"],["YIELD Cilantro Leaves",0.25,"Cup"],["YIELD Green Onions Prepped",2.0,"Cup"]],"PREP Happy Sauce":[["OTHER FOOD Ketchup Bulk",6.0,"OZ-fl"],["PREP Chipotle Remoulade",8.0,"OZ-fl"]],"PREP Herb Buttermilk Dressing":[["DAIRY Buttermilk",1.0,"Cup"],["DAIRY Sour Cream",0.5,"Cup"],["OTHER FOOD Mayo Bulk",2.5,"Cup"],["OTHER FOOD Mustard Dijon",1.0,"OZ-wt"],["OTHER FOOD Spice House S&P",1.0,"Tbsp"],["PREP Garlic Puree",1.0,"Tbsp"],["PROD Juice Lemon",1.0,"OZ-fl"],["YIELD Basil",1.5,"OZ-wt"],["YIELD Green Onions Prepped",2.0,"OZ-wt"],["YIELD Parsley Leaves",1.0,"OZ-wt"]],"PREP Honey Onions":[["DAIRY Butter",1.0,"OZ-wt"],["OTHER FOOD Honey",2.0,"OZ-fl"],["OTHER FOOD Spice House S&P",0.5,"Tbsp"],["OTHER FOOD Spice Pepper Red Crushed",1.0,"tsp"],["OTHER FOOD Sugar Brown Dark",3.0,"OZ-wt"],["YIELD Onion Yellow Prepped",3.0,"LB"]],"PREP House Brined Pickles":[["OTHER FOOD Salt Kosher",1.25,"Cup"],["OTHER FOOD Salt Kosher",1.25,"Cup"],["OTHER FOOD Spice Bay Leaf",5.0,"Each"],["OTHER FOOD Spice Bay Leaf",5.0,"Each"],["OTHER FOOD Spice Peppercorn",1.5,"Tbsp"],["OTHER FOOD Spice Peppercorn",1.5,"Tbsp"],["OTHER FOOD Vinegar Apple Cider",2.0,"Quart"],["OTHER FOOD Vinegar Apple Cider",2.0,"Quart"],["PREP Garlic Minced",5.0,"Tbsp"],["PREP Garlic Minced",5.0,"Tbsp"],["PROD Cucumber Pickle",10.0,"LB"],["PROD Cucumber Pickle",10.0,"LB"],["PROD Herb Dill",2.5,"OZ-wt"],["PROD Herb Dill",2.5,"OZ-wt"],["YIELD Onion Yellow Prepped",1.25,"Cup"],["YIELD Onion Yellow Prepped",1.25,"Cup"]],"PREP Island Slaw":[["PROD Cabbage Green",10.0,"LB"],["PROD Cabbage Red",2.5,"LB"],["PROD Herb Cilantro",8.0,"OZ-wt"],["PROD Onion Red",2.0,"LB"]],"PREP Jerk Sauce":[["OTHER FOOD Mayo Bulk",24.0,"OZ-fl"],["OTHER FOOD Sauce Steak",32.0,"OZ-fl"],["OTHER FOOD Sauce Tabasco",1.5,"OZ-fl"],["OTHER FOOD Sauce Worcestershire",4.0,"OZ-fl"],["OTHER FOOD Spice Jerk",3.0,"OZ-wt"],["OTHER FOOD Spice Paprika",3.0,"Tbsp"],["OTHER FOOD Spice Pepper Black Ground",1.5,"tsp"],["OTHER FOOD Spice Pepper Cayenne",1.0,"tsp"],["OTHER FOOD Spice Pepper Red Crushed",2.0,"tsp"],["OTHER FOOD Sugar Granulated",1.0,"tsp"],["OTHER FOOD Vinegar Balsamic",1.0,"OZ-fl"],["PREP Garlic Puree",5.0,"OZ-wt"],["PROD Juice Lemon",1.5,"tsp"]],"PREP Key Lime Pie":[["PREP Key Lime Pie Batter",42.0,"OZ-fl"],["PREP Key Lime Pie Crust",1.0,"LB"]],"PREP Key Lime Pie Batter":[["DAIRY Egg Yolk Liquid",3.5,"LB"],["OTHER FOOD Juice Lime Concentrate FRZ",10.0,"OZ-fl"],["OTHER FOOD Milk Sweetened Condensed",1.5,"Gallon"]],"PREP Key Lime Pie Crust":[["OTHER FOOD Nut Macadamia",1.16,"LB"],["OTHER FOOD Salt Iodized",0.75,"tsp"],["OTHER FOOD Sugar Granulated",1.5,"LB"],["PREP Short Bread Cookies",4.0,"LB"]],"PREP Lemon Basil Vinaigrette":[["OTHER FOOD Honey",4.0,"OZ-fl"],["OTHER FOOD Mustard Dijon",0.25,"Cup"],["OTHER FOOD Oil Blend",16.0,"OZ-fl"],["OTHER FOOD Spice House S&P",2.0,"tsp"],["OTHER FOOD Vinegar Sherry",4.0,"OZ-fl"],["PREP Garlic Puree",1.5,"OZ-wt"],["PROD Herb Basil",1.0,"OZ-wt"],["PROD Juice Lemon",2.0,"OZ-fl"]],"PREP Lime Sour Cream":[["DAIRY Sour Cream",2.5,"LB"],["OTHER BAR Juice Lime",4.0,"OZ-fl"]],"PREP Lime Vinaigrette":[["OTHER BAR Juice Lime",12.0,"OZ-fl"],["OTHER FOOD Oil Olive Blend",24.0,"OZ-fl"],["OTHER FOOD Spice House S&P",6.0,"Tbsp"]],"PREP Mango Chutney":[["OTHER BAR Spice Nutmeg Ground",2.0,"tsp"],["OTHER FOOD Mustard Dijon",4.0,"OZ-fl"],["OTHER FOOD Salt Kosher",1.0,"tsp"],["OTHER FOOD Spice Cinnamon",1.0,"tsp"],["OTHER FOOD Spice Ginger Ground",2.0,"tsp"],["OTHER FOOD Sugar Brown Light",2.5,"LB"],["OTHER FOOD Sugar Granulated",2.5,"LB"],["OTHER FOOD Vinegar White Wine",24.0,"OZ-fl"],["PROD Garlic Peeled",2.0,"Each"],["PROD Mango FZN",6.0,"LB"],["PROD Pepper Thai",5.0,"Each"],["YIELD Ginger Prepped",1.75,"OZ-wt"],["YIELD Onion Yellow Prepped",32.0,"OZ-wt"],["YIELD Papaya Cleaned",1.0,"LB"]],"PREP Mango Salsa":[["OTHER BAR Juice Lime",2.0,"OZ-fl"],["OTHER FOOD Oil Blend",2.0,"OZ-fl"],["OTHER FOOD Salt Kosher",1.5,"tsp"],["OTHER FOOD Spice Pepper Black Coarse Ground",1.0,"tsp"],["YIELD Cilantro Leaves",0.42,"OZ-wt"],["YIELD Green Onions Prepped",1.0,"OZ-wt"],["YIELD Jalapeno Prepped",1.0,"OZ-wt"],["YIELD Mango Prepped",2.2,"LB"]],"PREP Marinara":[["OTHER FOOD Oil Blend",1.0,"Quart"],["OTHER FOOD Salt Kosher",4.5,"OZ-wt"],["OTHER FOOD Spice Oregano",0.25,"OZ-wt"],["OTHER FOOD Spice Pepper Black Ground",0.12,"OZ-wt"],["OTHER FOOD Sugar Granulated",0.25,"OZ-wt"],["OTHER FOOD Tomato Peeled",6.55,"LB"],["PREP Garlic Puree",5.5,"OZ-wt"],["YIELD Basil",3.0,"OZ-wt"],["YIELD Onion Yellow Prepped",2.5,"LB"]],"PREP Marinated Chicken":[["PLTRY Chicken Breast",20.0,"LB"],["PREP Chicken Marinade",4.0,"Cup"]],"PREP Marinated Filet":[["MEAT Beef Filet Medallion",10.0,"LB"],["PREP Steak Marinade",2.0,"Cup"]],"PREP No Cook BBQ Sauce":[["OTHER FOOD Honey",4.0,"OZ-fl"],["OTHER FOOD Ketchup Bulk",16.0,"OZ-fl"],["OTHER FOOD Mustard Bulk",4.0,"OZ-fl"],["OTHER FOOD Sauce Steak",8.0,"OZ-fl"],["OTHER FOOD Seasoning Liquid Smoke",1.0,"tsp"],["OTHER FOOD Spice Ancho Powder",1.0,"Tbsp"],["OTHER FOOD Spice French Fry",1.0,"Tbsp"],["OTHER FOOD Spice Paprika",1.0,"tsp"],["OTHER FOOD Spice Pepper Cayenne",0.5,"tsp"],["OTHER FOOD Vinegar Apple Cider",4.0,"OZ-fl"]],"PREP Pickled Cucumbers & Onions":[["OTHER FOOD Salt Kosher",1.0,"Tbsp"],["OTHER FOOD Sugar Granulated",1.0,"Cup"],["OTHER FOOD Vinegar Rice Wine",16.0,"OZ-fl"],["OTHER FOOD Wine Cooking Mirin",8.0,"OZ-fl"],["PROD Cucumber",1.0,"LB"],["PROD Onion Red",8.0,"OZ-wt"]],"PREP Pizza Cheese":[["DAIRY Cheese Monterey Jack Shredded",5.0,"LB"],["DAIRY Cheese Mozzarella Shredded",5.0,"LB"]],"PREP Poke Dressing":[["OTHER BAR Juice Lime",4.0,"OZ-fl"],["OTHER BAR Juice Lime",4.0,"OZ-fl"],["OTHER FOOD Oil Sesame",16.0,"OZ-fl"],["OTHER FOOD Oil Sesame",16.0,"OZ-fl"],["OTHER FOOD Pepper Chipotle",2.0,"OZ-wt"],["OTHER FOOD Pepper Chipotle",2.0,"OZ-wt"],["OTHER FOOD Sauce Soy/Tamari",16.0,"OZ-fl"],["OTHER FOOD Sauce Soy/Tamari",16.0,"OZ-fl"],["YIELD Ginger Prepped",2.0,"OZ-wt"],["YIELD Ginger Prepped",2.0,"OZ-wt"],["YIELD Onion Shallots Prepped",4.0,"OZ-wt"],["YIELD Onion Shallots Prepped",4.0,"OZ-wt"]],"PREP Roasted Mushrooms":[["OTHER FOOD Oil Blend",6.0,"OZ-fl"],["OTHER FOOD Spice House S&P",4.0,"Tbsp"],["PREP Garlic Puree",6.0,"OZ-wt"],["PROD Mushroom",4.0,"LB"],["PROD Mushroom",4.0,"LB"]],"PREP Salad Lettuce Mix":[["PROD Lettuce Arugula",1.0,"LB"],["PROD Lettuce Romaine",3.0,"LB"],["PROD Lettuce Salad Greens",1.5,"LB"]],"PREP Short Bread Cookies":[["DAIRY Butter",2.0,"LB"],["OTHER FOOD Flour AP",2.2,"LB"],["OTHER FOOD Sugar Confectioner",1.0,"LB"]],"PREP Soy Reduction":[["OTHER BAR Juice Orange",16.0,"OZ-fl"],["OTHER BAR Orange",1.0,"Each"],["OTHER FOOD Sauce Soy/Tamari",32.0,"OZ-fl"],["OTHER FOOD Sugar Granulated",32.0,"OZ-wt"],["OTHER FOOD Wine Cooking Mirin",48.0,"OZ-fl"]],"PREP Sriracha Aioli":[["OTHER FOOD Mayo Bulk",2.0,"Quart"],["OTHER FOOD Sauce Sriracha",6.0,"OZ-fl"]],"PREP Steak Marinade":[["OTHER BAR Juice Pineapple",24.0,"OZ-fl"],["OTHER FOOD Oil Olive Blend",16.0,"OZ-fl"],["OTHER FOOD Oil Sesame",4.0,"OZ-fl"],["OTHER FOOD Sauce Chile Sweet Thai",16.0,"OZ-fl"],["OTHER FOOD Sauce Worcestershire",8.0,"OZ-fl"],["OTHER FOOD Sugar Brown Light",1.0,"LB"],["PROD Garlic Peeled",2.0,"OZ-wt"],["PROD Onion Shallot Peeled",6.0,"OZ-wt"]],"PREP Sushi Rice":[["OTHER FOOD Rice Sushi",3.0,"Cup"],["OTHER FOOD Salt Sea",0.25,"tsp"],["PREP Sushi Vinegar",3.5,"OZ-fl"]],"PREP Sushi Vinegar":[["OTHER FOOD Salt Kosher",2.0,"OZ-wt"],["OTHER FOOD Sugar Granulated",3.32,"OZ-wt"],["OTHER FOOD Vinegar Rice Wine",8.0,"OZ-fl"]],"PREP Tomato Relish":[["OTHER BAR Juice Lime",1.75,"OZ-fl"],["OTHER FOOD Oil Blend",0.5,"OZ-fl"],["OTHER FOOD Spice House S&P",2.0,"tsp"],["YIELD Cilantro Leaves",1.0,"Tbsp"],["YIELD Prepped Red Onions",4.0,"OZ-wt"],["YIELD RomaTomato Diced",1.0,"Quart"]],"PREP Tortilla Chips":[["BREAD Tortilla Corn",1.0,"LB"],["OTHER FOOD Spice French Fry",0.1,"OZ-wt"]],"PREP Wasabi Avocado":[["DAIRY Sour Cream",1.0,"LB"],["OTHER BAR Juice Lime",2.0,"OZ-fl"],["OTHER FOOD Salt Kosher",4.0,"Tbsp"],["OTHER FOOD Wasabi",0.5,"tsp"],["YIELD Avocado Prepped",1.0,"LB"],["YIELD Cilantro Leaves",1.5,"OZ-wt"]],"PREP Whipped Cream":[["DAIRY Cream Heavy",32.0,"OZ-fl"],["OTHER FOOD Chocolate White Mousse Mix",2.0,"Tbsp"],["OTHER FOOD Extract Vanilla Pure",1.0,"tsp"],["OTHER FOOD Sugar Confectioner",3.0,"OZ-wt"]],"PREP Wonton Taco":[["OTHER FOOD Wonton Wrapper",1.0,"Each"]],"YIELD Avocado Prepped":[["PROD Avocado",1.0,"Each"]],"YIELD Bacon Cooked":[["MEAT Pork Bacon",1.0,"LB"]],"YIELD Banana Leaf":[["PROD Banana/Ti/Bamboo Leaf",1.0,"LB"]],"YIELD Basil":[["PROD Herb Basil",1.0,"LB"]],"YIELD Bell Pepper Green Prepped":[["PROD Pepper Bell Green",1.0,"LB"]],"YIELD Bell Pepper Red Brunoise":[["PROD Pepper Bell Red",1.0,"LB"]],"YIELD Bell Peppers Red Prepped":[["PROD Pepper Bell Red",1.0,"LB"]],"YIELD Boston Lettuce":[["PROD Lettuce Boston",1.0,"Each"]],"YIELD Celery Prepped":[["PROD Celery",1.0,"LB"]],"YIELD Chives":[["PROD Herb Chive",1.0,"LB"]],"YIELD Chorizo Cooked":[["MEAT Sausage Chorizo",1.0,"LB"]],"YIELD Cilantro Leaves":[["PROD Herb Cilantro",1.0,"LB"]],"YIELD Corn Prepped":[["PROD Corn",1.0,"Each"]],"YIELD Ginger Prepped":[["PROD Ginger",1.0,"LB"]],"YIELD Green Onions Prepped":[["PROD Onion Green",1.0,"LB"]],"YIELD Jalapeno Prepped":[["PROD Pepper Jalapeno",1.0,"LB"]],"YIELD Lime Wedge":[["OTHER BAR Lime",1.0,"Each"]],"YIELD Mango Prepped":[["PROD Mango",1.0,"LB"]],"YIELD Mint Leaves":[["OTHER BAR Herb Mint",1.0,"LB"]],"YIELD Onion Shallots Prepped":[["PROD Onion Shallot Peeled",1.0,"LB"]],"YIELD Onion Yellow Prepped":[["PROD Onion",1.0,"LB"]],"YIELD Oregano":[["PROD Herb Oregano",1.0,"LB"]],"YIELD Papaya Cleaned":[["PROD Papaya",1.0,"LB"]],"YIELD Parsley Leaves":[["PROD Herb Parsley",1.0,"LB"]],"YIELD Prepped Red Onions":[["PROD Onion Red",1.0,"LB"]],"YIELD RomaTomato Diced":[["PROD Tomato Roma",1.0,"LB"]],"YIELD tomato 4 x 5 sliced":[["PROD Tomato 4x5",1.0,"LB"]]},"yields":{"MI Add Blackened Chicken Entree":"1 Each","MI Add Grilled Chicken Entree":"1 Each","MI Ahi Poke Bowl":"1 Each","MI Ahi Tuna Tacos":"1 Each","MI Avocado Taco Salad":"1 Each","MI Avocado Taco Salad w/ Chicken":"1 Each","MI Avocado Taco Salad w/ Shrimp":"1 Each","MI BBQ Smokehouse Burger Double":"1 Each","MI BBQ Smokehouse Burger Single":"1 Each","MI Blackened Shrimp Chopped Salad":"1 Each","MI Cajun Crinkle Cut Fries":"1 Each","MI Chicken Fajitas":"1 Each","MI Chicken Pesto Flatbread":"1 Each","MI Crispy Lemon Chicken":"1 Each","MI Grilled Chicken & Mango Salad":"1 Each","MI IT Bar Burger Slider":"1 Each","MI IT Blackened Mahi Taco":"1 Each","MI IT Cajun Crinkle Cut Fries":"1 Each","MI IT Chicken Pesto Flatbread":"1 Each","MI IT Guacamole & Fire Roasted Salsa":"1 Each","MI IT Street Corn Dip":"1 Each","MI IT World Famous Coconut Shrimp":"1 Each","MI Jerk Chicken Sandwich":"1 Each","MI Kale & Brussel Caesar":"1 Each","MI Kid Cheese Flatbread":"1 Each","MI Kid Pepperoni Flatbread":"1 Each","MI Kids Cheeseburger":"1 Each","MI Kids Chicken Taco":"1 Each","MI Kids Pasta w/ Butter":"1 Each","MI MB All-American Burger Double":"1 Each","MI MB All-American Burger Single":"1 Each","MI MB Blackened Mahi Mahi Tacos":"1 Each","MI MB Coconut Shrimp":"1 Each","MI Margherita Flatbread":"1 Each","MI Shrimp Fajitas":"1 Each","MI Side Chips & Salsa":"1 Each","MI Small Key Lime Pie":"1 Each","MI Snickers Croffle":"1 Each","MI Steak Fajitas":"1 Each","MI Steak Flatbread":"1 Each","MI Strawberry Croffle":"1 Each","MI Street Corn Dip":"1 Each","PREP Black Beans":"2 LB","PREP Blackened Shrimp":"10 LB","PREP Blackening Marinade":"19 OZ-fl","PREP Caesar Dressing":"1 Gallon","PREP Caramel Sauce":"24 OZ-fl","PREP Chicken Marinade":"1 Gallon","PREP Chile Butter":"1.25 LB","PREP Chipotle Aioli":"40 OZ-fl","PREP Chipotle Remoulade":"1.5 Quart","PREP Cilantro Lime Vin":"24 OZ-fl","PREP Cilantro/Basil Pesto":"18 OZ-fl","PREP Coco Shrimp Batter":"1.25 Gallon","PREP Coco Spray":"2.25 Quart","PREP Coconut Shrimp":"1 Each","PREP Corn Dip":"64 OZ-wt","PREP Corn Salsa":"38 OZ-wt","PREP Crispy Flour Tortillas":"8 OZ-wt","PREP Crispy Pepitas":"1 LB","PREP Croutons":"3 Quart","PREP Fire Roasted Salsa":"1.5 Gallon","PREP Fried Wonton Strips":"3 LB","PREP Garlic Aioli":"3 Quart","PREP Garlic Butter":"1 Gallon","PREP Garlic Minced":"5 LB","PREP Garlic Puree":"1 LB","PREP Guacamole":"64 OZ-fl","PREP Happy Sauce":"18 OZ-fl","PREP Herb Buttermilk Dressing":"1 Quart","PREP Honey Onions":"24 OZ-fl","PREP House Brined Pickles":"10 LB","PREP Island Slaw":"15 LB","PREP Jerk Sauce":"2.5 Quart","PREP Key Lime Pie":"1 Each","PREP Key Lime Pie Batter":"2.25 Gallon","PREP Key Lime Pie Crust":"6.6 LB","PREP Lemon Basil Vinaigrette":"0.5 Quart","PREP Lime Sour Cream":"80 OZ-fl","PREP Lime Vinaigrette":"35 OZ-fl","PREP Mango Chutney":"1.5 Gallon","PREP Mango Salsa":"3 LB","PREP Marinara":"1.5 Gallon","PREP Marinated Chicken":"20 LB","PREP Marinated Filet":"10 LB","PREP No Cook BBQ Sauce":"40 OZ-fl","PREP Pickled Cucumbers & Onions":"22 OZ-fl","PREP Pizza Cheese":"10 LB","PREP Poke Dressing":"1.25 Quart","PREP Roasted Mushrooms":"4 LB","PREP Salad Lettuce Mix":"5.5 LB","PREP Short Bread Cookies":"5.75 LB","PREP Soy Reduction":"1.5 Quart","PREP Sriracha Aioli":"2 Quart","PREP Steak Marinade":"1 Gallon","PREP Sushi Rice":"6 Cup","PREP Sushi Vinegar":"8 OZ-fl","PREP Tomato Relish":"1 Quart","PREP Tortilla Chips":"12 OZ-wt","PREP Wasabi Avocado":"2.25 Quart","PREP Whipped Cream":"3 LB","PREP Wonton Taco":"1 Each","YIELD Avocado Prepped":"0.7 Each","YIELD Bacon Cooked":"0.65 OZ-wt","YIELD Banana Leaf":"0.8 LB","YIELD Basil":"0.55 LB","YIELD Bell Pepper Green Prepped":"0.85 LB","YIELD Bell Pepper Red Brunoise":"0.6 LB","YIELD Bell Peppers Red Prepped":"0.85 LB","YIELD Boston Lettuce":"0.42 LB","YIELD Celery Prepped":"0.75 LB","YIELD Chives":"0.95 LB","YIELD Chorizo Cooked":"0.55 OZ-wt","YIELD Cilantro Leaves":"0.55 LB","YIELD Corn Prepped":"0.45 Each","YIELD Ginger Prepped":"0.75 LB","YIELD Green Onions Prepped":"0.75 LB","YIELD Jalapeno Prepped":"0.8 LB","YIELD Lime Wedge":"6 Each","YIELD Mango Prepped":"0.68 LB","YIELD Mint Leaves":"0.5 LB","YIELD Onion Shallots Prepped":"0.95 LB","YIELD Onion Yellow Prepped":"0.85 LB","YIELD Oregano":"0.4 LB","YIELD Papaya Cleaned":"0.85 LB","YIELD Parsley Leaves":"0.55 LB","YIELD Prepped Red Onions":"0.85 LB","YIELD RomaTomato Diced":"0.9 LB","YIELD tomato 4 x 5 sliced":"0.8 OZ-wt"},"prepMap":{"PREP Island Slaw":"Island Slaw","PREP Corn Dip":"Corn Dip","PREP Mango Chutney":"Mango Chutney","PREP Tomato Relish":"Tomato Relish","PREP Chipotle Aioli":"Chipotle Aioli","PREP Fire Roasted Salsa":"Fire Roasted Salsa","PREP Guacamole":"Guacamole","PREP Lime Sour Cream":"Lime Sour Cream","PREP Corn Salsa":"Roasted Corn Salsa","PREP Lime Vinaigrette":"Lime Vinaigrette","PREP Garlic Aioli":"Garlic Aioli","PREP Rajas":"Rajas","PREP Poke Dressing":"Poke Dressing","PREP Baja Tartar Sauce":"Baja Tartar Sauce","PREP Mango Salsa":"Mango Salsa","PREP Wasabi Avocado":"Wasabi Lime Avocado","PREP Caesar Dressing":"Caesar Dressing","PREP Beer Chimichurri":"Beer Chimichurri","PREP Lemon Basil Vinaigrette":"Lemon Basil Vinaigrette","PREP Pickled Cucumbers & Onions":"Pickled Pickles & Onions","PREP Sriracha Aioli":"Sriracha Aioli","PREP No Cook BBQ Sauce":"BBQ Sauce","PREP Lemon Caper Sauce":"Lemon Caper Base & Sauce","PREP Herb Buttermilk Dressing":"Herb Buttermilk Dressing","PREP Marinara":"Marinara","PREP Cilantro/Basil Pesto":"Cilantro Pesto","PREP Honey Onions":"Honey Onion","PREP Jerk Sauce":"Jerk Sauce","PREP Soy Reduction":"Orange Sweet Soy Reduction","PREP Coco Spray":"Coco Spray","PREP Chocolate Whipped Ricotta":"Chocolate Whipped Ricotta","PREP Croutons":"Croutons","PREP Chicken Marinade":"Chicken Marinade","PREP Blackening Marinade":"Blackening Marinade","PREP Steak Marinade":"Steak & Portobello Marinade","PREP Key Lime Pie Batter":"Key Lime Batter","PREP Key Lime Pie":"Key Lime Pie","PREP Chicken Breading Procedure":"Breaded Lemon Chicken","PREP Whipped Cream":"Whipped Cream","PREP Strawberry Sauce":"Strawberry Sauce","PREP Coconut Shrimp":"Coco Shrimp"},"mism":{"Garlic Aioli":{"card":"48oz","r365":"3 Quart","r365name":"PREP Garlic Aioli","ratio":2.0},"Marinara":{"card":"2 Quarts","r365":"1.5 Gallon","r365name":"PREP Marinara","ratio":3.0},"Chicken Marinade":{"card":"1.75 Gallons","r365":"1 Gallon","r365name":"PREP Chicken Marinade","ratio":0.5714},"Steak & Portobello Marinade":{"card":"2 QUARTS","r365":"1 Gallon","r365name":"PREP Steak Marinade","ratio":2.0},"Key Lime Batter":{"card":"3 gallons","r365":"2.25 Gallon","r365name":"PREP Key Lime Pie Batter","ratio":0.75}}};
+function r365Norm(s){ return String(s||'').trim().toUpperCase(); }
+function r365D(d){ return d?dateObjLA(d).toLocaleDateString(isES()?'es-US':'en-US',{month:'short',day:'numeric'}):''; }
+function r365Strip(s){ return String(s||'').replace(/^(PREP|Prep|YIELD|SEA|PROD|MEAT|DAIRY|BREAD|PLTRY|BEER|RUM|OTHER FOOD|OTHER BAR|MI|DAN)\s+/,'').replace(/^MB\s+/,''); }
+function r365Mism(name){ const k=String(name||'').trim().toLowerCase(); const M=R365_BOOK.mism||{};
+  for(const n of Object.keys(M)) if(n.toLowerCase()===k) return M[n]; return null; }
+// How often each Oracle item sells per guest, measured off the real days that have Oracle's
+// item list saved (tb_daily_history.menu_items). Last 42 such days. Never modeled.
+async function plateRatesLoad(force){
+  const c=S._plateRates;
+  if(c && !force && Date.now()-c.at<30*60e3) return c;
+  const q=await db.from('tb_daily_history').select('business_date,guests,menu_items')
+    .eq('synthetic',false).not('menu_items','is',null).order('business_date',{ascending:false}).limit(42);
+  if(q.error) return (S._plateRates={rates:{},units:{},days:0,err:q.error.message,at:Date.now()});
+  const rows=dhFix(q.data||[]).filter(r=>Number(r.guests)>0 && r.menu_items && typeof r.menu_items==='object');
+  const units={}; let g=0;
+  rows.forEach(r=>{ g+=Number(r.guests);
+    for(const [k,v] of Object.entries(r.menu_items)){ const u=Number(v)||0; if(u>0){ const n=r365Norm(k); units[n]=(units[n]||0)+u; } } });
+  const rates={}; if(g>0) for(const [k,u] of Object.entries(units)) rates[k]=u/g;
+  const ds=rows.map(r=>String(r.business_date)).sort();
+  return (S._plateRates={rates, units, days:rows.length, from:ds[0]||null, to:ds[ds.length-1]||null, guests:g, at:Date.now()});
+}
+// Plates expected (guests × each plate's rate) × what each plate uses → containers per prep.
+function platesNeed(guests){
+  const R=S._plateRates, B=R365_BOOK, need={}, pieces={}, from={};
+  if(!R||!R.days) return {need, pieces, from, ok:false};
+  const add=(obj,k,v,name,pl)=>{ obj[k]=(obj[k]||0)+v; (from[k]=from[k]||[]).push([name,pl]); };
+  for(const [name,per] of Object.entries(B.per||{})){ const pl=guests*(R.rates[name]||0); if(!pl) continue;
+    for(const [grp,c] of Object.entries(per)) add(need, grp.trim().toLowerCase(), pl*c, name, pl); }
+  for(const [name,pc] of Object.entries(B.pieces||{})){ const pl=guests*(R.rates[name]||0); if(!pl) continue;
+    for(const [grp,n] of Object.entries(pc)) add(pieces, grp.trim().toLowerCase(), pl*n, name, pl); }
+  return {need, pieces, from, ok:true};
+}
+// Same rules as prepPlan — same cushion, same min par floor, same ½-batch rounding — with the
+// usage number taken from the plates instead of the menu-group share. Keyed by prepKey.
+function prepPlanPlates(guests){
+  const P=platesNeed(guests); const ss=S.model.safety_stock ?? 0.2; const out={};
+  if(!P.ok) return out;
+  for(const g of prepGroups()){
+    const k=g.key, needC=P.need[k]||0, pcs=P.pieces[k]||0;
+    if(!needC && !pcs) continue;
+    out[k]={g, needC, pieces:pcs, par:Math.max(needC*(1+ss), g.minPar), mism:r365Mism(g.rep.name_en), from:P.from[k]||[]};
+  }
+  return out;
+}
+function platesBatches(pr, onHand){
+  const cpb=pr.g.cpb||1; const deficit=Math.max(0, pr.par-(Number(onHand)||0));
+  const half=x=>x>0?Math.ceil(x*2-1e-9)/2:0;
+  const b=half(deficit/cpb);
+  const bR=(pr.mism&&pr.mism.ratio)?half(deficit/(cpb*pr.mism.ratio)):null;
+  return {deficit, batches:b, make:b*cpb, batchesR:bR};
+}
+// The stat drawn on a manager's prep line, next to the list's own batch box.
+function platesStatHtml(p, onHand){
+  const PL=S._platesPlan; if(!PL) return '';
+  const pr=PL[prepKey(p)];
+  if(!pr) return `<span class="st plates none" title="No plate we sell uses this in R365 (or it isn't matched yet) · Ningún plato lo usa en R365"><i>Plates · Platos</i><b>—</b></span>`;
+  if(!pr.needC && pr.pieces){
+    return `<span class="st plates" title="R365 counts shrimp per plate. How many shrimp fill one ${esc(pr.g.rep.container||'')} isn't known yet — tell Dan with 🐞 · ¿Cuántos camarones caben en un ${esc(pr.g.rep.container||'')}? Díselo a Dan con 🐞"><i>Plates · Platos</i><b>~${Math.round(pr.pieces)} ${isES()?'camarones':'shrimp'}</b><em class="pl">${isES()?'¿cuántos por '+esc(pr.g.rep.container||'bandeja')+'? 🐞':'how many per '+esc(pr.g.rep.container||'pan')+'? 🐞'}</em></span>`;
+  }
+  const B=platesBatches(pr, onHand);
+  const w=n=>isES()?(n===1?'tanda':'tandas'):(n===1?'batch':'batches');
+  return `<span class="st plates" title="From the R365 plate builds: plates expected today × what each plate uses = ~${fmtQ(pr.needC)} ${esc(pr.g.rep.container||'')}. Same cushion, same min par, same ½-batch rounding as the list."><i>Plates · Platos</i><b>${fmtQ(B.batches)} ${w(B.batches)}</b><em class="pl">${isES()?'usa':'uses'} ~${fmtQ(pr.needC)}</em></span>`
+    +(pr.mism&&B.batchesR!=null?`<span class="st plates mism" title="The app's card says one batch makes ${esc(pr.mism.card)}; R365 says ${esc(pr.mism.r365)}. Both shown until Dan says which is right."><i>${isES()?'Tanda R365':'R365 batch size'} (${esc(pr.mism.r365)})</i><b>${fmtQ(B.batchesR)} ${w(B.batchesR)}</b><em class="pl">${isES()?'tarjeta':'card'} ${esc(pr.mism.card)} 🐞</em></span>`:'');
+}
+// The note on top of a manager's list for the side-by-side week.
+function platesNoteHtml(){
+  const R=S._plateRates; if(!S._platesPlan) return '';
+  const es=isES();
+  if(!R||!R.days) return `<div class="plates-note">${es?'<b>Platos (R365):</b> aún no hay días con la lista de platos de Oracle, así que no hay número de platos.':'<b>Plates (R365):</b> no day has Oracle’s plate list saved yet, so there is no plates number.'}</div>`;
+  return `<div class="plates-note"><b>${es?'Semana 1 — lado a lado':'Week 1 — side by side'}</b> · ${es
+    ?`La caja de tandas es la lista de siempre (no cambió). <b>Platos</b> es lo que dicen las recetas de R365: platos esperados hoy × lo que lleva cada plato, con el mismo colchón, el mismo par mínimo y el mismo redondeo de ½ tanda. Platos por cliente medidos en ${R.days} días reales de Oracle (${r365D(R.from)} – ${r365D(R.to)}). ¿Cuál acertó? Díselo a Dan con 🐞.`
+    :`The batch box is the list as always (unchanged). <b>Plates</b> is what the R365 plate builds say: plates expected today × what goes on each plate, same cushion, same min par, same ½-batch rounding. How often each plate sells per guest is measured over ${R.days} real Oracle days (${r365D(R.from)} – ${r365D(R.to)}). Which one was right? Tell Dan with 🐞.`}</div>`;
+}
+// Items the plates say to make that are not on today's list at all.
+function platesAlsoHtml(onList){
+  const PL=S._platesPlan; if(!PL) return '';
+  const es=isES(); const rows=[];
+  for(const [k,pr] of Object.entries(PL)){
+    if(onList.has(k)) continue;
+    if(!pr.needC && pr.pieces){ rows.push({pr, shrimp:Math.round(pr.pieces)}); continue; }
+    const B=platesBatches(pr, groupOnHand(pr.g, S.counts||{}));
+    if(B.batches>0) rows.push({pr, B});
+  }
+  if(!rows.length) return '';
+  const w=n=>es?(n===1?'tanda':'tandas'):(n===1?'batch':'batches');
+  return `<div class="card no-print plates-also">
+    <h3 style="margin:0 0 4px">${es?'Los platos también dicen preparar':'Plates also say make'} <span class="h2sub">${es?'no están en la lista de hoy · solo para comparar':'not on today’s list · for comparison only'}</span></h3>
+    ${rows.map(x=>{ const p=x.pr.g.rep, nm=esc(es&&p.name_es?p.name_es:p.name_en);
+      if(x.shrimp!=null) return `<div class="pa-row"><b>${nm}</b><span>~${x.shrimp} ${es?'camarones':'shrimp'} <em class="pl">${es?'¿cuántos por '+esc(p.container||'bandeja')+'? 🐞':'how many per '+esc(p.container||'pan')+'? 🐞'}</em></span></div>`;
+      return `<div class="pa-row"><b>${nm}</b><span>${fmtQ(x.B.batches)} ${w(x.B.batches)} <em class="pl">${es?'usa':'uses'} ~${fmtQ(x.pr.needC)} · ${es?'hay':'on hand'} ${fmtQ(groupOnHand(x.pr.g,S.counts||{}))} ${esc(p.container||'')}</em>${x.pr.mism&&x.B.batchesR!=null?` <em class="pl">R365: ${fmtQ(x.B.batchesR)}</em>`:''}</span></div>`; }).join('')}
+    <div class="muted" style="font-size:11px;margin-top:6px">${es?'Nada aquí se agrega a la lista. Si alguno hacía falta de verdad, díselo a Dan con 🐞.':'Nothing here is added to the list. If one of these really was needed, tell Dan with 🐞.'}</div>
+  </div>`;
 }
 
 // ---------- roles & access ----------
@@ -6870,6 +6992,7 @@ function danBusyHtml(o){
   const dial=ww&&hrs.some(x=>x.base!==x.g);
   const chips=`<div class="t2-chips">
     <div class="t2-chip"><span>${es?'Pronóstico de cubiertos':'Cover forecast'}</span><b>${guests}</b><i>${es?'probable':'likely'} ${Math.round(R.lo*kk)}–${Math.round(R.hi*kk)}</i></div>
+    ${o.sales!=null?`<div class="t2-chip sales"><span>${es?'Pronóstico de ventas':'Sales forecast'}</span><b>$${Number(o.sales).toLocaleString()}</b><i>${es?'cubiertos × cheque promedio':'covers × average check'}</i></div>`:''}
     ${actD!=null?`<div class="t2-chip"><span>${es?'Cubiertos reales':'Real covers'}</span><b>${actD}</b></div>`:''}
     ${LA?`<div class="t2-chip ly"><span>${es?'El año pasado':'Last year'} · ${esc(LA.short||LA.label)}</span><b>$${Math.round(LA.sales).toLocaleString()}</b><i>${LA.est?'~':''}${LA.guests} ${es?'clientes':'guests'}${LA.est?(es?' (estimados)':' (estimated)'):''}</i></div>`:''}
     ${W?`<div class="t2-chip"><span>${es?'Clima':'Weather'}</span><b>${W.ic} ${W.hi}°${W.lo!=null?` / ${W.lo}°`:''}</b></div>`:''}</div>`;
@@ -6882,6 +7005,7 @@ function danBusyHtml(o){
       return `<div class="t2-hc"${dial&&x.base!==x.g?` title="before your timing dial: ${x.base}"`:''}><span class="t2-hr big">${x.g}</span><div class="t2-hb${x.g/mxH>0.8?' pk':''}" style="height:${Math.round(x.g/mxH*70)}px"></div><span class="t2-hh">${hl(x.h).replace('am','a').replace('pm','p')}</span>${t!=null?`<span class="t2-ht${t>=100?' hot':''}">${t}°</span>`:''}</div>`; }).join('')}</div>
     <div class="t2-hkey"><span>${es?'arriba = cubiertos proyectados esa hora':'top = projected covers that hour'}</span><span><i></i>${es?'presión pico':'peak pressure'}</span>${wh?`<span>${es?'abajo = temperatura':'bottom = temperature'}${wh.src==='monthnorm'?(es?' (normal del mes)':' (the month’s normal)'):''} · <b class="hot">100°+</b></span>`:''}</div>
     <details class="t2-src"><summary>${es?'De dónde sale esta forma ▸':'Where this shape comes from ▸'}</summary><div>${src}</div></details>
+    ${o.extra||''}
   </div>`;
 }
 window.t2Spread=fi=>{ const el=document.getElementById('ih-'+fi); if(el) el.style.display=el.style.display==='none'?'block':'none'; };
@@ -6997,12 +7121,10 @@ async function viewToday(){
     if(can('admin.import')){ if(!S.importsLoaded) loadImports().then(()=>paintImports()); paintSynthetic(); }
     return;
   }
-  let inner=`
-  ${todayAlertsHtml(d)}
-  ${danWeekHtml({d, wk:wkDays, wkFrozen, actualByDate, salesByDate})}
-  ${danBusyHtml({d, hrs, guests, ww, shp, LA, actD:actualByDate[d], lateClose})}
-  ${danTopHtml({d, guests, hrs, swing, realN:realDays.length})}
-  <div class="card">
+  // Sep 29 2026 — Dan: "i want to have these 2 combined. i dont want you to erase anything just combine
+  // them. you can erase the weather that shows under the daily cover forecast … show the daily forecast
+  // ($5992) right under when it gets busy." The forecast block now lives inside the busy-hours card.
+  const fcBlock=`  <div class="t2-fcblock">
     <div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap">
       <input type="date" value="${d}" style="max-width:170px" onchange="S.selDate=this.value;S.guestsOverride=null;S.editPlan=false;render()">
       <div><div class="muted">Cover forecast · Pronóstico de cubiertos</div>
@@ -7010,25 +7132,25 @@ async function viewToday(){
         <span class="big">${guests}</span>
         ${can('today.override')?`<input class="qty no-print" type="number" placeholder="edit" style="width:74px" onchange="S.guestsOverride=Number(this.value)||null;render()">`:''}
       </div></div>
-      ${can('analytics.money')?`<div><div class="muted">Sales forecast · Pronóstico de ventas</div>
-      <div style="display:flex;align-items:center;gap:8px">
-        <span class="big">${salesForecast!=null?'$'+salesForecast.toLocaleString():'—'}</span>
-      </div></div>`:''}
       <div style="margin-left:auto;text-align:right" class="muted">${fmtDate(d)}<br>${lateClose?'11am–9pm':'11am–8pm'}</div>
     </div>
     ${can('analytics.money')?`<div class="muted" style="margin-top:4px;font-size:11.5px">${avgCheck!=null
-      ? `${guests} covers × $${avgCheck.toFixed(2)}/cover average check <span class="drtag est">derived</span> — average check measured across ${realDays.length} real Oracle day${realDays.length===1?'':'s'} on file so far.`
+      ? `Sales forecast · Pronóstico de ventas: ${guests} covers × $${avgCheck.toFixed(2)}/cover average check = <b>$${salesForecast.toLocaleString()}</b> <span class="drtag est">derived</span> — average check measured across ${realDays.length} real Oracle day${realDays.length===1?'':'s'} on file so far.`
       : `No real Oracle day has an average check yet, so there is nothing to multiply the cover forecast by — this fills in as exports upload.`}</div>`:''}
     ${fcNoteHtml(d)}
     ${wxf?`<div style="margin-top:8px;font-size:12.5px;background:var(--sand);border-radius:8px;padding:8px 10px">
       <b>${baseGuests}</b> from the weekday + season pattern, then <b>${wxf.f<1?'−':'+'}${Math.abs(Math.round((wxf.f-1)*1000)/10)}%</b>
       for weather → <b>${adjGuests}</b>. <span class="wx-lab mine">your call</span>
       <span style="color:var(--muted)">The ${wxf.pct}%-per-10° figure is your own estimate; the ${wxf.anom>0?'+':''}${wxf.anom}° anomaly behind it is measured.</span></div>`:''}
-    ${wxCard(d, range, ww, wxf)}
     ${ly?`<div class="muted" style="margin-top:8px;border-top:1px solid var(--sand-dark);padding-top:8px">
       📅 <b>Same day last year${lyRow?` (${esc(lyRow.label)})`:' (estimate)'}:</b> ${lyRow?'':'~'}${ly.guests} guests${can('analytics.money')?` · ${lyRow?'':'~'}$${ly.sales.toLocaleString()} net sales`:''}
       <span style="font-size:11.5px">— source: <b>${lyRow?'daily history table'+(ly.syn?' (sample data — replaced automatically when your Oracle exports upload)':''):'System Financial 2025 totals × season × weekday'}</b></span></div>`:''}
-  </div>
+  </div>`;
+  let inner=`
+  ${todayAlertsHtml(d)}
+  ${danWeekHtml({d, wk:wkDays, wkFrozen, actualByDate, salesByDate})}
+  ${danBusyHtml({d, hrs, guests, ww, shp, LA, actD:actualByDate[d], lateClose, extra:fcBlock, sales:can('analytics.money')?salesForecast:null})}
+  ${danTopHtml({d, guests, hrs, swing, realN:realDays.length})}
   ${card86(d)}`;
   inner += eventsCard();
   inner += dataCard(!!(S.settings||{}).bilingual);
@@ -7213,10 +7335,18 @@ async function applyDailyOperations(bdate, parsed){
   // (Dan approved). Never invented: a file without it writes null.
   const cOk=isFinite(parsed.checks) && parsed.checks>0;
   let historyMsg=null;
+  // Sep 29 2026: Oracle's whole plate list is kept too (menu_items = {ITEM NAME: units}) — the
+  // R365 plate builds turn it into what each prep SHOULD have used, and it's where the plates
+  // per guest are measured. Only written when the file had items, so a file without the item
+  // section never wipes a day that already has them.
+  const menuItems={};
+  (parsed.items||[]).forEach(it=>{ const n=r365Norm(it.name), q=Number(it.qty)||0; if(n && q>0) menuItems[n]=(menuItems[n]||0)+q; });
+  const hasMI=Object.keys(menuItems).length>0;
   if(netOk && gOk){
-    await db.from('tb_daily_history').upsert({business_date:bdate, guests:Math.round(parsed.guests),
+    await db.from('tb_daily_history').upsert(Object.assign({business_date:bdate, guests:Math.round(parsed.guests),
       checks:cOk?Math.round(parsed.checks):null,
-      net_sales:parsed.netSales, synthetic:false});
+      net_sales:parsed.netSales, synthetic:false}, hasMI?{menu_items:menuItems}:{}));
+    if(hasMI) S._plateRates=null;
     historyMsg=`$${parsed.netSales.toLocaleString(undefined,{minimumFractionDigits:2,maximumFractionDigits:2})} net sales · ${Math.round(parsed.guests)} covers${cOk?` · ${Math.round(parsed.checks)} checks`:''}`;
   }
   let itemsLoaded=0, itemsSkipped=0;
@@ -8314,6 +8444,10 @@ async function viewPrep(){
   const guests = S.guestsOverride ?? guestPlan(d);
   const hasTasks = S.tasks.length>0 && !S.editPlan;
   const rows = prepPlan(d, guests, S.counts);
+  // Sep 29 2026 — R365 plate builds, side by side for the first week (managers only: the people
+  // who build the list are the ones who judge which number was right).
+  S._platesPlan=null;
+  if(can('prep.generate')){ try{ await plateRatesLoad(); S._platesPlan=prepPlanPlates(guests); }catch(e){ S._platesPlan=null; } }
   const activeStaff=S.staff.filter(s=>s.active&&s.role!=='admin');
   // Seed the "who's prepping" chips ONLY from the list that already exists — real
   // assignments, never a guess. The old fallback that silently pre-selected the first
@@ -8360,8 +8494,10 @@ async function viewPrep(){
       <h2>Suggested plan · Plan sugerido</h2>
       ${countStatusNote(bil)}
       ${yieldLegend(bil)}
+      ${platesNoteHtml()}
       ${rows.map(r=>taskLine(r,bil)).join('')||'<div class="muted">No demand computed.</div>'}
-    </div>`;
+    </div>
+    ${platesAlsoHtml(new Set(rows.map(r=>r.group?r.group.key:prepKey(r.prep))))}`;
   } else {
     // Per-cook view (approved from mockup Aug 13): a login that cannot build or assign
     // lists sees ONLY its own items — their day, nothing else's. Managers see everything.
@@ -8462,6 +8598,7 @@ async function viewPrep(){
         ${activeStaff.map(s=>`<span class="chip ${S.workingIds.has(s.id)?'on':''}" ${can('prep.assign')?`onclick="togglePerson('${s.id}')"`:''}>${s.name}${assigned.has(s.id)?'':' <span style="opacity:.6;font-weight:500">· nothing yet</span>'}</span>`).join('')}
       </div>
       ${yieldLegend(bil,'tasks')}
+      ${platesNoteHtml()}
       ${can('prep.assign')?`<div class="muted" style="margin-top:8px;font-size:12.5px">Tap a name to add or remove them, then <b>Split evenly</b> to redeal the work — check marks and any hand-edited batch counts are kept. Or move one item at a time with the name dropdown on each line below.</div>`:''}
     </div>`;
     for(const [pid,ts] of Object.entries(byPerson)){
@@ -8497,6 +8634,7 @@ async function viewPrep(){
                 <span class="st"><i>Sell est · Venta</i><b>${t.forecast_qty==null?'—':'~'+fmtQ(t.forecast_qty)}</b></span>
                 <span class="st${p.id?' parchip':''}" ${p.id?`onclick="parSheetOpen('${p.id}')" title="Tap to change the min par · Toca para cambiar el par mínimo"`:''}><i>Min par (${t.container||p.container||''})</i><b>${fmtQ(Number(t.min_par)||Number(p.min_par)||0)}${(ohg&&ohg.ids.length>1)?`<em class="pl">${ohg.ids.length} places</em>`:''}</b></span>
                 <span class="st"><i>On hand · Hay</i><b title="${t.not_counted?'* nobody counted this — 0 is an assumption, not a measurement':'total across every place this item lives'}">${t.not_counted?'0*':oh}</b></span>
+                ${p.id?platesStatHtml(p, t.not_counted?0:oh):''}
               </div>
               <div class="yield" style="justify-content:flex-start">
                 <!-- Dan, Aug 21 2026: MAKES and T.D. cells retired from the list card —
@@ -8520,6 +8658,7 @@ async function viewPrep(){
         ${cookSheet(person?person.name:'SIN ASIGNAR · UNASSIGNED', ts, d)}
       </div>`;
     }
+    inner+=platesAlsoHtml(new Set(S.tasks.filter(t=>t.status!=='removed').map(t=>{ const p=S.preps.find(x=>x.id===t.prep_item_id); return p?prepKey(p):String(t.item_name||'').trim().toLowerCase(); })));
     // The bottom bar + add picker (Dan, Aug 21 2026). The bar never prints.
     if(S.prepAdd&&can('prep.generate')) inner+=prepAddCard();
     inner+=`<div style="height:74px" class="no-print"></div>
@@ -9227,6 +9366,7 @@ function taskLine(r,bil){
         <span class="st parchip" onclick="parSheetOpen('${p.id}')" title="Tap to change the min par · Toca para cambiar el par mínimo"><i>Min par (${cu})</i><b>${fmtQ(r.minPar)}${r.places>1?`<em class="pl">${r.places} places</em>`:''}</b></span>
         <span class="st"><i>Par today (${cu})</i><b>${fmtQ(r.par)}${Number(r.par)>Number(r.minPar)+1e-9?'<em class="pl fc" title="Above the min par because the forecast asks for more">forecast</em>':''}</b></span>
         <span class="st"><i>On hand · Hay (${cu})</i><b title="${nc?'* nobody counted this — 0 is an assumption, not a measurement':'total across every place this item lives'}">${nc?'0*':fmtQ(r.onHand)}</b></span>
+        ${platesStatHtml(p, r.onHand)}
       </div></div>
     <!-- Dan, Aug 31 2026: no station badge and no walk-in/line split on a prep line. The
          prep list is about the item; where it goes afterwards is the cook's job, not the
@@ -10052,7 +10192,12 @@ window.closeFull=()=>{ S.fullRecipe=null; render(); };
 // Everything the card itself printed that isn't the ingredient list or the procedure.
 // Shown on both the collapsed detail and the full page so the two never disagree.
 function rcpChips(r,m){
+  // Sep 29 2026: where our card's batch and R365's batch disagree, both are shown until Dan
+  // says which is right ("in the bug feature ill let you know which one is the correct").
+  const rp=((S.preps||[]).concat(S.removedPreps||[])).find(p=>p.recipe_id===r.id);
+  const mm=rp?r365Mism(rp.name_en):null;
   return [
+    mm?`<span class="st plates mism" title="Both shown until Dan says which is right · Se muestran las dos hasta que Dan diga cuál es"><i>${isES()?'Tanda':'Batch'}: ${isES()?'tarjeta':'card'} ${esc(mm.card)} · R365 ${esc(mm.r365)}</i><b>${isES()?'¿cuál es? díselo a Dan con 🐞':'which is right? tell Dan with 🐞'}</b></span>`:'',
     r.shelf_life_days?`<span class="st"><i>Shelf life</i><b>${r.shelf_life_days} day${r.shelf_life_days>1?'s':''}</b></span>`:
       (m.shelf_life_printed?`<span class="st"><i>Shelf life (as printed)</i><b>${m.shelf_life_printed}</b></span>`:''),
     m.storage?`<span class="st"><i>Storage</i><b>${m.storage}</b></span>`:'',
@@ -10117,12 +10262,81 @@ function fullRecipeHtml(){
     <div class="muted" style="font-size:11.5px;margin-top:8px">Scaling multiplies every measurement — taste and adjust seasonings on large multiples like a chef would.</div>
   </div></div>`;
 }
+// ---- Recipes › Plates (Sep 29 2026) --------------------------------------------------------
+// Every plate Palm Springs sells, with what goes on it, straight from the R365 export. Lines
+// that are one of OUR preps link to that prep's recipe card; lines that are another R365 recipe
+// open underneath. Best-guess matches and Dan's own builds are tagged so nobody mistakes them
+// for R365's word.
+const R365_UNIT={'OZ-wt':'oz','OZ-fl':'fl oz','Each':'each','LB':'lb','tsp':'tsp','Tbsp':'Tbsp','Cup':'cup','Quart':'qt','Gallon':'gal'};
+function r365Title(s){ return String(s||'').toLowerCase().replace(/(^|[\s\-\/&(])([a-z])/g,(m,a,b)=>a+b.toUpperCase()).replace(/\bIt\b/,'IT').replace(/\bSm\b/,'SM').replace(/\bW\//g,'w/'); }
+// Our recipe card for an R365 PREP line, if we have one: R365 name → our prep → its card.
+function r365OurCard(item){
+  const g=(R365_BOOK.prepMap||{})[item]; if(!g) return null;
+  const k=g.trim().toLowerCase();
+  const all=(S.preps||[]).concat(S.removedPreps||[]);
+  const p=all.find(x=>prepKey(x)===k && x.recipe_id && (S.book||[]).some(b=>b.id===x.recipe_id)) || all.find(x=>prepKey(x)===k);
+  return {group:g, recipe_id:p&&p.recipe_id&&(S.book||[]).some(b=>b.id===p.recipe_id)?p.recipe_id:null};
+}
+function plBuildHtml(recipe, path, depth){
+  const lines=(R365_BOOK.builds||{})[recipe]||[];
+  if(!lines.length) return `<div class="muted" style="font-size:12px">${isES()?'Sin líneas en R365.':'No lines in R365.'}</div>`;
+  return `<table class="pl-ing">${lines.map(([item,q,u],i)=>{
+    const our=r365OurCard(item), sub=(R365_BOOK.builds||{})[item]&&depth<3, key=path+'|'+i, open=S.plSub&&S.plSub.has(key);
+    const nm=esc(r365Strip(item));
+    const tag=our?(our.recipe_id?`<span class="pl-tag prep" onclick="event.stopPropagation();openFull('${our.recipe_id}')">${isES()?'nuestra prep ▸':'our prep ▸'}</span>`:`<span class="pl-tag prep" style="cursor:default">${isES()?'nuestra prep':'our prep'}</span>`):'';
+    return `<tr${sub?` style="cursor:pointer" onclick="plSubToggle('${esc(key)}')"`:''}><td class="q"><b>${rcNiceQty(Number(q))}</b> ${R365_UNIT[u]||esc(u)}</td><td>${sub?(open?'▾ ':'▸ '):''}${nm}${tag}${sub&&open?`<div class="pl-sub" onclick="event.stopPropagation()"><div class="muted" style="font-size:11px">${isES()?'receta R365 · rinde':'R365 recipe · makes'} ${esc((R365_BOOK.yields||{})[item]||'?')}</div>${plBuildHtml(item,key,depth+1)}</div>`:''}</td></tr>`; }).join('')}</table>`;
+}
+function plPlatesHtml(){
+  const es=isES(), q=(S.recipeQuery||'').toLowerCase(), R=S._plateRates||{units:{}};
+  const byPlate={}, none=[];
+  for(const [pos,[plate,conf,why]] of Object.entries(R365_BOOK.plates||{})){
+    const sold=(R.units||{})[pos]||0;
+    if(!plate){ none.push({pos,sold}); continue; }
+    const x=byPlate[plate]=byPlate[plate]||{plate, pos:[], sold:0, conf:'high', why:[]};
+    x.pos.push(pos); x.sold+=sold;
+    if(conf==='dan') x.conf='dan'; else if(conf==='check' && x.conf!=='dan') x.conf='check';
+    if(why) x.why.push(why);
+  }
+  let list=Object.values(byPlate).sort((a,b)=>b.sold-a.sold || a.plate.localeCompare(b.plate));
+  if(q) list=list.filter(x=>x.plate.toLowerCase().includes(q) || x.pos.some(p=>p.toLowerCase().includes(q)) || ((R365_BOOK.builds||{})[x.plate]||[]).some(l=>l[0].toLowerCase().includes(q)));
+  const rng=R.days?`${r365D(R.from)} – ${r365D(R.to)}`:'';
+  const rows=list.map((x,i)=>{
+    const open=S.plOpen===x.plate;
+    const nm=esc(r365Strip(x.plate));
+    const tag=x.conf==='check'?`<span class="pl-tag guess" title="${esc(x.why.join(' · '))}">${es?'mejor suposición':'best guess'}</span>`:x.conf==='dan'?`<span class="pl-tag dan">${es?'receta de Dan':'Dan’s build'}</span>`:'';
+    const mb=/^MI MB /.test(x.plate)?`<span class="pl-tag" style="background:var(--sand-dark);color:var(--muted)">Marlin Bar</span>`:'';
+    return `<div class="pl-plate">
+      <div class="rcp-row ${open?'open':''}" onclick="plToggle(${i})">
+        ${ic('caret','ico-sm caret')}<b style="flex:1">${nm}${tag}${mb}</b>
+        ${x.sold?`<span class="muted" style="font-size:12px;white-space:nowrap">${Math.round(x.sold).toLocaleString()} ${es?'vendidos':'sold'}</span>`:''}
+      </div>
+      ${open?`<div style="padding:4px 0 8px 21px">
+        <div class="muted" style="font-size:11.5px;margin-bottom:4px">Oracle: ${x.pos.map(p=>esc(r365Title(p))).join(' · ')}${x.why.length?` — ${esc(x.why.join(' · '))}`:''}</div>
+        <div class="muted" style="font-size:11.5px;margin-bottom:4px">${es?'1 plato · toca una línea ▸ para ver su receta':'1 plate · tap a ▸ line to open it'}</div>
+        ${plBuildHtml(x.plate, 'p'+i, 0)}
+      </div>`:''}
+    </div>`; }).join('');
+  S._plList=list.map(x=>x.plate);
+  const noneF=none.filter(x=>!q||x.pos.toLowerCase().includes(q)).sort((a,b)=>b.sold-a.sold);
+  return `<div class="card">
+    <h2>${es?'Platos · lo que lleva cada plato':'Plates · what goes on each plate'}<span class="h2sub">${list.length} ${es?'platos de R365':'plates from R365'}${rng?` · ${es?'vendidos':'sold'} ${rng}`:''}</span></h2>
+    ${rows||`<div class="muted">${es?'Sin resultados':'No matches'}</div>`}
+    ${noneF.length?`<div style="margin-top:12px;font-size:12.5px"><b>${es?'Sin receta en R365':'No R365 recipe yet'}:</b> <span class="muted">${noneF.map(x=>esc(r365Title(x.pos))+(x.sold?` (${Math.round(x.sold)})`:'')).join(' · ')}</span></div>`:''}
+    <div class="muted" style="font-size:11px;margin-top:8px">${es
+      ?'Fuente: exportación de recetas de R365 (28 sep 2026). <b>mejor suposición</b> = el nombre de Oracle no coincide exacto con R365; <b>receta de Dan</b> = no hay receta en R365, la dio Dan. Si algo está mal, díselo a Dan con 🐞.'
+      :'Source: R365 recipe export (Sep 28 2026). <b>best guess</b> = Oracle’s name doesn’t match R365 exactly; <b>Dan’s build</b> = no R365 recipe, Dan gave it. Anything wrong? Tell Dan with 🐞.'}</div>
+  </div>`;
+}
+window.plToggle=i=>{ const p=(S._plList||[])[i]; S.plOpen=(S.plOpen===p?null:p); rcPaint(); };
+window.plSubToggle=k=>{ S.plSub=S.plSub||new Set(); S.plSub.has(k)?S.plSub.delete(k):S.plSub.add(k); rcPaint(); };
+window.rcModeSet=async m=>{ S.rcMode=m; if(m==='plates') await plateRatesLoad().catch(()=>null); render(); };
 // Why recipe search repaints ONLY #rc-results and never calls render(): a full render
 // rebuilds the <input> you are typing into, which drops focus — on a phone that closes
 // the keyboard after every single letter (Dan hit exactly this). Same rule as the
 // order-guide fix (ogLiveOH): the element being typed into must never be part of what
 // repaints. Works the same on laptop — focus and caret survive every keystroke.
 function rcResultsHtml(){
+  if(S.rcMode==='plates') return plPlatesHtml();
   const q=(S.recipeQuery||'').toLowerCase();
   const list=S.book.filter(r=>!q || r.name.toLowerCase().includes(q) || (r.category||'').toLowerCase().includes(q));
   if(!list.length) return `<div class="card"><div class="muted" style="font-size:13px">No matches · Sin resultados</div></div>`;
@@ -10169,6 +10383,8 @@ async function viewRecipes(){
     S.book=data||[];
   }
   if(S.fullRecipe){ shell(fullRecipeHtml()); return; }
+  if(S.rcMode==='plates') await plateRatesLoad().catch(()=>null);
+  const es=isES(), pm=S.rcMode==='plates';
   shell(`<div class="card">
     <h2>Recipe book · Recetario<span class="h2sub">${S.book.length} recipes from the TB tablets${(()=>{
       // Every recipe lives here, whether or not the kitchen counts it. "On the count list"
@@ -10185,9 +10401,13 @@ async function viewRecipes(){
       if(rm) bits.push(`${rm} belong to items taken off the count list but are kept here`);
       return bits.length?' · '+bits.join(' · '):'';})()}</span></h2>
     <label class="search">${ic('search')}
-      <input type="search" placeholder="Search recipes… · Buscar…" value="${S.recipeQuery||''}"
+      <input type="search" placeholder="${pm?'Search plates or what’s on them… · Buscar platos…':'Search recipes… · Buscar…'}" value="${S.recipeQuery||''}"
         oninput="rcSearch(this.value)">
     </label>
+    <div class="rc-mode no-print">
+      <button class="${pm?'btn-ghost':'btn-primary'} btn-sm" onclick="rcModeSet('recipes')">${es?'Recetas':'Recipes'} · ${S.book.length}</button>
+      <button class="${pm?'btn-primary':'btn-ghost'} btn-sm" onclick="rcModeSet('plates')">${es?'Platos (R365)':'Plates (R365)'} · ${new Set(Object.values(R365_BOOK.plates).map(x=>x[0]).filter(Boolean)).size}</button>
+    </div>
   </div>
   <div id="rc-results">${rcResultsHtml()}</div>`);
 }
@@ -10922,6 +11142,158 @@ async function loadTiming(){
     S.timing=(q.data||[]).map(r=>({name:r.name,detail:r.detail,created_at:r.at})); }catch(e){ S.timing=[]; }
 }
 
+// ---- Used vs should have used — the kitchen AvT (Sep 29 2026) ---------------------------------
+// Admin + Leadership only (Dan's default: "you, Josh, Israel, Patrick").
+// SHOULD = plates Oracle says we sold that week × the R365 plate builds, in each prep's own
+//          containers. Only days with Oracle's plate list count; a week missing any is not graded.
+// USED   = on hand at the start of the week + made (prep ticked done) − wasted − on hand at the
+//          end. Start = Monday's opening count, else Sunday night's close. End = Sunday's close,
+//          else Monday's opening. Same ladder as the day report.
+// A line only gets a gap % when every piece of it was measured. Anything missing is named in
+// the gap column instead ("prep not ticked", "no count") — never filled in, never guessed.
+function AVT_OK(){ const u=pu(); return !!u && ['admin','manager'].includes(pRole(u)); }
+async function avtLoad(mon){
+  const days=weekMonSun(mon), d0=days[0], d6=days[6], prv=shiftDay(d0,-1), nxt=shiftDay(d6,1);
+  const [hq,cq,lq,wq]=await Promise.all([
+    db.from('tb_daily_history').select('business_date,guests,menu_items').eq('synthetic',false).gte('business_date',d0).lte('business_date',d6),
+    db.from('inventory_counts').select('id,notes,status').eq('restaurant_id',TBID).in('notes',[prv+' close', d0, d6+' close', nxt]),
+    db.from('prep_lists').select('id,date,created_at').eq('restaurant_id',TBID).gte('date',d0).lte('date',d6).order('created_at',{ascending:false}),
+    db.from('waste_records').select('*').eq('restaurant_id',TBID).gte('date',d0).lte('date',d6)
+  ]);
+  const cs=cq.data||[]; const at=n=>cs.find(c=>String(c.notes)===n)||null;
+  const cO=at(d0), cP=at(prv+' close'), cC=at(d6+' close'), cN=at(nxt);
+  const cids=[cO,cP,cC,cN].filter(Boolean).map(c=>c.id);
+  const lists={}; (lq.data||[]).forEach(l=>{ const k=String(l.date); if(!lists[k]) lists[k]=l; });   // newest list per day
+  const lids=Object.values(lists).map(l=>l.id);
+  const [ciq,liq]=await Promise.all([
+    cids.length?db.from('inventory_count_items').select('count_id,inventory_item_id,counted_qty').in('count_id',cids):Promise.resolve({data:[]}),
+    lids.length?db.from('prep_list_items').select('prep_list_id,inventory_item_id,recipe_id,item_name,quantity,status,notes').in('prep_list_id',lids):Promise.resolve({data:[]})
+  ]);
+  return {mon, days, d0, d6, hist:dhFix(hq.data||[]), cO, cP, cC, cN, citems:ciq.data||[], lists, litems:liq.data||[], waste:wq.data||[]};
+}
+function avtCompute(A){
+  const groups=prepGroups(); const byKey={}; groups.forEach(g=>byKey[g.key]=g);
+  const idKey={}; groups.forEach(g=>g.ids.forEach(id=>idKey[id]=g.key));
+  const recKey={}; (S.preps||[]).forEach(p=>{ if(p.recipe_id && idKey[p.id]) recKey[p.recipe_id]=idKey[p.id]; });
+  // SHOULD — only from days that carry Oracle's plate list
+  const miDays=A.hist.filter(r=>r.menu_items && typeof r.menu_items==='object').map(r=>String(r.business_date));
+  const should={}, shrimp={}; let plates=0;
+  A.hist.forEach(r=>{ if(!r.menu_items||typeof r.menu_items!=='object') return;
+    for(const [k,v] of Object.entries(r.menu_items)){ const n=r365Norm(k), u=Number(v)||0; if(!u) continue;
+      const per=(R365_BOOK.per||{})[n], pc=(R365_BOOK.pieces||{})[n];
+      if(per||pc) plates+=u;
+      if(per) for(const [grp,c] of Object.entries(per)){ const gk=grp.trim().toLowerCase(); should[gk]=(should[gk]||0)+u*c; }
+      if(pc) for(const [grp,c] of Object.entries(pc)){ const gk=grp.trim().toLowerCase(); shrimp[gk]=(shrimp[gk]||0)+u*c; } } });
+  // COUNTS — per inventory row, then the ladder, then added up per item
+  const cnt={}; A.citems.forEach(it=>{ const m=cnt[it.count_id]=cnt[it.count_id]||{}; m[it.inventory_item_id]=(m[it.inventory_item_id]||0)+(Number(it.counted_qty)||0); });
+  const rd=(c,id)=>(c&&cnt[c.id]&&cnt[c.id][id]!=null)?cnt[c.id][id]:null;
+  const side=(g,a,b)=>{ let t=0,n=0,alt=0; g.ids.forEach(id=>{ const x=rd(a,id); if(x!=null){t+=x;n++;} else { const y=rd(b,id); if(y!=null){t+=y;n++;alt++;} } }); return n?{q:t,n,alt}:null; };
+  // MADE — ticked-done lines; a line without its container count uses batches × containers per batch, flagged
+  const made={}, open={}, est={};
+  A.litems.forEach(it=>{ const m=jparse(it.notes,{}); if(m.removed) return;
+    const gk=idKey[it.inventory_item_id]||recKey[it.recipe_id]||String(it.item_name||'').trim().toLowerCase(); if(!byKey[gk]) return;
+    if(it.status==='done'||it.status==='completed'){
+      let c=m.containers!=null?Number(m.containers):null;
+      if(c==null){ c=(Number(it.quantity)||0)*(byKey[gk].cpb||1); est[gk]=true; }
+      made[gk]=(made[gk]||0)+c;
+    } else open[gk]=(open[gk]||0)+1; });
+  // WASTE
+  const wasted={}; let orphan=0; const wDays=new Set();
+  A.waste.forEach(w=>{ wDays.add(String(w.date)); if(w.reason==='none') return;
+    const gk=idKey[w.inventory_item_id]; if(!gk){ orphan++; return; } wasted[gk]=(wasted[gk]||0)+(Number(w.quantity)||0); });
+  const listDays=Object.keys(A.lists).length;
+  const miOK=miDays.length===7, wasteOK=wDays.size===7 && !orphan;
+  const rows=[];
+  const keys=new Set(Object.keys(should).concat(Object.keys(shrimp)));
+  keys.forEach(gk=>{ const g=byKey[gk]; if(!g) return;
+    const s0=side(g,A.cO,A.cP), s1=side(g,A.cC,A.cN);
+    const mk=made[gk]||0, ws=wasted[gk]||0;
+    const used=(s0&&s1)? s0.q+mk-ws-s1.q : null;
+    let why=null;
+    if(shrimp[gk] && !should[gk]) why='pan';
+    else if(!miOK) why='plates';
+    else if(!s0||!s1) why='count';
+    else if(open[gk]) why='prep';
+    else if(!wasteOK) why='waste';
+    else if(used<0) why='neg';
+    rows.push({g, should:should[gk]||0, shrimp:shrimp[gk]||0, used, made:mk, waste:ws, s0, s1, open:open[gk]||0, est:!!est[gk], why,
+      gap:(why===null && should[gk]>0)? (used-should[gk])/should[gk] : null});
+  });
+  rows.sort((a,b)=>(b.should-a.should)||(b.shrimp-a.shrimp));
+  return {rows, plates, miDays, listDays, wDays:wDays.size, orphan, miOK, wasteOK,
+    startSrc:A.cO?'open':(A.cP?'close_prev':null), endSrc:A.cC?'close':(A.cN?'open_next':null)};
+}
+function avtHtml(A){
+  const es=isES(), C=avtCompute(A);
+  const sd=d=>dateObjLA(d).toLocaleDateString(es?'es-US':'en-US',{weekday:'short',month:'short',day:'numeric'});
+  const WHY={pan:[es?'tamaño de bandeja ?':'pan size ?', es?'No se sabe cuántos camarones caben en una bandeja':'How many shrimp fill a pan isn’t known yet'],
+    plates:[es?'faltan platos':'plates missing', es?'No todos los días de la semana tienen la lista de platos de Oracle':'Not every day this week has Oracle’s plate list'],
+    count:[es?'sin conteo':'no count', es?'Falta el conteo al inicio o al final de la semana':'No count at the start or end of the week'],
+    prep:[es?'prep sin marcar':'prep not ticked', es?'Hubo prep en la lista que nunca se marcó hecha — no se sabe cuánto se hizo':'Something on a list was never ticked done — how much was made isn’t known'],
+    waste:[es?'merma sin anotar':'waste not logged', es?'No se anotó la merma (o “nada”) todos los días':'Waste (or “nothing wasted”) wasn’t logged every day'],
+    neg:[es?'no cuadra':'doesn’t add up', es?'Salió negativo: algo se contó o se hizo sin anotar':'Came out negative: something was counted or made without being logged']};
+  const n=x=>x==null?'—':(Math.abs(x)<10?(Math.round(x*10)/10).toFixed(1):Math.round(x).toString());
+  const graded=C.rows.filter(r=>r.gap!=null).length;
+  const src={open:es?'apertura del lunes':'Monday opening', close_prev:es?'cierre del domingo anterior':'the Sunday before, closing', close:es?'cierre del domingo':'Sunday closing', open_next:es?'apertura del lunes siguiente':'next Monday opening'};
+  const ok=(b,t)=>`<span class="avt-badge" style="${b?'background:#e6f3ea;color:var(--palm)':'background:#fdeaea;color:#b23b3b'}">${b?'✓':'✗'} ${t}</span>`;
+  return `<div style="display:flex;align-items:center;gap:8px;margin:4px 0 8px">
+      <button class="btn-ghost btn-sm" onclick="avtShift(-7)">‹</button>
+      <b style="flex:1;text-align:center">${sd(A.d0)} – ${sd(A.d6)}</b>
+      <button class="btn-ghost btn-sm" onclick="avtShift(7)">›</button></div>
+    <div class="muted" style="font-size:12px;margin-bottom:6px">${Math.round(C.plates).toLocaleString()} ${es?'platos vendidos con receta':'plates sold with a build'} · ${es?'en contenedores de cada prep':'in each prep’s own containers'}</div>
+    <div style="display:flex;gap:5px;flex-wrap:wrap;margin-bottom:8px">
+      ${ok(C.miOK, `${es?'platos Oracle':'Oracle plates'} ${C.miDays.length}/7`)}
+      ${ok(!!C.startSrc, `${es?'conteo inicio':'start count'}${C.startSrc?': '+src[C.startSrc]:''}`)}
+      ${ok(!!C.endSrc, `${es?'conteo final':'end count'}${C.endSrc?': '+src[C.endSrc]:''}`)}
+      <span class="avt-badge">${es?'listas de prep':'prep lists'} ${C.listDays}/7</span>
+      ${ok(C.wasteOK, `${es?'merma anotada':'waste logged'} ${C.wDays}/7${C.orphan?` · ${C.orphan} ${es?'sin artículo':'with no item'}`:''}`)}
+    </div>
+    ${C.rows.length?`<table class="avt-t" style="width:100%;border-collapse:collapse">
+      <tr><th>${es?'Artículo':'Item'}</th><th>${es?'Debido':'Should'}</th><th>${es?'Usado':'Used'}</th><th>${es?'Diferencia':'Gap'}</th></tr>
+      ${C.rows.map(r=>{ const p=r.g.rep, nm=esc(es&&p.name_es?p.name_es:p.name_en);
+        const tip=`${es?'inicio':'start'} ${r.s0?n(r.s0.q):'—'} + ${es?'hecho':'made'} ${n(r.made)}${r.est?(es?' (estimado)':' (estimated)'):''} − ${es?'merma':'waste'} ${n(r.waste)} − ${es?'final':'end'} ${r.s1?n(r.s1.q):'—'}`;
+        const gapTxt=r.gap!=null?`<b style="color:${Math.abs(r.gap)<=0.15?'var(--palm)':(r.gap>0?'var(--coral)':'#3b5a8c')}">${r.gap>0?'+':''}${Math.round(r.gap*100)}%</b>`:`<span class="avt-badge" title="${esc(WHY[r.why][1])}">${WHY[r.why][0]}</span>`;
+        return `<tr><td>${nm}<div class="muted" style="font-size:10.5px">${esc(p.container||'')}${r.est?` · ${es?'hecho estimado':'made estimated'}`:''}</div></td>
+          <td>${r.shrimp&&!r.should?`~${Math.round(r.shrimp)} ${es?'camarones':'shrimp'}`:n(r.should)}</td><td title="${esc(tip)}">${n(r.used)}</td><td>${gapTxt}</td></tr>`; }).join('')}
+    </table>`:`<div class="muted">${es?'No hay platos de Oracle esta semana.':'No Oracle plates this week.'}</div>`}
+    <div class="muted" style="font-size:11px;margin-top:8px">${graded
+      ?`${graded} ${es?'de':'of'} ${C.rows.length} ${es?'artículos se pudieron medir completos.':'items could be measured end to end.'} `
+      :`${es?'Ningún artículo se pudo medir completo esta semana — las etiquetas dicen qué faltó.':'No item could be measured end to end this week — the tags say what was missing.'} `}${es
+      ?'<b>Debido</b> = platos que Oracle dice que vendimos × lo que lleva cada plato (R365). <b>Usado</b> = inicio + hecho − merma − final (toca el número para ver la cuenta). Para que funcione: marcar la prep hecha, anotar la merma (o “nada”) cada día, y contar el lunes y el domingo.'
+      :'<b>Should</b> = plates Oracle says we sold × what goes on each plate (R365). <b>Used</b> = start + made − waste − end (tap the number to see the math). To make it work: tick prep done, log waste (or “nothing wasted”) every day, and count on Monday and Sunday.'}</div>`;
+}
+window.avtShift=async k=>{ S.avtMon=shiftDay(S.avtMon,k); await avtPaint(); };
+async function avtPaint(){
+  const el=document.getElementById('avtcard'); if(!el) return;
+  if(!S.avtMon){
+    // Opens on the newest week that can be read end to end: all 7 days carry Oracle's plate
+    // list AND there is a count at both ends. Failing that, the newest week with plates.
+    const [mq,cq]=await Promise.all([
+      db.from('tb_daily_history').select('business_date').eq('synthetic',false).not('menu_items','is',null).order('business_date',{ascending:false}).limit(120),
+      db.from('inventory_counts').select('notes').eq('restaurant_id',TBID).gte('notes','2026-07-01')]);
+    const mi=new Set((mq.data||[]).map(r=>String(r.business_date))), cn=new Set((cq.data||[]).map(r=>String(r.notes)));
+    const last=(mq.data&&mq.data[0])?String(mq.data[0].business_date):todayLA();
+    let mon=weekMonSun(last)[0], pick=null, fallback=null;
+    for(let i=0;i<10;i++){ const wk=weekMonSun(mon);
+      const full=wk.every(x=>mi.has(x));
+      const ends=(cn.has(wk[0])||cn.has(shiftDay(wk[0],-1)+' close')) && (cn.has(wk[6]+' close')||cn.has(shiftDay(wk[6],1)));
+      if(full && !fallback) fallback=mon;
+      if(full && ends){ pick=mon; break; }
+      mon=shiftDay(mon,-7); }
+    S.avtMon=pick||fallback||weekMonSun(last)[0];
+  }
+  const mon=S.avtMon;
+  el.innerHTML=`<div class="muted">${isES()?'Cargando…':'Loading…'}</div>`;
+  let A; try{ A=await avtLoad(mon); }catch(e){ el.innerHTML=`<div class="muted">Could not load: ${esc(e.message||e)}</div>`; return; }
+  if(S.avtMon!==mon) return;
+  const el2=document.getElementById('avtcard'); if(el2) el2.innerHTML=avtHtml(A);
+}
+function avtCardHtml(){
+  if(!AVT_OK()) return '';
+  return `<div class="card"><h2 style="margin-bottom:2px">${isES()?'Usado vs debido · Used vs should have used':'Used vs should have used · Usado vs debido'}</h2>
+    <div class="muted" style="font-size:11.5px">${isES()?'Solo Admin y Liderazgo · por semana, lunes a domingo':'Admin + Leadership only · by week, Monday to Sunday'}</div>
+    <div id="avtcard"><div class="muted">${isES()?'Cargando…':'Loading…'}</div></div></div>`;
+}
 async function viewAnalytics(){
   // Monthly report replaces the whole Analytics screen while it is open — same pattern
   // as the full-page recipe. Everything else about Analytics stays untouched.
@@ -11161,6 +11533,7 @@ async function viewAnalytics(){
   shell(`
   ${reportBuilderCard()}
   ${GRADES()?fcLedgerCardHtml():''}
+  ${avtCardHtml()}
   ${timingCardHtml()}
   <div class="card">
     <h2 style="margin-bottom:8px">Analytics · Analíticas</h2>
@@ -11364,6 +11737,7 @@ async function viewAnalytics(){
     ${anaSrc('Your own entries (waste_records). <b>Measured data.</b> No dollar figures shown anywhere on this panel — no cost-per-container data has been loaded, and I am not going to invent one.')}
   </div>`);
   renderDayReport(S.anaDay);
+  if(AVT_OK()) avtPaint();
 }
 
 window.logActual=async()=>{
