@@ -726,6 +726,9 @@
   .grip:focus-visible{outline:2px solid var(--lagoon);outline-offset:1px}
   /* What you are holding, and where it will land. Without these the row gives no feedback
      at all while dragging -- you cannot tell whether it took. */
+  /* A number that would not save. Loud on purpose — this is the row that used to go in as 0. */
+  .count-row.cnt-unsaved{background:#fdeaea;border-radius:10px;box-shadow:inset 0 0 0 2px #b23b3b}
+  .count-row.cnt-unsaved .nm b::after{content:' · NOT SAVED';color:#b23b3b;font-size:11px;font-weight:800;letter-spacing:.4px}
   .count-row.drag{opacity:.5;background:var(--sand);border-radius:10px}
   .count-row.over{box-shadow:inset 0 3px 0 0 var(--palm)}
   .count-row.over-lo{box-shadow:inset 0 -3px 0 0 var(--palm)}
@@ -1390,7 +1393,7 @@ const SB_KEY='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZ
 const TBID='9f8d7c6b-5a49-4e38-b271-06d5f00dbeef'; // Tommy Bahama tenant inside ChefOpsAI
 // Stamped by publish.sh at upload time. It is the only version label there is now —
 // one address, updated in place, so this tells you which build that address is serving.
-const BUILD='Sep 30, 2026 · datasets: raw count, comps, prices';
+const BUILD='Sep 30, 2026 · count save + recipe search + paired par';
 // ---------- IS THIS PHONE EVEN RUNNING THE LATEST BUILD? ----------
 // Sep 3 2026. Three prep fixes shipped and Dan still saw the old behaviour, because the app
 // installs to the home screen and an installed web app does not go back and re-fetch its own
@@ -1618,6 +1621,11 @@ const S = { user:null, staff:[], families:[], preps:[], model:null, settings:nul
             // who always starts on the line does not have to re-pick it every morning.
             // countedAt: when each item's number actually went in, straight off the row.
             countSection:'walkin', countedAt:{}, addTo:null, addQ:'',
+            // Count-save integrity (Sep 30 2026). cntFailed: numbers that would not save, kept
+            // so they can be retried and so submit can refuse to run while any are outstanding.
+            // _cntRowId: the row each item already owns, so a second save never inserts a twin.
+            // _cntQ / _cntAll: one queue per item, and every save in flight.
+            cntFailed:{}, _cntRowId:{}, _cntQ:{}, _cntAll:new Set(),
             // parMode flips the SAME count list into setting minimum pars. Same rail, same
             // groups, same walk order — only the box changes meaning, from "what is here
             // today" to "what should always be here". Chosen over a separate screen (Dan,
@@ -2896,6 +2904,8 @@ async function loadAll(){
 // to be able to say "last night's closing count is already submitted" without a second trip,
 // and submitting one of them needs to know whether the other one exists.
 async function loadCounts(dstr){
+  S.cntFailed={}; S._cntRowId={}; S._cntQ={}; S._cntAll=new Set();
+  try{ cntUnsavedPaint(); }catch(e){}
   S.counts={}; S.split={}; S.zeroMark={}; S.cantCount={}; S.countedAt={}; S.rawUnit={}; S.countId=null; S.count=null; S.countRows={open:null, close:null};
   const {data:cs}=await db.from('inventory_counts').select('*').eq('restaurant_id',TBID)
     .in('notes',[dstr, dstr+' close']);
@@ -2913,8 +2923,15 @@ async function loadCounts(dstr){
   const act=S.countRows[S.countWhen==='close'?'close':'open'];
   if(!act) return;
   S.countId=act.id; S.count=act;
-  (items||[]).filter(it=>it.count_id===act.id).forEach(it=>{
+  // Duplicates exist in the data (the old select-then-insert race made them, and there is no
+  // unique key on the table to stop them). Reading them in whatever order PostgREST returned
+  // meant the OLDER row could win and a number Dan typed could come back as the value before
+  // it — sometimes 0. Oldest first, so the NEWEST row is the one that lands, every time.
+  const mine=(items||[]).filter(it=>it.count_id===act.id)
+    .sort((a,b)=>String(a.counted_at||'').localeCompare(String(b.counted_at||'')));
+  mine.forEach(it=>{
     const m=jparse(it.notes,null);
+    S._cntRowId[it.inventory_item_id]=it.id;   // later saves update THIS row instead of inserting
     // Kept for BOTH branches: "could not count" is still a moment somebody stood there and
     // looked, so it counts toward when the station was started.
     if(it.counted_at) S.countedAt[it.inventory_item_id]=it.counted_at;
@@ -3008,6 +3025,22 @@ async function existingList(d){
           done:rows.filter(r=>r.status==='done'||r.status==='completed').length};
 }
 window.submitCount=async()=>{ if(!guard('count.start')) return;
+  // The last number typed is still being written when the thumb reaches Submit — the change
+  // event fires on blur and the save is three round trips long. Reading the totals here used
+  // to beat it, and that item went in as a zero. Wait for every save first.
+  const inFocus=document.activeElement;
+  if(inFocus && /^cin-/.test(inFocus.id||'')) inFocus.blur();
+  await cntSettled();
+  // Anything that genuinely would not save stops the submit dead. Building a prep list on a
+  // number the database never received is the one outcome Dan asked to never happen again.
+  const bad=Object.keys(S.cntFailed||{});
+  if(bad.length){
+    const names=bad.slice(0,8).map(pid=>'• '+((S.preps.find(x=>x.id===pid)||{}).name_en||pid)
+      +' = '+fmtQ(S.cntFailed[pid].v)).join('\n')+(bad.length>8?`\n• …and ${bad.length-8} more`:'');
+    alert(`${bad.length} number(s) never reached the database, so they are NOT part of this count:\n\n${names}\n\nSubmitting now would treat them as not counted. Tap "Try again" on the red bar at the bottom first.\n\n${bad.length} número(s) no se guardaron. Toca "Try again" antes de enviar.`);
+    cntUnsavedPaint();
+    return;
+  }
   const d=S.selDate, cid=S.countId; tbMark('count.submit', d);
   if(!cid) return toast('Start the count first');
   const when=(S.count&&S.count.when)||'open';
@@ -3203,42 +3236,162 @@ async function measuredAvgCheck(){
   return g>0 ? n/g : null;
 }
 // where = 'w' (walk-in) or 'l' (line). Total is always the sum of the two.
-async function upsertCountItem(cid,pid,payload){
-  const {data:ex}=await db.from('inventory_count_items').select('id').eq('count_id',cid).eq('inventory_item_id',pid).limit(1);
-  if(ex&&ex.length) await db.from('inventory_count_items').update(payload).eq('id',ex[0].id);
-  else await db.from('inventory_count_items').insert({count_id:cid, inventory_item_id:pid, ...payload});
+// ---- COUNT SAVE INTEGRITY — Sep 30 2026 (Dan: "it says it's on zero but for some i did input")
+// Four ways a number Dan typed used to disappear, all fixed here:
+//  1. upsertCountItem did select-then-insert with no lock and no error check. Two saves for the
+//     same item milliseconds apart (the + stepper tapped twice) both found no row and both
+//     INSERTED. The database has no unique key on (count_id,inventory_item_id), so it kept both.
+//     loadCounts then read them in no particular order and the OLDER, lower row could win —
+//     which is how a 2 became a 0. Proof in the data: 27 duplicate pairs, several 3-8ms apart,
+//     always <n> then <n+1>. Now every item has a one-at-a-time queue and, once its row id is
+//     known, saves UPDATE that exact row. No second insert is possible.
+//  2. Number(v)||0 turned anything unparseable into a silent zero — including "1,5", which is
+//     what an Android keyboard in Spanish gives you, and this app is bilingual. Now a comma is
+//     read as a decimal point and real junk is refused out loud instead of being stored as 0.
+//  3. catch(e){} swallowed every failure. A dropout in the walk-in meant no save, no warning,
+//     and the typed number still sitting on screen looking saved. Now it retries, and if it
+//     still cannot save it says so, marks the row red, and remembers it.
+//  4. Submit read the totals while saves were still in flight. Now it waits for them.
+// (Merged Sep 30 with the raw-row unit switch: the typed value is converted to the row's base
+//  unit inside saveCountOnce, and what was typed + its unit ride along in the notes.)
+const CNT_RETRY=[0,400,1200];                 // three tries, backing off — a walk-in dropout is brief
+function parseCount(v){
+  const raw=String(v==null?'':v).trim().replace(',','.');
+  if(raw==='') return {empty:true};
+  const n=Number(raw);
+  if(!isFinite(n)||n<0) return {bad:true};
+  return {n:Math.round(n*1000)/1000};
 }
-window.saveCount=async(pid,where,v)=>{ if(!guard('count.start')) return;
+function cntRowRed(pid,on){
+  const row=document.getElementById('crow-'+pid); if(!row) return;
+  row.classList.toggle('cnt-unsaved',!!on);
+  if(on) row.classList.remove('done');
+}
+// One promise chain per item. Two taps on + can no longer race each other into two rows.
+function cntQueue(pid,fn){
+  const q=(S._cntQ[pid]||Promise.resolve()).then(fn,fn);
+  S._cntQ[pid]=q.catch(()=>{});
+  S._cntAll.add(q); q.catch(()=>{}).then(()=>S._cntAll.delete(q));
+  return q;
+}
+// Every save for an item after the first one UPDATEs the row id we already know, so there is
+// no select to lose a race with. The id is learned once, from the insert or from loadCounts.
+async function upsertCountItem(cid,pid,payload){
+  const known=S._cntRowId[pid];
+  if(known){
+    // .select() matters: an update whose id no longer exists comes back with NO error and
+    // zero rows. Without checking what it touched, a deleted row would look like a good save.
+    const {data:up,error}=await db.from('inventory_count_items').update(payload).eq('id',known).select('id');
+    if(error) throw new Error(error.message||'update failed');
+    if(up&&up.length) return;
+    delete S._cntRowId[pid];                 // row is gone — fall through and find or make one
+  }
+  const {data:ex,error:selErr}=await db.from('inventory_count_items')
+    .select('id').eq('count_id',cid).eq('inventory_item_id',pid).order('counted_at',{ascending:false}).limit(1);
+  if(selErr) throw new Error(selErr.message||'lookup failed');   // never fall through to a blind insert
+  if(ex&&ex.length){
+    S._cntRowId[pid]=ex[0].id;
+    const {data:up2,error}=await db.from('inventory_count_items').update(payload).eq('id',ex[0].id).select('id');
+    if(error) throw new Error(error.message||'update failed');
+    if(!up2||!up2.length) throw new Error('row disappeared mid-save');
+    return;
+  }
+  const {data:ins,error:insErr}=await db.from('inventory_count_items')
+    .insert({count_id:cid, inventory_item_id:pid, ...payload}).select('id').single();
+  if(insErr) throw new Error(insErr.message||'insert failed');
+  if(ins&&ins.id) S._cntRowId[pid]=ins.id;
+}
+async function saveCountOnce(pid,where,val,now){
   const d=S.selDate;
-  // typing a real number clears either mark — the number is now the answer
-  delete S.zeroMark[pid]; delete S.cantCount[pid];
   const cur=S.split[pid]||{w:0,l:0};
-  const next={w:cur.w, l:cur.l};
+  const next={w:Number(cur.w)||0, l:Number(cur.l)||0};
   // Raw rows: the box may be in the other unit — convert to the base unit, keep what was typed.
   const rp=S.preps.find(x=>x.id===pid), ru=(rp&&rp.raw)?rawUnitOf(rp):null;
-  const typed=Number(v)||0;
-  next[where]=ru ? Math.round(rawToBase(rp,typed,ru)*1000)/1000 : typed;
-  if(ru){ next.typed=typed; next.tu=ru; }
+  next[where]=ru ? Math.round(rawToBase(rp,val,ru)*1000)/1000 : val;
+  if(ru){ next.typed=val; next.tu=ru; }
   const qty=Math.round((next.w+next.l)*1000)/1000;
+  const cid=await ensureCount(d);
+  const payload={counted_qty:qty, counted_at:now, status:'counted', notes:JSON.stringify(next)};
+  await upsertCountItem(cid,pid,payload);
+  const {error:invErr}=await db.from('inventory').update({current_qty:qty}).eq('id',pid);
+  if(invErr) throw new Error(invErr.message||'inventory update failed');
+  return {next,qty,rp,ru};
+}
+window.saveCount=(pid,where,v)=>{ if(!guard('count.start')) return Promise.resolve();
+  const p=parseCount(v);
+  const rp0=S.preps.find(x=>x.id===pid);
+  const showSaved=()=>{ const inp=document.getElementById('cin-'+pid); if(!inp) return;
+    inp.value=(rp0&&rp0.raw)?rawShown(rp0):(S.split[pid]?fmtQ(S.counts[pid]):''); };
+  if(p.bad){
+    // Refuse loudly. The old code stored 0 here and nobody ever knew.
+    toast('That is not a number · Eso no es un número');
+    showSaved();
+    return Promise.resolve();
+  }
+  if(p.empty){                                  // cleared the box — leave it uncounted, do not store 0
+    showSaved();
+    return Promise.resolve();
+  }
   const now=new Date().toISOString();
-  try{
-    const cid=await ensureCount(d);
-    const payload={counted_qty:qty, counted_at:now, status:'counted', notes:JSON.stringify(next)};
-    await upsertCountItem(cid,pid,payload);
-    await db.from('inventory').update({current_qty:qty}).eq('id',pid);
-    S.split[pid]=next; S.counts[pid]=qty;
-    // First number in this station stamps when it was started, and the stamp never moves
-    // afterwards — it is the moment somebody actually stood there, not the latest edit.
-    if(!S.countedAt[pid]) S.countedAt[pid]=now;
-    const el=document.getElementById('tot-'+pid); if(el) el.textContent=fmtQ(qty);
-    const inp=document.getElementById('cin-'+pid);
-    if(ru){ if(inp) inp.value=rawShown(rp); const oth=document.getElementById('co-'+pid); if(oth) oth.innerHTML=rawOtherTxt(rp); }
-    else if(inp && String(inp.value)!==String(fmtQ(qty))) inp.value=fmtQ(qty);
-    const row=document.getElementById('crow-'+pid); if(row) row.classList.add('done');
-    refreshCountTallies(); refreshStationRail();
-    toast('Saved ✔');
-  }catch(e){}
+  return cntQueue(pid, async()=>{
+    // These maps are built by loadCounts. A save must never be the thing that throws because
+    // one of them is missing — losing the number is the failure this whole block exists to stop.
+    S.zeroMark=S.zeroMark||{}; S.cantCount=S.cantCount||{}; S.cntFailed=S.cntFailed||{};
+    S.counts=S.counts||{}; S.split=S.split||{}; S.countedAt=S.countedAt||{}; S._cntRowId=S._cntRowId||{};
+    delete S.zeroMark[pid]; delete S.cantCount[pid];
+    let lastErr=null;
+    for(let i=0;i<CNT_RETRY.length;i++){
+      if(CNT_RETRY[i]) await new Promise(r=>setTimeout(r,CNT_RETRY[i]));
+      try{
+        const {next,qty,rp,ru}=await saveCountOnce(pid,where,p.n,now);
+        S.split[pid]=next; S.counts[pid]=qty;
+        delete S.cntFailed[pid];
+        // First number in this station stamps when it was started, and the stamp never moves
+        // afterwards — it is the moment somebody actually stood there, not the latest edit.
+        if(!S.countedAt[pid]) S.countedAt[pid]=now;
+        const el=document.getElementById('tot-'+pid); if(el) el.textContent=fmtQ(qty);
+        const inp=document.getElementById('cin-'+pid);
+        if(ru){ if(inp) inp.value=rawShown(rp); const oth=document.getElementById('co-'+pid); if(oth) oth.innerHTML=rawOtherTxt(rp); }
+        else if(inp && String(inp.value)!==String(fmtQ(qty))) inp.value=fmtQ(qty);
+        const row=document.getElementById('crow-'+pid); if(row) row.classList.add('done');
+        cntRowRed(pid,false);
+        refreshCountTallies(); refreshStationRail(); cntUnsavedPaint();
+        toast('Saved ✔');
+        return;
+      }catch(e){ lastErr=e; }
+    }
+    // Three tries and it still would not save. Keep the number, say so, make the row obvious.
+    S.cntFailed[pid]={where, v:p.n, at:now, err:(lastErr&&lastErr.message)||'no connection'};
+    cntRowRed(pid,true);
+    const nm=(S.preps.find(x=>x.id===pid)||{}).name_en||'that item';
+    toast('NOT saved — '+nm+' · NO se guardó');
+    cntUnsavedPaint();
+  });
 };
+// A standing banner while anything is unsaved, so it cannot be missed on a phone in a walk-in.
+function cntUnsavedPaint(){
+  const n=Object.keys(S.cntFailed||{}).length;
+  let bar=document.getElementById('cnt-unsaved-bar');
+  if(!n){ if(bar) bar.remove(); return; }
+  if(!bar){
+    bar=document.createElement('div'); bar.id='cnt-unsaved-bar'; bar.className='no-print';
+    bar.style.cssText='position:fixed;left:8px;right:8px;bottom:8px;z-index:9000;background:#b23b3b;color:#fff;border-radius:11px;padding:11px 13px;font-size:13px;font-weight:700;display:flex;gap:10px;align-items:center;box-shadow:0 6px 18px rgba(0,0,0,.28)';
+    document.body.appendChild(bar);
+  }
+  bar.innerHTML=`<span style="flex:1;line-height:1.35">${n} number${n>1?'s':''} did NOT save · ${n} número${n>1?'s':''} NO se guardó<br>
+    <span style="font-weight:400;opacity:.92;font-size:12px">Do not submit yet — tap to try again · No envíes todavía</span></span>
+    <button onclick="cntRetryAll()" style="background:#fff;color:#b23b3b;border:none;border-radius:8px;font-weight:800;font-size:13px;padding:9px 12px;cursor:pointer;font-family:inherit">Try again</button>`;
+}
+window.cntRetryAll=async()=>{
+  const pending=Object.entries(S.cntFailed||{});
+  if(!pending.length) return;
+  toast('Trying again · Reintentando');
+  for(const [pid,f] of pending){ await saveCount(pid,f.where,f.v); }
+  const left=Object.keys(S.cntFailed||{}).length;
+  toast(left?left+' still not saved · '+left+' sin guardar':'All saved ✔ · Todo guardado');
+};
+// Everything still in flight, so submit never reads a half-written count.
+function cntSettled(){ return Promise.all([...S._cntAll].map(p=>p.catch(()=>{}))); }
 // The stepper. Reads what is on screen rather than only what is in state, so a number typed
 // but not yet committed is what gets bumped — tapping + right after typing 3 gives 4, not 1.
 // WHOLE steps. Half-steps were tried on Aug 17 2026 and Dan rejected them after using it:
@@ -4055,25 +4208,32 @@ window.markNotPrepped=async(pid)=>{ if(!guard('count.start')) return;
   try{
     const cid=await ensureCount(S.selDate);
     if(S.zeroMark[pid]){
-      await db.from('inventory_count_items').delete().eq('count_id',cid).eq('inventory_item_id',pid);
-      delete S.zeroMark[pid]; delete S.counts[pid]; delete S.split[pid];
+      const {error}=await db.from('inventory_count_items').delete().eq('count_id',cid).eq('inventory_item_id',pid);
+      if(error) throw new Error(error.message);
+      delete S._cntRowId[pid];               // the row it pointed at is gone
+      delete S.zeroMark[pid]; delete S.counts[pid]; delete S.split[pid]; delete S.cntFailed[pid];
+      cntRowRed(pid,false);
       toast('Cleared · Borrado');
     } else {
       delete S.cantCount[pid];
       await upsertCountItem(cid,pid,{counted_qty:0, counted_at:new Date().toISOString(),
         status:'counted', notes:JSON.stringify({w:0,l:0,zero:'not_prepped'})});
-      await db.from('inventory').update({current_qty:0}).eq('id',pid);
+      const {error:ie}=await db.from('inventory').update({current_qty:0}).eq('id',pid);
+      if(ie) throw new Error(ie.message);
       S.counts[pid]=0; S.split[pid]={w:0,l:0}; S.zeroMark[pid]=true;
+      delete S.cntFailed[pid]; cntRowRed(pid,false);
       toast('Not prepped — real zero ✔ · No preparado');
     }
-    render();
-  }catch(e){}
+    cntUnsavedPaint(); render();
+  }catch(e){ toast('Did NOT save · NO se guardó — '+((e&&e.message)||'no connection')); }
 };
 window.markCantCount=async(pid)=>{ if(!guard('count.start')) return;
   try{
     const cid=await ensureCount(S.selDate);
     if(S.cantCount[pid]){
-      await db.from('inventory_count_items').delete().eq('count_id',cid).eq('inventory_item_id',pid);
+      const {error}=await db.from('inventory_count_items').delete().eq('count_id',cid).eq('inventory_item_id',pid);
+      if(error) throw new Error(error.message);
+      delete S._cntRowId[pid];
       delete S.cantCount[pid];
       toast('Cleared · Borrado');
     } else {
@@ -4081,10 +4241,11 @@ window.markCantCount=async(pid)=>{ if(!guard('count.start')) return;
       await upsertCountItem(cid,pid,{counted_qty:null, counted_at:new Date().toISOString(),
         status:'skipped', notes:JSON.stringify({skip:true})});
       S.cantCount[pid]=true;
+      delete S.cntFailed[pid]; cntRowRed(pid,false);
       toast('Marked: could not count · Sin contar');
     }
-    render();
-  }catch(e){}
+    cntUnsavedPaint(); render();
+  }catch(e){ toast('Did NOT save · NO se guardó — '+((e&&e.message)||'no connection')); }
 };
 
 // ---------- waste log ----------
@@ -10473,6 +10634,18 @@ window.rcModeSet=async m=>{ S.rcMode=m; if(m==='plates') await plateRatesLoad().
 // repaints. Works the same on laptop — focus and caret survive every keystroke.
 function rcResultsHtml(){
   if(S.rcMode==='plates') return plPlatesHtml();
+  // The book can be null: the wake-up refresh clears it, and the screen stays up while it
+  // reloads. Typing in that window used to throw "Cannot read properties of null (reading
+  // 'filter')" and the whole screen died mid-keystroke (Dan, Sep 19). Never assume it is there.
+  if(!Array.isArray(S.book)){
+    if(S._bookErr) return `<div class="card"><div class="up-warn" style="margin:0">
+      <b>Could not load the recipe book · No se pudo cargar el recetario</b><br>
+      <span class="muted" style="font-size:12px">${esc(String(S._bookErr))}</span><br>
+      <button class="btn-secondary btn-sm no-print" style="margin-top:8px" onclick="rcRetry()">Try again · Reintentar</button>
+    </div></div>`;
+    rcKick();
+    return `<div class="card"><div class="muted" style="font-size:13px">Loading the recipe book… · Cargando el recetario…</div></div>`;
+  }
   const q=(S.recipeQuery||'').toLowerCase();
   const list=S.book.filter(r=>!q || r.name.toLowerCase().includes(q) || (r.category||'').toLowerCase().includes(q));
   if(!list.length) return `<div class="card"><div class="muted" style="font-size:13px">No matches · Sin resultados</div></div>`;
@@ -10513,24 +10686,49 @@ window.rcPaint=()=>{ const el=document.getElementById('rc-results'); if(el) el.i
 window.rcSearch=v=>{ S.recipeQuery=v; rcPaint(); };
 window.rcToggle=id=>{ S.openRecipe=(S.openRecipe===id?null:id); rcPaint(); };
 
-async function viewRecipes(){
-  if(!S.book){
-    const {data}=await db.from('recipes').select('*').eq('restaurant_id',TBID).eq('recipe_type','book').order('category').order('name');
+// One shared in-flight request. Ten fast keystrokes used to be able to fire ten loads; now
+// they all wait on the same one. After a failure it holds off 4s instead of hammering the
+// network from inside a walk-in.
+function rcLoadBook(){
+  if(Array.isArray(S.book)) return Promise.resolve(S.book);
+  if(S._bookP) return S._bookP;
+  if(S._bookErr && Date.now()-(S._bookErrAt||0) < 4000) return Promise.resolve(null);
+  S._bookErr=null;
+  S._bookP=(async()=>{
+    const {data,error}=await db.from('recipes').select('*').eq('restaurant_id',TBID)
+      .eq('recipe_type','book').order('category').order('name');
+    if(error) throw new Error(error.message||'could not reach the database');
     S.book=data||[];
+    return S.book;
+  })().catch(e=>{ S._bookErr=(e&&e.message)||'no connection'; S._bookErrAt=Date.now(); return null; })
+     .finally(()=>{ S._bookP=null; });
+  return S._bookP;
+}
+// Fire-and-forget from a keystroke: repaint when it lands, never block the typing.
+function rcKick(){ const p=rcLoadBook(); if(p&&p.then) p.then(()=>{ if(S.view==='recipes') rcPaint(); }); }
+window.rcRetry=()=>{ S._bookErr=null; S._bookErrAt=0; rcKick(); rcPaint(); };
+async function viewRecipes(){
+  await rcLoadBook();
+  // A failed load is a card that says so with a retry, never a blank white screen and never
+  // a crash on the next keystroke. BK is the book or an empty list — nothing below may
+  // touch S.book directly, because S.book is allowed to be null.
+  const BK = Array.isArray(S.book) ? S.book : [];
+  if(S.fullRecipe){
+    if(!BK.length && S._bookErr){ shell(rcResultsHtml()); return; }
+    shell(fullRecipeHtml()); return;
   }
-  if(S.fullRecipe){ shell(fullRecipeHtml()); return; }
   if(S.rcMode==='plates') await plateRatesLoad().catch(()=>null);
   const es=isES(), pm=S.rcMode==='plates';
   shell(`<div class="card">
-    <h2>Recipe book · Recetario<span class="h2sub">${S.book.length} recipes from the TB tablets${(()=>{
+    <h2>Recipe book · Recetario<span class="h2sub">${BK.length} recipes from the TB tablets${(()=>{
       // Every recipe lives here, whether or not the kitchen counts it. "On the count list"
       // is decided by inventory.active on the item the recipe is attached to — so these two
       // counts are read from the same place the Count screen reads, not from a second flag.
       const onIds=new Set((S.preps||[]).map(p=>p.recipe_id).filter(Boolean));
       const offIds=new Set((S.removedPreps||[]).map(p=>p.recipe_id).filter(Boolean));
-      const on=S.book.filter(r=>onIds.has(r.id)).length;
-      const rm=S.book.filter(r=>offIds.has(r.id)).length;
-      const bo=S.book.length-on-rm;
+      const on=BK.filter(r=>onIds.has(r.id)).length;
+      const rm=BK.filter(r=>offIds.has(r.id)).length;
+      const bo=BK.length-on-rm;
       const bits=[];
       if(on) bits.push(`${on} are on the count / prep list`);
       if(bo) bits.push(`${bo} are reference only — nothing counts them, so they are not on the prep list`);
@@ -10541,7 +10739,7 @@ async function viewRecipes(){
         oninput="rcSearch(this.value)">
     </label>
     <div class="rc-mode no-print">
-      <button class="${pm?'btn-ghost':'btn-primary'} btn-sm" onclick="rcModeSet('recipes')">${es?'Recetas':'Recipes'} · ${S.book.length}</button>
+      <button class="${pm?'btn-ghost':'btn-primary'} btn-sm" onclick="rcModeSet('recipes')">${es?'Recetas':'Recipes'} · ${BK.length}</button>
       <button class="${pm?'btn-primary':'btn-ghost'} btn-sm" onclick="rcModeSet('plates')">${es?'Platos (R365)':'Plates (R365)'} · ${new Set(Object.values(R365_BOOK.plates).map(x=>x[0]).filter(Boolean)).size}</button>
     </div>
   </div>
@@ -14002,12 +14200,21 @@ function ogEditPadHtml(it){
     // The pad offered 0,1,2,3,4,5,6,8,10,12. Dan's real pars are 0.25, 0.5, 0.75, 0.8, 1.5 —
     // not one of them was on it, so every par change went through the "type another number"
     // prompt anyway. One box, numeric keypad, decimals (Dan, Aug 30).
+    // PAIRED LINES (Dan, Sep 22): a paired item is one thing sold in two case sizes and the
+    // ordering math reads pair_par, counted in the thing you hold. This pad used to open on
+    // the per-row par (6 CS on Cabbage Green Shred) and save to ONE row as "par" — so every
+    // par Dan set here never reached the ordering at all. Now it shows and writes the shared
+    // number, in the unit he counts, to both rows — the same door the Setting pars list uses.
+    const mates=ogPairMates(it);
+    const shown=ogParShown(it);
+    const unit=mates?(it.pair_unit||''):(it.par_unit||'');
     return `<div class="og-edit">
-      <div class="muted" style="font-size:11px;margin-bottom:6px">${it.par==null
+      <div class="muted" style="font-size:11px;margin-bottom:6px">${shown==null
         ?'No par has ever been set here. What should always be on hand?'
-        :`Now <b>${fmtCase(it.par)} ${esc(it.par_unit||'')}</b>. Changing it changes every future order — and the change is recorded.`}</div>
+        :`Now <b>${fmtCase(shown)} ${esc(unit)}</b>. Changing it changes every future order — and the change is recorded.`}
+        ${mates?`<br><b style="color:var(--teal-dark)">Both case sizes move together · Ambos tamaños cambian juntos</b>`:''}</div>
       <input id="ogpar-${it.id}" class="og-parin" type="number" inputmode="decimal" step="any" min="0"
-        value="${it.par==null?'':fmtCase(it.par)}" placeholder="—"
+        value="${shown==null?'':fmtCase(shown)}" placeholder="—"
         onkeydown="if(event.key==='Enter'){event.preventDefault();ogParTyped('${it.id}')}">
       <div class="og-pad" style="margin-top:6px">
         <button class="wide go" onclick="ogParTyped('${it.id}')">Save · Guardar</button>
@@ -14035,8 +14242,12 @@ window.ogParTyped=async(id)=>{
   const n=(raw==='')?null:Number(raw);
   if(n!=null&&(!isFinite(n)||n<0)){ toast('Numbers only · Solo números'); el.focus(); return; }
   const it=(S.og.items[S.og.vendor]||[]).find(x=>x.id===id); if(!it) return;
-  if(Number(it.par)===Number(n)){ ogCloseEdit(); return; }
-  await ogApplyPar(it,n);
+  // Compare against what the pad actually SHOWED, not the per-row par — on a paired line
+  // those are different numbers, and comparing the wrong one either blocked a real change
+  // or let a no-op through.
+  const mates=ogPairMates(it);
+  if(Number(ogParShown(it))===Number(n)){ ogCloseEdit(); return; }
+  if(mates) await ogApplyPairPar(mates,n); else await ogApplyPar(it,n);
   S.ogWalk.openEdit=null; S.ogWalk.why=null; render();
 };
 window.ogPadType=()=>{ const v=prompt('Type the number'); if(v==null) return;
@@ -16316,6 +16527,13 @@ document.querySelectorAll('#tabs button').forEach(b=>b.onclick=()=>go(b.dataset.
 // jump to the new day and re-pull the freshest model/attach rates from the database ----
 async function dailyRefresh(force){
   const today=todayLA();
+  // A count takes twenty minutes and the phone screen locks in the middle of it. Coming back
+  // used to trigger a full reload that re-rendered every row from the database — wiping any
+  // number typed but not yet committed, and quietly reverting any number whose save had
+  // failed. A count in progress is somebody standing in the walk-in; leave it alone.
+  const counting = S.view==='count' && S.countId && S.count && S.count.status!=='completed';
+  const risky = counting && (Object.keys(S.cntFailed||{}).length>0 || S.dayStamp===today);
+  if(risky){ S.lastSeen=Date.now(); return; }
   if(force || S.dayStamp!==today){
     S.dayStamp=today; S.selDate=today; S.guestsOverride=null; S.book=null; S.par.loaded=false;
     // On the sign-in screen of a secured phone there is nothing to load but names.
