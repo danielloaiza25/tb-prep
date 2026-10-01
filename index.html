@@ -172,15 +172,22 @@
   .prog{height:7px;background:var(--sand-dark);border-radius:99px;overflow:hidden;margin-top:8px;flex:1 1 120px;min-width:100px}
   .prog i{display:block;height:100%;border-radius:99px;background:linear-gradient(90deg,var(--ocean),var(--lagoon));transition:width .25s ease}
 
+  /* Oct 1 2026 — Dan, phone screenshot in Chrome: a ~48px empty white strip under the tab bar.
+     Chrome on Android reports the system navigation bar as safe-area-inset-bottom even though it
+     draws that bar itself (opaque) and the page already stops above it — so the padding was added
+     twice. The inset is real only when the app runs installed (home-screen app, iPhone home bar),
+     so it is used only there; in a browser tab it is 0. */
+  :root{--sab:0px}
+  @media (display-mode: standalone), (display-mode: fullscreen){ :root{--sab:env(safe-area-inset-bottom, 0px)} }
   nav.tabs{position:fixed;bottom:0;left:0;right:0;background:var(--white);border-top:2px solid var(--gold);
-    display:flex;justify-content:space-around;padding:6px 2px calc(8px + env(safe-area-inset-bottom));z-index:50;
+    display:flex;justify-content:space-around;padding:6px 2px calc(8px + var(--sab));z-index:50;
     box-shadow:0 -2px 14px rgba(15,47,58,.10)}
   nav.tabs button{position:relative;background:none;color:var(--muted);font-size:10.5px;font-weight:600;
     display:flex;flex-direction:column;align-items:center;gap:3px;padding:6px 6px;border-radius:10px;
     min-height:52px;white-space:nowrap;letter-spacing:.1px}
   nav.tabs button.active{color:var(--ocean);background:var(--sand)}
   /* "Admin/Settings" is the one long label — it breaks at the slash instead of widening the bar */
-  nav.tabs button[data-v="admin"]{white-space:normal;line-height:1.08;word-break:break-all;max-width:66px}
+  nav.tabs button[data-v="admin"]{white-space:normal;line-height:1.08;word-break:normal;overflow-wrap:normal;max-width:66px}
   nav.tabs button.active::after{content:'';position:absolute;left:50%;transform:translateX(-50%);bottom:1px;
     width:18px;height:2.5px;border-radius:2px;background:var(--gold)}
   /* eight tabs have to fit a phone without wrapping or scrolling */
@@ -785,7 +792,7 @@
   .org-sheet{position:fixed;inset:0;background:rgba(20,25,24,.55);z-index:140;
     display:flex;align-items:flex-end;justify-content:center}
   .org-sheet .inner{background:#fff;border-radius:16px 16px 0 0;width:100%;max-width:600px;
-    padding:14px 16px calc(18px + env(safe-area-inset-bottom))}
+    padding:14px 16px calc(18px + var(--sab))}
   @media print{ .rr-bar,.rr-hint,.rr-note,.org-chips,.org-sheet{display:none} }
   /* ---- prep action bar + per-line remove (Dan, Aug 21 2026) ---- */
   /* Sits ON TOP of the tab bar — nav.tabs is also fixed at bottom:0, opaque, and z-50,
@@ -1042,7 +1049,7 @@
     width:18px;height:18px;pointer-events:none}
   .search input{padding-left:36px}
   /* ---- Dev Log (Sep 4 2026) ---- */
-  #devfab{position:fixed;right:14px;bottom:calc(74px + env(safe-area-inset-bottom));z-index:110;
+  #devfab{position:fixed;right:14px;bottom:calc(74px + var(--sab));z-index:110;
     width:52px;height:52px;border-radius:50%;background:var(--coral);color:#fff;border:2px solid #fff;
     font-size:22px;line-height:1;display:flex;align-items:center;justify-content:center;cursor:pointer;
     box-shadow:0 4px 16px rgba(217,105,79,.45);padding:0;font-family:inherit}
@@ -1393,7 +1400,7 @@
   <button data-v="waste"><svg class="ico"><use href="#i-waste"/></svg>Waste</button>
   <button data-v="orders"><svg class="ico"><use href="#i-orders"/></svg>Orders</button>
   <button data-v="analytics"><svg class="ico"><use href="#i-analytics"/></svg>Analytics</button>
-  <button data-v="admin"><svg class="ico"><use href="#i-admin"/></svg>Admin/Settings</button>
+  <button data-v="admin"><svg class="ico"><use href="#i-admin"/></svg><span>Admin/<wbr>Settings</span></button>
 </nav>
 
 <script>
@@ -1402,7 +1409,7 @@ const SB_KEY='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZ
 const TBID='9f8d7c6b-5a49-4e38-b271-06d5f00dbeef'; // Tommy Bahama tenant inside ChefOpsAI
 // Stamped by publish.sh at upload time. It is the only version label there is now —
 // one address, updated in place, so this tells you which build that address is serving.
-const BUILD='Sep 30, 2026 · stuck-tab watch + dev switch';
+const BUILD='Oct 1, 2026 · phone tab bar fix';
 // ---------- IS THIS PHONE EVEN RUNNING THE LATEST BUILD? ----------
 // Sep 3 2026. Three prep fixes shipped and Dan still saw the old behaviour, because the app
 // installs to the home screen and an installed web app does not go back and re-fetch its own
@@ -16918,7 +16925,10 @@ async function render(){
   const TABL={today:['Today','Hoy'],count:['Count/Lists','Conteo/Listas'],prep:['Prep','Prep'],checklist:['Checklist','Lista'],recipes:['Recipes','Recetas'],waste:['Waste','Merma'],orders:['Orders','Pedidos'],analytics:['Analytics','Análisis'],admin:['Admin/Settings','Admin/Ajustes']};
   document.querySelectorAll('#tabs button').forEach(b=>{
     const v=b.dataset.v;
-    b.innerHTML=`<svg class="ico"><use href="#i-${v}"/></svg>`+(TABL[v]?TABL[v][isES()?1:0]:v);
+    // Two-word labels break only at the slash ("Admin/<wbr>Settings"), never mid-word, and only
+    // when the bar is out of room — Oct 1:
+    // with Android's bigger text setting it read "Admin/Setting" + "s" on Dan's phone.
+    b.innerHTML=`<svg class="ico"><use href="#i-${v}"/></svg>`+String(TABL[v]?TABL[v][isES()?1:0]:v).replace('/','/<wbr>');
     b.style.display=sec(v)?'':'none';
     b.classList.toggle('active',v===S.view || ((S.view==='pars'||S.view==='dev') && v==='admin'));
   });
