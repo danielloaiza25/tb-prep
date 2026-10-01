@@ -4,7 +4,8 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
 <meta name="theme-color" content="#0b4a4f">
-<link rel="manifest" href="data:application/manifest+json,%7B%22name%22%3A%20%22TB%20Prep%20%5Cu2014%20Tommy%20Bahama%20Palm%20Springs%22%2C%20%22short_name%22%3A%20%22TB%20Prep%22%2C%20%22start_url%22%3A%20%22https%3A%2F%2Fapp.chefsopai.com%2F%22%2C%20%22scope%22%3A%20%22https%3A%2F%2Fapp.chefsopai.com%2F%22%2C%20%22display%22%3A%20%22standalone%22%2C%20%22background_color%22%3A%20%22%23f4ecdf%22%2C%20%22theme_color%22%3A%20%22%230b4a4f%22%2C%20%22icons%22%3A%20%5B%7B%22src%22%3A%20%22data%3Aimage%2Fsvg%2Bxml%2C%253Csvg%20xmlns%3D%27http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%27%20viewBox%3D%270%200%20100%20100%27%253E%253Crect%20width%3D%27100%27%20height%3D%27100%27%20rx%3D%2720%27%20fill%3D%27%25230b4a4f%27%2F%253E%253Ctext%20x%3D%2750%27%20y%3D%2764%27%20font-size%3D%2740%27%20text-anchor%3D%27middle%27%20fill%3D%27%2523f4ecdf%27%20font-family%3D%27Arial%27%20font-weight%3D%27bold%27%253ETB%253C%2Ftext%253E%253C%2Fsvg%253E%22%2C%20%22sizes%22%3A%20%22any%22%2C%20%22type%22%3A%20%22image%2Fsvg%2Bxml%22%7D%5D%2C%20%22id%22%3A%20%22https%3A%2F%2Fapp.chefsopai.com%2F%22%7D">
+<link rel="manifest" href="data:application/manifest+json,%7B%22name%22%3A%20%22ChefOpsAI%20%5Cu2014%20Tommy%20Bahama%20Palm%20Springs%22%2C%20%22short_name%22%3A%20%22ChefOpsAI%22%2C%20%22start_url%22%3A%20%22https%3A%2F%2Fapp.chefsopai.com%2F%22%2C%20%22scope%22%3A%20%22https%3A%2F%2Fapp.chefsopai.com%2F%22%2C%20%22display%22%3A%20%22standalone%22%2C%20%22background_color%22%3A%20%22%23f4ecdf%22%2C%20%22theme_color%22%3A%20%22%230b4a4f%22%2C%20%22icons%22%3A%20%5B%7B%22src%22%3A%20%22data%3Aimage%2Fsvg%2Bxml%2C%253Csvg%20xmlns%3D%27http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%27%20viewBox%3D%270%200%20100%20100%27%253E%253Crect%20width%3D%27100%27%20height%3D%27100%27%20rx%3D%2720%27%20fill%3D%27%25230b4a4f%27%2F%253E%253Ctext%20x%3D%2750%27%20y%3D%2755%27%20font-size%3D%2716%27%20text-anchor%3D%27middle%27%20fill%3D%27%2523f4ecdf%27%20font-family%3D%27Arial%27%20font-weight%3D%27bold%27%253EChefOpsAI%253C%2Ftext%253E%253C%2Fsvg%253E%22%2C%20%22sizes%22%3A%20%22any%22%2C%20%22type%22%3A%20%22image%2Fsvg%2Bxml%22%7D%5D%2C%20%22id%22%3A%20%22https%3A%2F%2Fapp.chefsopai.com%2F%22%7D">
+<meta name="apple-mobile-web-app-title" content="ChefOpsAI">
 <title>ChefOpsAI · Palm Springs</title>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
@@ -1409,7 +1410,7 @@ const SB_KEY='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZ
 const TBID='9f8d7c6b-5a49-4e38-b271-06d5f00dbeef'; // Tommy Bahama tenant inside ChefOpsAI
 // Stamped by publish.sh at upload time. It is the only version label there is now —
 // one address, updated in place, so this tells you which build that address is serving.
-const BUILD='Oct 1, 2026 · Today combined + covers + ChefOpsAI name';
+const BUILD='Oct 1, 2026 · Today combined + covers + ChefOpsAI everywhere';
 // ---------- IS THIS PHONE EVEN RUNNING THE LATEST BUILD? ----------
 // Sep 3 2026. Three prep fixes shipped and Dan still saw the old behaviour, because the app
 // installs to the home screen and an installed web app does not go back and re-fetch its own
@@ -1515,7 +1516,7 @@ function updateVerify(){
   d.innerHTML=`<b>That update did not take.</b><br>
     <span style="opacity:.92">You are still on ${esc(BUILD)}. This copy is pinned to an old address — most likely the
     icon on your home screen.</span>
-    <div style="margin-top:9px;opacity:.92"><b>To fix it once:</b> delete the TB Prep icon from your home screen,
+    <div style="margin-top:9px;opacity:.92"><b>To fix it once:</b> delete the app icon from your home screen (ChefOpsAI — on older phones it may still say TB Prep),
     open <span style="text-decoration:underline">${esc(APP_HOSTED)}</span> in your browser, then add it to the
     home screen again. After that Update will work normally.</div>
     <div style="margin-top:10px;display:flex;gap:8px;flex-wrap:wrap">
