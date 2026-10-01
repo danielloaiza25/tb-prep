@@ -1275,6 +1275,7 @@
   .t2-fcblock{margin-top:12px;padding-top:12px;border-top:1px solid var(--sand-dark)}
   /* Sep 29 2026 — R365 plates, side by side */
   .st.plates{background:#eef3fb;border-color:#b9c9e6}.st.plates i{color:#3b5a8c}.st.plates b{color:#23426f}
+  .st.thru{background:#eaf5ec;border-color:#a9d3b3}.st.thru i{color:#2f6b45}.st.thru b{color:#1f4f31}.st.thru em.pl{display:block;font-style:normal;font-size:10.5px;opacity:.85;color:#2f6b45}
   .st.plates.none{opacity:.6}.st.plates.mism{background:#fff4e5;border-color:#f0cf99}.st.plates.mism i,.st.plates.mism b{color:#8a5a00}
   .plates-note{font-size:12px;background:#eef3fb;border-left:3px solid #6f8fc4;border-radius:0 8px 8px 0;padding:7px 10px;margin:8px 0;line-height:1.35}
   .plates-also .pa-row{display:flex;justify-content:space-between;gap:10px;padding:6px 0;border-bottom:1px solid var(--sand-dark);font-size:13px}
@@ -1393,7 +1394,7 @@ const SB_KEY='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZ
 const TBID='9f8d7c6b-5a49-4e38-b271-06d5f00dbeef'; // Tommy Bahama tenant inside ChefOpsAI
 // Stamped by publish.sh at upload time. It is the only version label there is now —
 // one address, updated in place, so this tells you which build that address is serving.
-const BUILD='Sep 30, 2026 · shelf lives + croffle base';
+const BUILD='Sep 30, 2026 · dynamic par + prep-ahead';
 // ---------- IS THIS PHONE EVEN RUNNING THE LATEST BUILD? ----------
 // Sep 3 2026. Three prep fixes shipped and Dan still saw the old behaviour, because the app
 // installs to the home screen and an installed web app does not go back and re-fetch its own
@@ -2497,7 +2498,7 @@ function groupOnHand(g, countsMap){
 function groupCounted(g, splitMap){
   let n=0; for(const id of g.ids) if(splitMap && splitMap[id]) n++; return n;
 }
-function prepPlan(dstr, guests, countsMap){
+function prepPlanOld(dstr, guests, countsMap){
   const dem=famDemand(guests); const ss=S.model.safety_stock ?? 0.2;
   const rows=[];
   for(const g of prepGroups()){
@@ -2519,6 +2520,175 @@ function prepPlan(dstr, guests, countsMap){
     rows.push({prep:p, group:g, forecast:Math.round(needC*10)/10, par:Math.round(par*10)/10,
                minPar:minPar0, onHand, make, batches, cpb, places:g.ids.length,
                minutes:batches*(Number(p.prep_minutes)||15)});
+  }
+  rows.sort((a,b)=>b.minutes-a.minutes);
+  return rows;
+}
+// ---- DYNAMIC PAR + PREP-AHEAD — Sep 30 2026 ------------------------------------------------
+// Dan, Sep 30: the par "should adapt given how much im going through, and the forecast. it
+// should be a dynamic par ... build something up to use as base ... if youre wrong ill just
+// correct it and you can use that to calibrate the par." And the week, in his words: "the week
+// should be divided into 2 sections. busy/not that busy ... thurs-sunday ... the prep from
+// thursday should last us until sunday night. then ... monday to wednesday" (we'd prep ahead
+// there too, smaller). Trigger he picked: make when today + tomorrow won't be covered.
+//
+// One item, one morning:
+//   rate   = containers one guest goes through. Starts from the R365 plate builds (Dan chose
+//            them over the menu-share model, Sep 30); items R365 doesn't cover keep the old
+//            model. Then corrected by what the counts say we actually went through
+//            (morning count + made − next morning's count, last 21 clean days, trimmed mean),
+//            weighted n/(n+3), only once an item has 5 clean days. Waste is NOT subtracted on
+//            purpose: a par has to cover what gets thrown out too. "Clean" needs the day's prep
+//            lines ticked done — Sep 8–29 only 6 of 15 list days had ticks, so on day one this
+//            part barely moves anything; it grows as ticking becomes routine.
+//   fixes  = every engine line Dan keeps, raises, lowers, removes, or adds by hand is a ratio
+//            (his level ÷ the app's level). Last 8, shrunk m/(m+2), held to ½×–2×. Accepting a
+//            line is a 1. That is the calibration. It no longer moves the min par.
+//   window = today through the end of the half (Sun night / Wed night), never past the
+//            item's shelf life. Thursday and Monday load the window; other days top up only
+//            when on hand won't cover today + tomorrow (or is under the floor).
+//   par    = window need × (1 + cushion), never under Dan's min par, never over his cap
+//            (inventory.notes.par_max — Coco Shrimp 5, Breaded Lemon Chicken 12, Sep 30).
+// Checked Sep 30 before building: R365 × guests vs the counts. The counts could not referee
+// yet — most lines were never ticked, so "made" is missing on most days.
+const DYN_FROM='2026-10-01';             // lines on lists from this day on teach the factor
+// The counts correction is built but OFF. Checked Sep 30 against the real record: with most
+// lines never ticked, "made" is missing and the counted go-through came out 2–6× the plates on
+// items Dan knows well (Key Lime Pie ~4.5 pies a day; he says the 9-pie par was already too
+// many). Turning it on is one switch once prep is ticked daily for ~3 weeks.
+const DYN_COUNTS=false;
+function dynAdd(dstr,n){ const t=new Date(dstr+'T12:00:00Z'); t.setUTCDate(t.getUTCDate()+n); return t.toISOString().slice(0,10); }
+function dynWd(dstr){ return new Date(dstr+'T12:00:00Z').getUTCDay(); }      // 0 Sun … 6 Sat
+// Thu–Sun is the busy half, Mon–Wed the slow one. Returns the days left in dstr's half.
+function dynHalf(dstr){ const w=dynWd(dstr); const left=(w>=4)?(7-w):(w===0?0:3-w);
+  const out=[dstr]; for(let i=1;i<=left;i++) out.push(dynAdd(dstr,i)); return out; }
+function dynIsLoad(dstr){ const w=dynWd(dstr); return w===4||w===1; }
+function dynDayName(dstr){ return dateObjLA(dstr).toLocaleDateString(isES()?'es-US':'en-US',{weekday:'short'}).replace('.',''); }
+async function dynPaged(build){ const out=[]; for(let off=0; off<8000; off+=1000){
+    const {data,error}=await build().range(off,off+999); if(error) throw error; out.push(...(data||[])); if(!data||data.length<1000) break; }
+  return out; }
+async function dynLoad(force){
+  const c=S._dyn; if(c && !force && Date.now()-c.at<30*60e3) return c;
+  const D={at:Date.now(), plates1:{}, meas:{}, corr:{}, ev:{}, err:[], conf:{days:0, lines:0, done:0}};
+  try{ await plateRatesLoad(); const P=platesNeed(1); if(P.ok) D.plates1=P.need; D.plateDays=(S._plateRates||{}).days||0; }catch(e){ D.err.push('plates: '+(e.message||e)); }
+  const today=todayLA(), from=DYN_COUNTS?dynAdd(today,-45):[DYN_FROM, dynAdd(today,-28)].sort()[1];
+  const byId={}; S.preps.forEach(p=>byId[p.id]=p);
+  const cpbOf={}; prepGroups().forEach(g=>cpbOf[g.key]=g.cpb);
+  const keyOf=(iid,name)=>{ const p=byId[iid]; return p?prepKey(p):String(name||'').trim().toLowerCase(); };
+  // The prep lines: what got MADE (ticked done) and Dan's fixes. Made is read here, by the
+  // line's own inventory id, not from tb_usage_daily.prepped: that column only counts lines
+  // that hang off a recipe card (Coco Shrimp, Cooked Cavatappi, Croffle… never counted) and a
+  // day whose lines were never ticked still reaches it as "made 0" — Sep 8–29 had ticks on
+  // 6 of 15 list days. A product-day with an unticked line is not a measurement.
+  const made={}, unconf={};
+  try{
+    const {data:ls,error:le}=await db.from('prep_lists').select('id,date').eq('restaurant_id',TBID).gte('date',from);
+    if(le) throw le;
+    const dates={}; (ls||[]).forEach(l=>dates[l.id]=l.date);
+    const ids=Object.keys(dates);
+    const items=ids.length?await dynPaged(()=>db.from('prep_list_items').select('id,prep_list_id,inventory_item_id,item_name,quantity,status,notes').in('prep_list_id',ids)):[];
+    items.forEach(it=>{ const m=jparse(it.notes,{}); const k=keyOf(it.inventory_item_id,it.item_name), d=dates[it.prep_list_id];
+      const done=it.status==='done'||it.status==='completed', q=Number(it.quantity)||0;
+      if(!m.removed){ D.conf.lines++; if(done){ D.conf.done++; (made[k]=made[k]||{})[d]=((made[k]||{})[d]||0)+q*(cpbOf[k]||1); }
+        else if(d<today) (unconf[k]=unconf[k]||{})[d]=1; }
+      if(d>=DYN_FROM){ const r=dynLineRatio(m, q, it.status, cpbOf[k]||1, d<today);
+        if(r!=null) (D.ev[k]=D.ev[k]||[]).push({d, id:it.id, r}); }
+    });
+    for(const k of Object.keys(D.ev)){ D.ev[k].sort((x,y)=>x.d<y.d?-1:x.d>y.d?1:0); D.corr[k]=dynCorr(D.ev[k]); }
+  }catch(e){ D.err.push('lines: '+(e.message||e)); }
+  // What we went through: morning count + made − next count, per product (every place added up).
+  if(DYN_COUNTS) try{
+    const rows=await dynPaged(()=>db.from('tb_usage_daily').select('item_name,business_date,on_hand_start,on_hand_end,guests_actual,drop_reason')
+      .eq('restaurant_id',TBID).gte('business_date',from).order('business_date'));
+    const by={};
+    rows.forEach(r=>{ const k=String(r.item_name||'').trim().toLowerCase(), d=r.business_date;
+      const a=((by[k]=by[k]||{})[d]=by[k][d]||{s:0,e:0,g:null,ok:true});
+      if(r.on_hand_start==null||r.on_hand_end==null||r.drop_reason==='container_changed'){ a.ok=false; return; }
+      a.s+=Number(r.on_hand_start)||0; a.e+=Number(r.on_hand_end)||0; a.g=Number(r.guests_actual)||null; });
+    for(const [k,days] of Object.entries(by)){
+      const v=Object.keys(days).sort().filter(d=>{ const a=days[d]; return a.ok && a.g>0 && !(unconf[k]&&unconf[k][d]) && (a.s+((made[k]||{})[d]||0))>0; })
+        .map(d=>{ const a=days[d]; return (a.s+((made[k]||{})[d]||0)-a.e)/a.g; }).slice(-21);
+      if(v.length<5) { if(v.length) D.meas[k]={rate:null, n:v.length}; continue; }
+      const x=v.slice().sort((p,q)=>p-q), cut=Math.floor(x.length*0.1), t=x.slice(cut, x.length-cut);
+      const mean=t.reduce((p,q)=>p+q,0)/t.length;
+      D.meas[k]={rate:mean>0?mean:null, n:v.length};
+    }
+    D.usageRows=rows.length;
+  }catch(e){ D.err.push('usage: '+(e.message||e)); }
+  S._dyn=D; return D;
+}
+// One line → one ratio (Dan's level ÷ the app's level), or null when the line says nothing yet.
+// A line left alone on a past day was accepted (a 1), ticked or not — Dan only touches the ones
+// he disagrees with, so counting only the touched ones would drift every factor.
+function dynLineRatio(m, q, status, cpbGroup, past){
+  const clip=r=>Math.max(0.5, Math.min(2, r));
+  if(m && m.dyn){ const y=m.dyn, oh=Math.max(0,Number(y.oh)||0), c=Number(y.cpb)||cpbGroup||1, b0=Number(y.b0)||0;
+    const app=oh+b0*c; if(!(app>0)) return null;
+    if(m.removed) return clip(oh/app);
+    if(Math.abs(q-b0)>1e-9) return clip((oh+Math.max(0,q)*c)/app);
+    return (status==='done'||status==='completed'||past)?1:null; }
+  if(m && m.added_by && m.dyn_day){ const oh=Math.max(0,Number(m.on_hand)||0);
+    return oh>0?clip((oh+Math.max(0,q)*(cpbGroup||1))/oh):2; }
+  return null;
+}
+function dynCorr(ev, extra){ const L=ev.filter(e=>!extra||e.id!==extra.id).concat(extra?[extra]:[]).slice(-8);
+  if(!L.length) return {c:1, m:0};
+  const mean=L.reduce((a,e)=>a+Math.log(e.r),0)/L.length, m=L.length;
+  return {c:Math.max(0.5, Math.min(2, Math.exp(mean*m/(m+2)))), m}; }
+function dynRateOf(g){
+  const D=S._dyn||{}; const k=g.key;
+  let prior=0, src='none';
+  const pl=Number((D.plates1||{})[k])||0;
+  if(pl>0){ prior=pl; src='r365'; }
+  else { let b=0; for(const u of (g.rep.uses||[])){ const f=(S.families||[]).find(x=>x.active&&x.name===u.family); if(f) b+=Number(f.attach_rate)*Number(u.qty||0); }
+         if(b>0){ prior=b*g.cpb; src='model'; } }
+  const M=(D.meas||{})[k]; let base=prior, n=0, meas=null;
+  if(DYN_COUNTS && prior>0 && M && M.n>=5 && M.rate>0){ n=M.n; meas=M.rate; const w=n/(n+3); base=Math.exp((1-w)*Math.log(prior)+w*Math.log(meas)); }
+  const C=(D.corr||{})[k]||{c:1,m:0};
+  return {rate:base*C.c, base, prior, src, meas, n, c:C.c, m:C.m};
+}
+// Dan's ceiling, where he gave one: summed like the floor, rows without one count at their min par.
+function dynCapOf(g){ if(!g.members.some(p=>p.meta&&Number(p.meta.par_max)>0)) return null;
+  return g.members.reduce((t,p)=>t+(p.meta&&Number(p.meta.par_max)>0?Number(p.meta.par_max):(Number(p.min_par)||0)),0); }
+// Minutes. A "batch" of a portioned item is ONE portion (Ahi 3oz/4oz, Croffle base, Breaded Lemon
+// Chicken), and none of them has a labor time on file, so the 15-minute default times 133
+// portions read "~2,000 min" on the first prep-ahead Thursday. Until Dan gives real portioning
+// times, such a line counts the default once, not once per portion.
+function dynMinutes(p, batches, cpb){
+  if(!(batches>0)) return 0;
+  const unitish=/^(ea|each|pieces?|portions?)$/i.test(String(p.container||p.unit||'').trim());
+  if(!p.prep_minutes_set && unitish && (Number(cpb)||1)===1) return Number(p.prep_minutes)||15;
+  return batches*(Number(p.prep_minutes)||15);
+}
+// opts.oneDay: today's need only, no window (labor and "prep up" estimates from an empty walk-in).
+function prepPlan(dstr, guests, countsMap, opts){
+  if(!S._dyn) return prepPlanOld(dstr, guests, countsMap);
+  opts=opts||{};
+  const ss=S.model.safety_stock ?? 0.2;
+  const win=opts.oneDay?[dstr]:dynHalf(dstr);
+  const load=!opts.oneDay && dynIsLoad(dstr);
+  const covers=win.map((x,i)=>i===0?Number(guests)||0:(Number(guestPlan(x))||0));
+  const rows=[];
+  for(const g of prepGroups()){
+    const p=g.rep; if(p.raw) continue;
+    const cpb=g.cpb, R=dynRateOf(g), floor=g.minPar, cap=dynCapOf(g);
+    if(!(R.rate>0) && floor===0) continue;
+    const shelf=Math.max(1, Math.floor(Number(p.shelf)||1));
+    const span=Math.max(1, Math.min(shelf, win.length));
+    const needs=covers.slice(0,span).map(c=>c*R.rate);
+    const needC=needs[0]||0, winNeed=needs.reduce((a,b)=>a+b,0);
+    let par=Math.max(winNeed*(1+ss), floor); const capped=(cap!=null && par>cap+1e-9);
+    if(capped) par=Math.max(cap, floor);
+    const onHand=groupOnHand(g, countsMap);
+    const near=(needs[0]||0)+(span>1?(needs[1]||0):0);
+    const short=load ? onHand<par-1e-9 : (onHand<Math.min(par, near*(1+ss))-1e-9 || onHand<floor-1e-9);
+    const deficit=short?Math.max(0, par-onHand):0;
+    const batches=deficit>0 ? Math.ceil((deficit/cpb)*2 - 1e-9)/2 : 0;
+    const make=batches*cpb;
+    rows.push({prep:p, group:g, forecast:Math.round(needC*10)/10, par:Math.round(par*10)/10,
+               minPar:floor, cap, onHand, make, batches, cpb, places:g.ids.length,
+               minutes:dynMinutes(p, batches, cpb),
+               dyn:{through:win[span-1], span, shelf, load, rate:R.rate, base:R.base, prior:R.prior, src:R.src, meas:R.meas, n:R.n, c:R.c, m:R.m, capped}});
   }
   rows.sort((a,b)=>b.minutes-a.minutes);
   return rows;
@@ -2610,8 +2780,41 @@ function platesStatHtml(p, onHand){
   return `<span class="st plates" title="From the R365 plate builds: plates expected today × what each plate uses = ~${fmtQ(pr.needC)} ${esc(pr.g.rep.container||'')}. Same cushion, same min par, same ½-batch rounding as the list."><i>Plates · Platos</i><b>${fmtQ(B.batches)} ${w(B.batches)}</b><em class="pl">${isES()?'usa':'uses'} ~${fmtQ(pr.needC)}</em></span>`
     +(pr.mism&&B.batchesR!=null?`<span class="st plates mism" title="The app's card says one batch makes ${esc(pr.mism.card)}; R365 says ${esc(pr.mism.r365)}. Both shown until Dan says which is right."><i>${isES()?'Tanda R365':'R365 batch size'} (${esc(pr.mism.r365)})</i><b>${fmtQ(B.batchesR)} ${w(B.batchesR)}</b><em class="pl">${isES()?'tarjeta':'card'} ${esc(pr.mism.card)} 🐞</em></span>`:'');
 }
-// The note on top of a manager's list for the side-by-side week.
-function platesNoteHtml(){
+// Sep 30 2026 — with the R365 plates now the base of the list, only the batch-size disagreement
+// is still worth a cell (Dan settles those one by one with 🐞).
+function platesMismHtml(p, onHand){
+  const R=S._dyn; if(!R||!can('prep.generate')) return '';
+  const mm=r365Mism(p.name_en); if(!mm||!mm.ratio) return '';
+  const g=prepGroups().find(x=>x.ids.indexOf(p.id)>=0); if(!g) return '';
+  const row=prepPlan(S.selDate||todayLA(), S.guestsOverride ?? guestPlan(S.selDate||todayLA()), S.counts||{}).find(r=>r.group.key===g.key);
+  if(!row) return '';
+  const half=x=>x>0?Math.ceil(x*2-1e-9)/2:0;
+  const bR=half(Math.max(0,row.par-(Number(onHand)||0))/(g.cpb*mm.ratio));
+  const w=n=>isES()?(n===1?'tanda':'tandas'):(n===1?'batch':'batches');
+  return `<span class="st plates mism" title="The app's card says one batch makes ${esc(mm.card)}; R365 says ${esc(mm.r365)}. Both shown until Dan says which is right."><i>${isES()?'Tanda R365':'R365 batch size'} (${esc(mm.r365)})</i><b>${fmtQ(bR)} ${w(bR)}</b><em class="pl">${isES()?'tarjeta':'card'} ${esc(mm.card)} 🐞</em></span>`;
+}
+// "Covers through Sat" — Dan's view only (approved in the prep-ahead mockup, Sep 30). The cook
+// sheets keep printing the batch number in TIEMPOS, nothing else.
+function dynThruHtml(y){
+  if(!y||!y.through||!can('prep.generate')) return '';
+  const es=isES();
+  const day=y.span>1?dynDayName(y.through):(es?'hoy':'today');
+  const src=y.src==='r365'?'R365':(y.src==='model'?(es?'modelo':'model'):'—');
+  const tip=`${src} · ${y.n?`${es?'contado':'counted'} ${y.n} ${es?'días':'days'}`:(es?'sin días contados':'no counted days yet')} · ${es?'tus ajustes':'your fixes'} ×${(Number(y.c)||1).toFixed(2)} → ${(Number(y.rate)||0).toFixed(4)} ${es?'por cliente':'per guest'}${y.load?(es?' · día de carga':' · load day'):''}`;
+  const fx=(Number(y.c)||1);
+  return `<span class="st thru" title="${esc(tip)}"><i>${es?'Cubre hasta':'Covers through'}</i><b>${day}</b><em class="pl">${es?'dura':'keeps'} ${y.shelf} d${Math.abs(fx-1)>=0.05?` · ×${fx.toFixed(2)}`:''}${y.capped||(y.cap!=null&&y.t!=null&&Math.abs(y.t-y.cap)<1e-9)?(es?' · tope':' · cap'):''}</em></span>`;
+}
+// The note on top of a manager's list: how the number is made, in two lines.
+function dynNoteHtml(){
+  const D=S._dyn; if(!D||!can('prep.generate')) return '';
+  const es=isES(); const nM=Object.values(D.meas||{}).filter(m=>m.n>=5&&m.rate>0).length, nC=Object.values(D.corr||{}).filter(c=>c.m>0).length;
+  return `<div class="plates-note"><b>${es?'Par dinámico':'Dynamic par'}</b> · ${es
+    ?`Jueves prepara hasta el domingo en la noche y lunes hasta el miércoles, hasta donde aguante cada producto; los demás días solo se completa lo que no alcance para hoy + mañana. El número es R365 (platos por cliente × lo que lleva cada plato × clientes esperados), corregido con tus ajustes en la lista (${nC} producto${nC===1?' ya aprendió':'s ya aprendieron'}). Tu par mínimo es el piso${DYN_COUNTS?`; los conteos corrigen ${nM}`:''}.`
+    :`Thursday preps through Sunday night and Monday through Wednesday night, as far as each item keeps; other days only top up what won't cover today + tomorrow. The number is R365 (plates sold per guest × what each plate uses × the guest forecast), corrected by your fixes on the list (${nC} item${nC===1?' has':'s have'} learned so far). Your min par is the floor${DYN_COUNTS?`; counts correct ${nM} items`:''}.`}${(D.err&&D.err.length)?`<br><span class="muted">${es?'Falta un dato':'Missing a source'}: ${esc(D.err.join(' · '))}</span>`:''}</div>`;
+}
+// (retired Sep 30 2026 — the side-by-side week ended when Dan picked the plates as the base)
+function platesNoteHtml(){ return dynNoteHtml(); }
+function platesNoteHtmlOld(){
   const R=S._plateRates; if(!S._platesPlan) return '';
   const es=isES();
   if(!R||!R.days) return `<div class="plates-note">${es?'<b>Platos (R365):</b> aún no hay días con la lista de platos de Oracle, así que no hay número de platos.':'<b>Plates (R365):</b> no day has Oracle’s plate list saved yet, so there is no plates number.'}</div>`;
@@ -2620,7 +2823,9 @@ function platesNoteHtml(){
     :`The batch box is the list as always (unchanged). <b>Plates</b> is what the R365 plate builds say: plates expected today × what goes on each plate, same cushion, same min par, same ½-batch rounding. How often each plate sells per guest is measured over ${R.days} real Oracle days (${r365D(R.from)} – ${r365D(R.to)}). Which one was right? Tell Dan with 🐞.`}</div>`;
 }
 // Items the plates say to make that are not on today's list at all.
-function platesAlsoHtml(onList){
+// Retired Sep 30 2026: the plates ARE the list's base now, so there is nothing to compare.
+function platesAlsoHtml(onList){ return ''; }
+function platesAlsoHtmlOld(onList){
   const PL=S._platesPlan; if(!PL) return '';
   const es=isES(); const rows=[];
   for(const [k,pr] of Object.entries(PL)){
@@ -2877,7 +3082,7 @@ async function loadAll(){
     // Items with no row on the sheet sort after every item that has one.
     const so=(i.sheet_order!=null)?Number(i.sheet_order):900+(Number(m.sort_order)||99);
     return {id:i.id, recipe_id:r.id||null, name_en:i.name, name_es:m.name_es||'', unit:i.unit,
-            batch_size:Number(r.yield_qty)||1, shelf:shelfOf(r,m)||1, shelf_set:shelfOf(r,m)!=null, prep_minutes:Number(r.labor_minutes)||Number(m.prep_minutes)||15,
+            batch_size:Number(r.yield_qty)||1, shelf:shelfOf(r,m)||1, shelf_set:shelfOf(r,m)!=null, prep_minutes:Number(r.labor_minutes)||Number(m.prep_minutes)||15, prep_minutes_set:!!(Number(r.labor_minutes)||Number(m.prep_minutes)),
             min_par:Number(i.min_par)||0, station:i.storage_location||'', sort:so,
             sheet_name:i.sheet_name||'', cgroup:i.count_group||'', list_note:i.list_note||'',
             // Order Dan dragged this into inside its own station. Deliberately NOT sheet_order:
@@ -3150,6 +3355,7 @@ async function submitCountGo(ctx, ids){
   // An item drops off the list only when NOBODY put a number on ANY of its places. Testing
   // the representative row alone used to drop a whole item because the walk-in was blank,
   // even when the line stations had been counted.
+  await dynLoad();
   const rows=prepPlan(tgt,guests,counts).filter(r=>r.make>0 && !r.group.ids.every(id=>skip.has(id)));
   rows.forEach(r=>{ r.countedPlaces=groupCounted(r.group,S.split); r.notCounted=!r.countedPlaces; });
   if(ids.length) splitTasks(rows,ids); else rows.forEach(r=>{ r.assigned_to=null; });
@@ -3218,10 +3424,17 @@ async function writePrepList(d, guests, rows, meta, overridden){
                           // on_hand and min_par above are the TOTAL across every place this
                           // item lives. Kept so a list can always be read back and explained.
                           places:(r.places!=null?r.places:1),
-                          counted_places:(r.countedPlaces!=null?r.countedPlaces:null)})}));
+                          counted_places:(r.countedPlaces!=null?r.countedPlaces:null),
+                          // Sep 30 2026 — the dynamic par's own numbers for this line: what it
+                          // asked (b0), what was on hand, the window it covers. Dan's fixes are
+                          // read back against b0/oh to calibrate the item (dynLineRatio).
+                          ...(r.dyn?{dyn:{b0:r.batches, oh:Math.round(r.onHand*100)/100, cpb:r.cpb, t:r.par,
+                            through:r.dyn.through, span:r.dyn.span, shelf:r.dyn.shelf, load:r.dyn.load,
+                            rate:Math.round(r.dyn.rate*1e5)/1e5, src:r.dyn.src, n:r.dyn.n,
+                            c:Math.round(r.dyn.c*1000)/1000, cap:r.cap}}:{})})}));
   const {error}=await db.rpc('tb_write_prep_list',{
     p_restaurant_id:TBID, p_date:d, p_title:'Daily prep — '+fmtDate(d), p_source:(meta&&meta.source)||'forecast',
-    p_notes:JSON.stringify({guests, overridden:ovr, ...(meta||{})}), p_items:items});
+    p_notes:JSON.stringify({guests, overridden:ovr, ...(meta||{}), ...(rows.some(r=>r.dyn)?{dyn:1}:{})}), p_items:items});
   if(error){ toast('Error: '+error.message); return false; }
   // Freeze the WHOLE morning plan, not just the covers: the average check this number was
   // multiplied by and every family's attach rate as of right now. Reviewing this week later
@@ -4345,7 +4558,7 @@ async function loadTasks(dstr){
             assigned_to:it.assigned_to, status:it.status==='done'?'done':'open',
             completed_at:it.completed_at||null, prepped_by:m.prepped_by||'',
             expires_on:m.expires_on||null, added_by:m.added_by||null, removed:m.removed||null,
-            edited:m.edited||null};
+            edited:m.edited||null, dyn:m.dyn||null, dyn_day:!!m.dyn_day};
   });
   // Lines Dan took off stay in the day's record (who and when, in the notes blob) but
   // leave every screen and every printed sheet. Kept separately so the Report can say
@@ -4661,6 +4874,7 @@ window.generateList=async()=>{ if(!guard('prep.generate')) return;
   // later) — this button was refusing the exact same thing the count screen allows, which is
   // what actually blocked him on 2026-08-24. Now it asks instead of refusing outright.
   if(!ids.length && !confirm('No one is picked to prep on this tab yet.\n\nBuild the list unassigned — same as choosing "Leave unassigned" when you submit a count? You can assign people to each task afterward.\n\nNadie está elegido todavía. ¿Generar la lista sin asignar? Puedes asignar después.')) return;
+  await dynLoad();
   const rows=prepPlan(d,guests,S.counts).filter(r=>r.make>0);
   if(!rows.length) return toast('Nothing to prep — pars are covered');
   // Built without submitting a count: anything never counted is standing in as empty,
@@ -4695,6 +4909,7 @@ window.rebuildList=async()=>{ if(!guard('prep.generate')) return;
     +`Nothing else is touched: your counts, your pars and the day's history all stay.`;
   if(!confirm(msg)) return;
   const guests = S.guestsOverride ?? guestPlan(d);
+  await dynLoad();
   const rows=prepPlan(d,guests,S.counts).filter(r=>r.make>0);
   rows.forEach(r=>{ r.countedPlaces=groupCounted(r.group,S.split); r.notCounted=!r.countedPlaces; });
   // Hand it back to whoever was already on it. If the old list was unassigned, it stays that way.
@@ -4803,36 +5018,50 @@ function prLines(){
     return {t, on:l.on, qty:l.qty, p:S.preps.find(x=>x.id===t.prep_item_id)||{}};
   });
 }
-// What today teaches the pars. Pure — reads the review state, returns {applied,watched}.
-// The one rule, said once: raise the level → the floor rises to the level you set
-// (hand-adds and batch raises). Lower or remove → watched, never auto-lowered.
-// min_par and on_hand are both in CONTAINERS; qty is batches, so qty*cpb converts.
+// What today teaches. Pure — reads the review state, returns {applied,watched}.
+// Sep 30 2026 — the old rule ("raise the level → the floor rises to it; lower → only watched")
+// ratcheted seven items up (Key Lime Pie 2→9 pies, Guacamole 1→4…). Dan: the par should adapt
+// and "if youre wrong ill just correct it and you can use that to calibrate the par". So a
+// fix no longer touches the min par: it becomes a ratio (your level ÷ the app's level) that
+// moves that item's factor for the next lists. applied stays empty on purpose.
 function parPlan(){
   const applied=[], watched=[];
-  if(!can('prep.generate')) return {applied, watched};   // par changes are a management action
+  if(!can('prep.generate')) return {applied, watched};
+  const D=S._dyn||{}, es=isES();
+  const gOf=id=>prepGroups().find(x=>x.ids.indexOf(id)>=0);
+  const learn=(key,id,ratio)=>{ const before=(D.corr||{})[key]||{c:1,m:0};
+    const after=ratio!=null?dynCorr((D.ev||{})[key]||[], {id, d:S.selDate, r:ratio}):before;
+    return {cBefore:before.c, cAfter:after.c}; };
+  const tail=(ratio,L)=>ratio==null?(es?' — lista anterior al par dinámico, solo se anota':' — list from before the dynamic par, noted only')
+    :(es?` — aprende ×${L.cBefore.toFixed(2)} → ×${L.cAfter.toFixed(2)}`:` — learns ×${L.cBefore.toFixed(2)} → ×${L.cAfter.toFixed(2)}`);
   for(const r of prLines()){
     if(!r.on || !r.p.id) continue;
-    const par=Number(r.p.min_par)||0, cpb=Number(r.p.cpb)||1;
-    const ohRaw=(r.t.on_hand!=null)?Number(r.t.on_hand):null;
-    const level=Math.round(((ohRaw||0)+r.qty*cpb)*10)/10;
-    const ohTxt=ohRaw!=null?fmtQ(ohRaw):'0*';
+    const g=gOf(r.p.id), key=g?g.key:prepKey(r.p), cpb=g?g.cpb:(Number(r.p.cpb)||1);
+    let kind=null, from=null, to=null, ratio=null, what='';
     if(r.t.added_by){
-      if(level>par) applied.push({item_id:r.p.id, item:r.p.name_en, kind:'add', from:par, to:level,
-        why:`added by hand — had ${ohTxt}, made ${fmtQ(r.qty)} batch${r.qty===1?'':'es'}`});
-    }else if(r.t.edited){
-      const up=Number(r.t.edited.to)>Number(r.t.edited.from);
-      if(up && level>par) applied.push({item_id:r.p.id, item:r.p.name_en, kind:'raise', from:par, to:level,
-        why:`you raised ${fmtQ(r.t.edited.from)} → ${fmtQ(r.t.edited.to)} batches`});
-      if(!up) watched.push({item_id:r.p.id, item:r.p.name_en, kind:'lower',
-        from:Number(r.t.edited.from), to:Number(r.t.edited.to),
-        note:`lowered ${fmtQ(r.t.edited.from)} → ${fmtQ(r.t.edited.to)} — ${nth((S.sigCounts&&S.sigCounts[r.p.id]||0)+1)} time, watching`});
+      kind='add'; from=0; to=r.qty;
+      ratio=(r.t.dyn_day||(S.listMeta&&S.listMeta.dyn))?dynLineRatio({added_by:1, dyn_day:1, on_hand:r.t.on_hand}, r.qty, 'done', cpb):null;
+      what=es?`añadido a mano — ${fmtQ(r.qty)} tanda${r.qty===1?'':'s'}`:`added by hand — ${fmtQ(r.qty)} batch${r.qty===1?'':'es'}`;
+    }else if(r.t.dyn && Math.abs(r.qty-Number(r.t.dyn.b0))>1e-9){
+      from=Number(r.t.dyn.b0); to=r.qty; kind=to>from?'raise':'lower';
+      ratio=dynLineRatio({dyn:r.t.dyn}, r.qty, 'done', cpb);
+      what=es?`pedía ${fmtQ(from)}, hiciste ${fmtQ(to)}`:`asked ${fmtQ(from)}, you made ${fmtQ(to)}`;
+    }else if(!r.t.dyn && r.t.edited){
+      from=Number(r.t.edited.from); to=Number(r.t.edited.to); kind=to>from?'raise':'lower';
+      what=es?`${fmtQ(from)} → ${fmtQ(to)} tandas`:`${fmtQ(from)} → ${fmtQ(to)} batches`;
     }
+    if(!kind) continue;
+    const L=learn(key, r.t.id, ratio);
+    watched.push({item_id:r.p.id, item:r.p.name_en, kind, from, to, ratio, ...L, note:what+tail(ratio,L)});
   }
   for(const t of (S.tasksRemoved||[])){
     const p=S.preps.find(x=>x.id===t.prep_item_id)||{};
+    const g=p.id?gOf(p.id):null, key=g?g.key:(p.id?prepKey(p):String(t.item_name||'').trim().toLowerCase());
+    const ratio=t.dyn?dynLineRatio({dyn:t.dyn, removed:1}, 0, 'done', g?g.cpb:1):null;
+    const L=learn(key, t.id, ratio);
     watched.push({item_id:p.id||null, item:p.name_en||t.item_name||'?', kind:'removed',
-      from:Number(t.final_qty)||0, to:0,
-      note:`taken off — ${nth((S.sigCounts&&p.id&&S.sigCounts[p.id]||0)+1)} time, watching`});
+      from:Number(t.final_qty)||0, to:0, ratio, ...L,
+      note:(es?`quitado — había ${fmtQ(Number(t.dyn&&t.dyn.oh)||Number(t.on_hand)||0)}`:`taken off — ${fmtQ(Number(t.dyn&&t.dyn.oh)||Number(t.on_hand)||0)} on hand`)+tail(ratio,L)});
   }
   return {applied, watched};
 }
@@ -4870,11 +5099,10 @@ function prepReviewHtml(){
         <span><b>${onRows.length}</b><i>prepped</i></span><span><b>${fmtQ(batches)}</b><i>batches</i></span>
         <span><b>${added.length}</b><i>added</i></span><span><b>${(S.tasksRemoved||[]).length}</b><i>removed</i></span><span><b>${edits.length}</b><i>edits</i></span>
       </div>
-      ${(pp.applied.length||pp.watched.length)?`<div class="pv-par">
-        <h4>⚙ Pars from today · Pares de hoy</h4>
-        ${pp.applied.map(a=>`<div class="pv-prow"><span class="w"><b>${esc(a.item)}</b><i>${esc(a.why)}</i></span><span class="d up">par ${fmtQ(a.from)} → ${fmtQ(a.to)}</span><span class="ap">WILL APPLY</span></div>`).join('')}
-        ${pp.watched.map(w=>`<div class="pv-prow"><span class="w"><b>${esc(w.item)}</b><i>${esc(w.note)}</i></span><span class="d">no change</span></div>`).join('')}
-        <div class="muted" style="font-size:10.5px;margin-top:6px">Raise the level → the floor rises to the level you set. Lower or remove → watched, never auto-lowered. · Subes el nivel → sube el par. Bajas o quitas → solo se observa.</div>
+      ${pp.watched.length?`<div class="pv-par">
+        <h4>⚙ What today teaches · Lo que aprende hoy</h4>
+        ${pp.watched.map(w=>`<div class="pv-prow"><span class="w"><b>${esc(w.item)}</b><i>${esc(w.note)}</i></span><span class="d${w.ratio!=null&&w.cAfter>w.cBefore+0.005?' up':''}">${w.ratio!=null?`×${w.cAfter.toFixed(2)}`:'—'}</span></div>`).join('')}
+        <div class="muted" style="font-size:10.5px;margin-top:6px">Your fixes teach each item's number for the next lists. The min par only changes when you set it. · Tus ajustes enseñan el número de cada producto. El par mínimo solo cambia cuando tú lo pones.</div>
       </div>`:''}
     </div>
     <div style="display:flex;gap:8px;padding:0 16px 14px">
@@ -4921,9 +5149,19 @@ window.prSave=async()=>{ if(!guard('prep.check')) return;
       happened_on:S.selDate,kind:a.kind,from_qty:a.from,to_qty:a.to,applied:true,by_name:(S.user&&S.user.name)||''})),
     ...pp.watched.map(w=>({restaurant_id:TBID,item_id:w.item_id,item_name:w.item,
       happened_on:S.selDate,kind:w.kind,from_qty:w.from,to_qty:w.to,applied:false,by_name:(S.user&&S.user.name)||''}))];
-  if(sigs.length) await db.from('tb_par_signals').insert(sigs);
+  // Sep 30 2026 — a re-save used to write every signal again (Guacamole had 4 copies a day,
+  // Sep 14–21). One row per item, kind and numbers per day.
+  if(sigs.length){
+    const {data:ex}=await db.from('tb_par_signals').select('item_id,kind,from_qty,to_qty').eq('restaurant_id',TBID).eq('happened_on',S.selDate);
+    const sk=x=>[x.item_id,x.kind,Number(x.from_qty),Number(x.to_qty)].join('|');
+    const have=new Set((ex||[]).map(sk)); const fresh=[];
+    sigs.forEach(x=>{ const k=sk(x); if(!have.has(k)){ have.add(k); fresh.push(x); } });
+    if(fresh.length) await db.from('tb_par_signals').insert(fresh);
+  }
+  if(S._dyn) S._dyn.at=0;   // the next list reads today's fixes
   S.prepReview=null; S.hist.loaded=false; await loadHistory(true);
-  toast(`Report saved ✔ · ${report.totals.prepped} lines · ${pp.applied.length} par${pp.applied.length===1?'':'s'} adjusted · Guardado`);
+  const nL=pp.watched.filter(w=>w.ratio!=null).length;
+  toast(`Report saved ✔ · ${report.totals.prepped} lines${nL?` · ${nL} fix${nL===1?'':'es'} learned`:''} · Guardado`);
   render();
 };
 // A saved receipt, reopened from the log. Read-only: it shows what was saved, not what is.
@@ -4993,6 +5231,7 @@ window.prepAddGo=async(pid)=>{ if(!guard('prep.generate')) return;
       on_hand:(addCounted?(g?groupOnHand(g,S.counts):(S.counts[p.id]??null)):null),
       containers:q*cpb, container:rep.container, not_counted:!addCounted,
       places:(g?g.ids.length:1), counted_places:addCounted,
+      ...((S.listMeta&&S.listMeta.dyn)?{dyn_day:1}:{}),
       added_by:{by:(S.user&&S.user.name)||'', at:new Date().toISOString()}})});
   if(ins.error){ toast('Error: '+ins.error.message); return; }
   S.prepAdd=false; await loadTasks(S.selDate); toast(`${rep.name_en} added ✔ · añadido`); render();
@@ -6827,7 +7066,7 @@ function bigDayAlertHtml(){
   // prep up: what the stretch will go through, in batches, against a normal stretch
   let prepH='';
   try{
-    const agg=list=>{ const m={}; list.forEach(([d,g])=>{ prepPlan(d,g,{}).forEach(r=>{ if(!(r.forecast>0)) return; const k=r.prep.id; (m[k]=m[k]||{p:r.prep,b:0}).b+=r.forecast/(r.cpb||1); }); }); return m; };
+    const agg=list=>{ const m={}; list.forEach(([d,g])=>{ prepPlan(d,g,{},{oneDay:true}).forEach(r=>{ if(!(r.forecast>0)) return; const k=r.prep.id; (m[k]=m[k]||{p:r.prep,b:0}).b+=r.forecast/(r.cpb||1); }); }); return m; };
     const A=agg(cur.map(o=>[o.d,o.R.g])), B=typSum?agg(cur.map(o=>[o.d,o.typ])):{};
     const top=Object.values(A).sort((a,b)=>b.b-a.b).slice(0,7)
       .map(a=>({name:(es&&a.p.name_es)?a.p.name_es:a.p.name_en, b:halfTxt(a.b), n:B[a.p.id]?halfTxt(B[a.p.id].b):null}));
@@ -7281,6 +7520,7 @@ async function viewToday(){
   // the weather, instead of each waiting its turn — same data, fewer trips before Today shows.
   const pOr=(d===todayLA() && sec('orders')) ? orLoadToday(d).catch(()=>null) : null;
   const p86=load86(d);
+  if(!S._dyn) dynLoad().catch(()=>{});   // the dynamic par, warmed in the background (Sep 30)
   if(!S.wx.loaded) await loadWeather();
   await wxEnsureHours(d);
   await loadEvents();
@@ -8717,11 +8957,11 @@ async function viewPrep(){
   if(!S.wx.loaded) await loadWeather();
   const guests = S.guestsOverride ?? guestPlan(d);
   const hasTasks = S.tasks.length>0 && !S.editPlan;
+  // Sep 30 2026 — the dynamic par replaced the side-by-side week: Dan picked the R365 plates
+  // as the base. Loaded for whoever builds lists; a cook's screen never needs the plan.
+  if(can('prep.generate')){ try{ await dynLoad(); }catch(e){} }
   const rows = prepPlan(d, guests, S.counts);
-  // Sep 29 2026 — R365 plate builds, side by side for the first week (managers only: the people
-  // who build the list are the ones who judge which number was right).
   S._platesPlan=null;
-  if(can('prep.generate')){ try{ await plateRatesLoad(); S._platesPlan=prepPlanPlates(guests); }catch(e){ S._platesPlan=null; } }
   const activeStaff=S.staff.filter(s=>s.active&&s.role!=='admin');
   // Seed the "who's prepping" chips ONLY from the list that already exists — real
   // assignments, never a guess. The old fallback that silently pre-selected the first
@@ -8762,7 +9002,7 @@ async function viewPrep(){
       </div>
       ${can('prep.generate')?`<div style="margin-top:14px"><button class="btn-primary" onclick="generateList()" ${S.workingIds.size===0?'disabled style="opacity:.45"':''}>${backing?'Replace prep list · Reemplazar lista':'Generate prep list · Generar lista'}</button>${S.workingIds.size===0?`<div class="muted" style="font-size:11.5px;margin-top:5px">Pick at least one person first · Elige al menos a una persona</div>`:''}</div>`
       :`<div class="muted" style="margin-top:14px;font-size:12.5px">No list has been built for this day yet. Building it is a management step. · La lista de este día aún no se ha generado.</div>`}
-      <div class="muted" style="margin-top:8px"><b>How the math works:</b> Pars and counts are in each item's real <b>container</b> — bottles for sauces, 1/6 pans for salsas, pies, bags. Par today = estimated usage + cushion, never below Min par. The system converts the container shortfall into <b>whole batches to prep</b> (e.g., short 2 bottles, batch fills 2 → prep 1 batch). <span style="color:var(--coral)">Container sizes & usage rates are first-pass — tell Dan where a batch fills more or fewer containers and it gets corrected.</span></div>
+      <div class="muted" style="margin-top:8px"><b>How the math works:</b> Pars and counts are in each item's real <b>container</b> — bottles for sauces, 1/6 pans for salsas, pies, bags. Par = what the days it has to cover will use (Thursday → Sunday night, Monday → Wednesday night, never past the item's shelf life) + cushion, never below Min par and never above your cap. Usage = R365 plates × guests, corrected by your fixes on the list. The system converts the container shortfall into <b>half batches to prep</b> (e.g., short 2 bottles, batch fills 2 → prep 1 batch). <span style="color:var(--coral)">Container sizes & usage rates are first-pass — tell Dan where a batch fills more or fewer containers and it gets corrected.</span></div>
     </div>
     <div class="card">
       <h2>Suggested plan · Plan sugerido</h2>
@@ -8908,7 +9148,7 @@ async function viewPrep(){
                 <span class="st"><i>Sell est · Venta</i><b>${t.forecast_qty==null?'—':'~'+fmtQ(t.forecast_qty)}</b></span>
                 <span class="st${p.id?' parchip':''}" ${p.id?`onclick="parSheetOpen('${p.id}')" title="Tap to change the min par · Toca para cambiar el par mínimo"`:''}><i>Min par (${t.container||p.container||''})</i><b>${fmtQ(Number(t.min_par)||Number(p.min_par)||0)}${(ohg&&ohg.ids.length>1)?`<em class="pl">${ohg.ids.length} places</em>`:''}</b></span>
                 <span class="st"><i>On hand · Hay</i><b title="${t.not_counted?'* nobody counted this — 0 is an assumption, not a measurement':'total across every place this item lives'}">${t.not_counted?'0*':oh}</b></span>
-                ${p.id?platesStatHtml(p, t.not_counted?0:oh):''}
+                ${dynThruHtml(t.dyn)}${p.id?platesMismHtml(p, t.not_counted?0:oh):''}
               </div>
               <div class="yield" style="justify-content:flex-start">
                 <!-- Dan, Aug 21 2026: MAKES and T.D. cells retired from the list card —
@@ -9664,9 +9904,9 @@ function taskLine(r,bil){
       <div class="stats">
         <span class="st"><i>Sell est · Venta</i><b>~${fmtQ(r.forecast)}</b></span>
         <span class="st parchip" onclick="parSheetOpen('${p.id}')" title="Tap to change the min par · Toca para cambiar el par mínimo"><i>Min par (${cu})</i><b>${fmtQ(r.minPar)}${r.places>1?`<em class="pl">${r.places} places</em>`:''}</b></span>
-        <span class="st"><i>Par today (${cu})</i><b>${fmtQ(r.par)}${Number(r.par)>Number(r.minPar)+1e-9?'<em class="pl fc" title="Above the min par because the forecast asks for more">forecast</em>':''}</b></span>
+        <span class="st"><i>${r.dyn&&r.dyn.span>1?`Par → ${esc(dynDayName(r.dyn.through))}`:'Par today'} (${cu})</i><b>${fmtQ(r.par)}${Number(r.par)>Number(r.minPar)+1e-9?'<em class="pl fc" title="Above the min par because the forecast asks for more">forecast</em>':''}</b></span>
         <span class="st"><i>On hand · Hay (${cu})</i><b title="${nc?'* nobody counted this — 0 is an assumption, not a measurement':'total across every place this item lives'}">${nc?'0*':fmtQ(r.onHand)}</b></span>
-        ${platesStatHtml(p, r.onHand)}
+        ${r.dyn?dynThruHtml(Object.assign({cap:r.cap,t:r.par},r.dyn)):''}${platesMismHtml(p, r.onHand)}
       </div></div>
     <!-- Dan, Aug 31 2026: no station badge and no walk-in/line split on a prep line. The
          prep list is about the item; where it goes afterwards is the cook's job, not the
@@ -11737,7 +11977,7 @@ async function viewAnalytics(){
     return;
   }
   const d=todayLA(), curM=Number(d.slice(5,7)), m=S.model;
-  await loadHistory(); await loadTiming();
+  await loadHistory(); await loadTiming(); try{ await dynLoad(); }catch(e){}
   if(!S.wx.loaded) await loadWeather();
   // Default the day report to the newest day that can actually be read end to end: a
   // submitted count in the morning AND a count the following morning to close it out.
@@ -11814,13 +12054,13 @@ async function viewAnalytics(){
 
   // ---- prep labor forecast: what the next 7 days cost in prep hours (from an empty walk-in)
   const labor=wk.map(x=>{
-    const rows=prepPlan(x, guestPlan(x), {});
+    const rows=prepPlan(x, guestPlan(x), {}, {oneDay:true});
     return {dstr:x, min:rows.reduce((a,r)=>a+r.minutes,0), batches:rows.reduce((a,r)=>a+r.batches,0)};
   });
   const lMax=Math.max(...labor.map(l=>l.min),1);
 
   // ---- biggest labor items (leverage)
-  const todayRows=prepPlan(d, gToday, {}).slice().sort((a,b)=>b.minutes-a.minutes);
+  const todayRows=prepPlan(d, gToday, {}, {oneDay:true}).slice().sort((a,b)=>b.minutes-a.minutes);
   const labMax=Math.max(...todayRows.map(r=>r.minutes),1);
 
   // ---- forecast coverage: at what guest count does each item stop running on its floor par
