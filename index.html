@@ -1402,7 +1402,7 @@ const SB_KEY='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZ
 const TBID='9f8d7c6b-5a49-4e38-b271-06d5f00dbeef'; // Tommy Bahama tenant inside ChefOpsAI
 // Stamped by publish.sh at upload time. It is the only version label there is now —
 // one address, updated in place, so this tells you which build that address is serving.
-const BUILD='Sep 30, 2026 · line stations + eggs + 86s';
+const BUILD='Sep 30, 2026 · stuck-tab watch + dev switch';
 // ---------- IS THIS PHONE EVEN RUNNING THE LATEST BUILD? ----------
 // Sep 3 2026. Three prep fixes shipped and Dan still saw the old behaviour, because the app
 // installs to the home screen and an installed web app does not go back and re-fetch its own
@@ -6158,6 +6158,60 @@ function syncPrepBar(){
   pb.style.bottom=((nb&&nb.style.display!=='none'&&nb.offsetHeight)||0)+'px';
 }
 window.addEventListener('resize',syncPrepBar);
+// ---- #5 "stuck on the Prep tab", watched for — Sep 30 2026 ------------------------------------
+// Dan, Aug 22: "it gets stuck in that section and it wont show the botton section bar where i can
+// change to other sections. i have to close the whole app and re open it". Never reproduced
+// (phone viewport, real render: the bar was visible and tappable every time). So instead of
+// waiting on a screenshot, the app checks itself every 3 seconds once someone is logged in:
+//  · tab bar hidden or pushed off the screen (twice in a row) → it puts the bar back and files
+//    an automatic note with what was open, the screen, sizes and scroll — the evidence;
+//  · tab bar covered by something that is NOT a full-screen sheet opened on purpose, for 15 s →
+//    a silent event naming what sits on top of it;
+//  · page scroll left locked by a recipe sheet that is already closed → unlocked.
+const tbWatch={hidden:0, covered:0, filed:{}};
+function tabWatchCtx(){
+  let mode='browser'; try{ if(navigator.standalone||(window.matchMedia&&window.matchMedia('(display-mode: standalone)').matches)) mode='installed'; }catch(e){}
+  return `view ${S.view||'—'}${S.view==='prep'?` · ${S.prepMode||'list'}`:''} · review ${S.prepReview?'open':'—'} · report ${S.repView?'open':'—'} · add ${S.prepAdd?'open':'—'}`
+    +` · rcov ${document.getElementById('rcov')?'yes':'no'} · scrollY ${Math.round(window.scrollY)} · ${window.innerWidth}×${window.innerHeight}`
+    +(window.visualViewport?` · vv ${Math.round(visualViewport.width)}×${Math.round(visualViewport.height)}`:'')+` · ${mode}`;
+}
+function tabWatchLog(kind, info, note){
+  const key=kind+'|'+(S.view||''); if(tbWatch.filed[key]) return; tbWatch.filed[key]=1;
+  const detail=info+' · '+tabWatchCtx();
+  // Written straight to the table like the timing marks — NOT through devEvent, which goes quiet
+  // when dev mode is off (it has been off since Sep 13), and this is exactly the evidence #5 needs.
+  try{ db.from('tb_dev_events').insert({restaurant_id:TBID, kind:'watch', name:'tabbar.'+kind, detail:detail.slice(0,400),
+    who:(pu()&&pu().name)||null, on_date:todayLA(), build:BUILD}).then(()=>{},()=>{}); }catch(e){}
+  if(note && typeof devSave==='function' && typeof devAutoToday==='function' && devAutoToday()<6){
+    devSave({kind:'bug', severity:'annoying', auto:true, err:'tabbar.'+kind,
+      title:'Bottom tab bar went missing — the app put it back',
+      detail:'Caught by the app itself (#5, the stuck Prep tab). '+detail, screen:S.view||'—'}).catch(()=>{});
+  }
+}
+function tabWatch(){
+  try{
+    const nb=document.getElementById('tabs'); if(!nb || !S.user) return;
+    if(!nb.querySelector('button')) return;                       // no tabs allowed → hidden on purpose
+    if(document.body.style.overflow==='hidden' && !document.getElementById('rcov')){
+      document.body.style.overflow=''; tabWatchLog('scroll-lock','page scroll was locked with no recipe sheet open'); }
+    const cs=getComputedStyle(nb), r=nb.getBoundingClientRect(), H=window.innerHeight;
+    if(cs.display==='none' || cs.visibility==='hidden' || r.height<10 || r.top>=H-2 || r.bottom<=0){
+      if(++tbWatch.hidden>=2){ tabWatchLog('hidden',`bar display ${cs.display} · visibility ${cs.visibility} · height ${Math.round(r.height)} · top ${Math.round(r.top)} of ${H}`, true);
+        nb.style.display='flex'; nb.style.visibility='visible'; syncPrepBar(); tbWatch.hidden=0; }
+      return;
+    }
+    tbWatch.hidden=0;
+    const el=document.elementFromPoint(window.innerWidth/2, Math.max(0, Math.min(H-2, r.top+r.height/2)));
+    let onPurpose=false;
+    if(el && !nb.contains(el)){
+      for(let x=el; x && x!==document.body; x=x.parentElement){ const c=getComputedStyle(x);
+        if(c.position==='fixed' && x.getBoundingClientRect().height>=H*0.8){ onPurpose=true; break; } }
+      if(!onPurpose){ if(++tbWatch.covered===5) tabWatchLog('covered', `covered by ${el.tagName.toLowerCase()}${el.id?'#'+el.id:''}${el.className&&typeof el.className==='string'?'.'+el.className.trim().split(/\s+/).join('.'):''} “${String(el.innerText||'').trim().slice(0,40)}”`); return; }
+    }
+    tbWatch.covered=0;
+  }catch(e){}
+}
+setInterval(tabWatch, 3000);
 // Who gets a name on the login screen. Being on the prep schedule and having a login are
 // two different things: a cook can be assigned work without ever opening the app, so
 // tb_login:false keeps somebody assignable while taking their name off this screen.
@@ -12653,7 +12707,7 @@ async function viewAdmin(){
   </div>`;
   shell(`
   ${parLauncher}
-  ${devOn()?devAdminCard():''}
+  ${devAdminCard()}
   ${rolesCard()}
   ${can('admin.perms')?backupCard():''}
   ${countListCard()}
@@ -16766,6 +16820,9 @@ async function viewDev(){
 }
 
 // ---- the Admin card ----
+// Sep 30 2026 — the card used to show only while the usage log was ON, so turning it off hid the
+// very switch that turns it back on (Dan, Sep 13: "i turned it off by accident ... it just
+// disappears after turning it off and i cant find it"). Always shown now.
 function devAdminCard(){
   const n=devOpenNotes().length;
   return `<div class="card">
