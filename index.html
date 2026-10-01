@@ -1409,7 +1409,7 @@ const SB_KEY='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZ
 const TBID='9f8d7c6b-5a49-4e38-b271-06d5f00dbeef'; // Tommy Bahama tenant inside ChefOpsAI
 // Stamped by publish.sh at upload time. It is the only version label there is now —
 // one address, updated in place, so this tells you which build that address is serving.
-const BUILD='Oct 1, 2026 · phone tab bar fix';
+const BUILD='Oct 1, 2026 · Today combined + covers labels';
 // ---------- IS THIS PHONE EVEN RUNNING THE LATEST BUILD? ----------
 // Sep 3 2026. Three prep fixes shipped and Dan still saw the old behaviour, because the app
 // installs to the home screen and an installed web app does not go back and re-fetch its own
@@ -7415,7 +7415,7 @@ function todayRangeHtml(o){
     const R=act!=null?null:(own?{g:guests,lo:guests,hi:guests}:dayRange(x));
     const v=act!=null?act:(own?guests:(R.lo+R.hi)/2), L=busyLv(v);
     const val=act!=null?act:(own?guests:`${R.lo}–${R.hi}`);
-    const sub=act!=null?'real ✓':(own?(es?'tu número':'your number'):(x<T?(es?'falta archivo':'no file yet'):(x===T?(es?'hoy':'today'):(es?'probable':'likely'))));
+    const sub=(es?'cubiertos · ':'covers · ')+(act!=null?'real ✓':(own?(es?'tu número':'your number'):(x<T?(es?'falta archivo':'no file yet'):(x===T?(es?'hoy':'today'):(es?'probable':'likely')))));
     const W=t2Wx(x);
     return `<div class="t2-tile lv${L.k}${x===d?' sel':''}" onclick="S.selDate='${x}';S.guestsOverride=null;render()">
       <div class="t2-lv">${es?L.es:L.en}</div><div class="t2-wx${W&&W.hot?' hot':''}">${W?`${W.ic} ${W.hi}°`:'&nbsp;'}</div><div class="t2-tw">${wdS(x)} <span>${dateObjLA(x).getDate()}</span></div>
@@ -7424,9 +7424,9 @@ function todayRangeHtml(o){
   const tilesCard=`<div class="card t2-days">
     <div class="rg-hd"><h3 style="margin:0">Day by day · Día por día</h3>
       <span class="rg-nav no-print"><button onclick="shiftWeek(-1)" aria-label="previous week">‹</button><button onclick="shiftWeek(1)" aria-label="next week">›</button></span></div>
-    <div class="muted" style="font-size:11.5px">${isCur?'':(wk[0]>T?(es?'Semana que viene · ':'Week ahead · '):(es?'Semana pasada · ':'Past week · '))}${wdS(wk[0])} ${short(wk[0])} – ${wdS(wk[6])} ${short(wk[6])} · ${es?'toca un día — las horas fuertes lo siguen':'tap a day — the busy hours below follow it'}</div>
+    <div class="muted" style="font-size:11.5px">${isCur?'':(wk[0]>T?(es?'Semana que viene · ':'Week ahead · '):(es?'Semana pasada · ':'Past week · '))}${wdS(wk[0])} ${short(wk[0])} – ${wdS(wk[6])} ${short(wk[6])} · ${es?'cubiertos por día · toca un día — las horas fuertes lo siguen':'covers per day · tap a day — the busy hours below follow it'}</div>
     <div class="t2-tiles">${tiles}</div>
-    <div class="t2-leg">${BUSY_LV.map((b,i)=>`<span class="t2-lk lv${b.k}">${es?b.es:b.en}</span> ${i===0?(es?'menos de 140':'under 140'):(i===3?'280+':`${BUSY_LV[i-1].max}–${b.max}`)}`).join(' ')}</div>
+    <div class="t2-leg">${BUSY_LV.map((b,i)=>`<span class="t2-lk lv${b.k}">${es?b.es:b.en}</span> ${i===0?(es?'menos de 140':'under 140'):(i===3?'280+':`${BUSY_LV[i-1].max}–${b.max}`)}`).join(' ')} <span class="muted">${es?'cubiertos':'covers'}</span></div>
   </div>`;
   // ---- the selected day
   const actD=actualByDate[d];
@@ -7446,17 +7446,17 @@ function todayRangeHtml(o){
   const wh=wxHours(d), hv=h=>{ const x=wh&&wh.h?wh.h[String(h)]:null; if(x==null) return null; const v=typeof x==='object'?(x.t!=null?x.t:x.a):x; return v!=null?Math.round(Number(v)):null; };
   const Wd=t2Wx(d);
   const dollars=DOLLARS();
-  const lyChip=LA?`<div class="t2-chip ly"><span>${es?'El año pasado':'Last year'} · ${esc(LA.short||LA.label)}</span><b>${dollars?`$${(LA.sales/1000).toFixed(1)}k`:`${LA.est?'~':''}${LA.guests} ${es?'clientes':'guests'}`}</b>${dollars&&LA.est?`<i>${es?'clientes estimados':'guests estimated'}</i>`:''}</div>`:'';
+  const lyChip=LA?`<div class="t2-chip ly"><span>${es?'El año pasado':'Last year'} · ${esc(LA.short||LA.label)}</span><b>${dollars?`$${(LA.sales/1000).toFixed(1)}k`:`${LA.est?'~':''}${LA.guests} ${es?'cubiertos':'covers'}`}</b>${dollars&&LA.est?`<i>${es?'cubiertos estimados':'covers estimated'}</i>`:''}</div>`:'';
   const busyCard=`<div class="card t2-busy">
     <h3 style="margin:0">When it gets busy · Horas fuertes</h3>
     <div class="muted" style="font-size:11.5px">${dayName}${busiest?` · ${es?'lo más fuerte':'busiest'} ${busiest}`:''}</div>
-    <div class="t2-chips"><div class="t2-chip"><span>${actD!=null?(es?'Clientes reales':'Real guests'):(es?'Clientes':'Guests')}</span><b>${actD!=null?actD:(own?guests:`${R.lo}–${R.hi}`)}</b></div>${lyChip}${Wd?`<div class="t2-chip"><span>${es?'Clima':'Weather'}</span><b>${Wd.ic} ${Wd.hi}°${Wd.lo!=null?` / ${Wd.lo}°`:''}</b></div>`:''}</div>
+    <div class="t2-chips"><div class="t2-chip"><span>${actD!=null?(es?'Cubiertos reales':'Real covers'):(es?'Cubiertos':'Covers')}</span><b>${actD!=null?actD:(own?guests:`${R.lo}–${R.hi}`)}</b></div>${lyChip}${Wd?`<div class="t2-chip"><span>${es?'Clima':'Weather'}</span><b>${Wd.ic} ${Wd.hi}°${Wd.lo!=null?` / ${Wd.lo}°`:''}</b></div>`:''}</div>
     <div class="t2-hrs">${hrs.map(x=>{ const sh=x.g/sumG, t=hv(x.h);
       const lab=actD!=null||own?`~${Math.round(dLo*sh)}`:`${Math.round(dLo*sh)}–${Math.round(dHi*sh)}`;
       return `<div class="t2-hc"><span class="t2-hr">${lab}</span><div class="t2-hb${x.g/mxH>0.8?' pk':''}" style="height:${Math.round(x.g/mxH*70)}px"></div><span class="t2-hh">${hl(x.h).replace('am','a').replace('pm','p')}</span>${t!=null?`<span class="t2-ht${t>=100?' hot':''}">${t}°</span>`:''}</div>`; }).join('')}</div>
-    <div class="t2-hkey"><span>${es?'arriba = clientes probables esa hora':'top = likely guests that hour'}</span><span><i></i>${es?'lo más fuerte':'busiest'}</span>${wh?`<span>${es?'abajo = temperatura':'bottom = temperature'}${wh.src==='monthnorm'?(es?' (normal del mes)':' (the month’s normal)'):''} · <b class="hot">100°+</b></span>`:''}</div>
+    <div class="t2-hkey"><span>${es?'arriba = cubiertos probables esa hora':'top = likely covers that hour'}</span><span><i></i>${es?'lo más fuerte':'busiest'}</span>${wh?`<span>${es?'abajo = temperatura':'bottom = temperature'}${wh.src==='monthnorm'?(es?' (normal del mes)':' (the month’s normal)'):''} · <b class="hot">100°+</b></span>`:''}</div>
     ${LA&&dollars?`<div class="muted" style="font-size:11px;margin-top:4px">${es?'Las ventas del año pasado son del día completo — las ventas por hora empiezan el 1 de agosto de 2026.':'Last year’s sales are for the whole day — hour-by-hour sales only start Aug 1, 2026.'}</div>`:''}
-  </div>`;
+  `;   // closed below, after the day's guests block (Oct 1 2026, Dan: combine like his)
   // ---- 3 · top 20 sellers, option C: likely plates = share of guests × the day's guest range
   // (a day that is already real uses its real guests and the measured item swing instead)
   const fams=S.families.filter(f=>(f.category==='food'||f.category==='dessert')&&f.active!==false).slice(0,20);
@@ -7479,15 +7479,18 @@ function todayRangeHtml(o){
     const mn=Math.min(lo,LA.guests)*0.85, mx=Math.max(hi,LA.guests)*1.12;
     const Q=v=>Math.max(0,Math.min(100,(v-mn)/(mx-mn)*100));
     lyBlock=`<div class="rg-ly"><div class="muted" style="font-size:11.5px">Same day last year · Mismo día el año pasado${LA.syn?' <span class="drtag est">sample data</span>':''}</div>
-      <div><b class="rg-lyv">${LA.guests} guests · $${LA.sales.toLocaleString()}</b> <span class="muted" style="font-size:11px">${esc(es?LA.es:LA.label)}</span></div>
+      <div><b class="rg-lyv">${LA.guests} covers · $${LA.sales.toLocaleString()}</b> <span class="muted" style="font-size:11px">${esc(es?LA.es:LA.label)}</span></div>
       ${actD==null?`<div class="rg-lybar"><i style="left:${Q(lo).toFixed(1)}%;width:${Math.max(2,Q(hi)-Q(lo)).toFixed(1)}%"></i><em style="left:${Q(LA.guests).toFixed(1)}%"></em></div>
       <div class="rg-key"><span><i class="k1"></i>${es?'rango de este año':'this year\'s likely range'}</span><span><i class="k2"></i>${es?'el año pasado':'last year'}</span></div>`:''}
     </div>`;
   }
-  const selCard=`<div class="card t2-sel" id="t2-day">
-    <h3 style="margin:0">${fmtDate(d)}${d===T?' · Hoy':''}</h3>
-    ${actD!=null?`<div class="muted" style="font-size:12px;margin-top:4px">Real guests · Clientes reales</div><div class="big rg-big">${actD}</div>`
-      :`<div class="muted" style="font-size:12px;margin-top:4px">Guests expected · Clientes esperados</div>
+  // Oct 1 2026 — Dan, for leadership and management: "you should have this one like mine in which
+  // theyre both combined". Same as his Sep 29 merge: the day's guests block now sits inside the
+  // busy-hours card, under the hours, and the weather line that sat under it is gone (the weather
+  // chip and the hourly temperatures in the same card stay).
+  const selCard=`<div class="t2-fcblock t2-sel" id="t2-day">
+    ${actD!=null?`<div class="muted" style="font-size:12px;margin-top:4px">Real covers · Cubiertos reales</div><div class="big rg-big">${actD}</div>`
+      :`<div class="muted" style="font-size:12px;margin-top:4px">Covers expected · Cubiertos esperados</div>
         <div class="big rg-big">${own?guests:`${R.lo} – ${R.hi}`}</div>
         ${own?`<div class="muted" style="font-size:12px">Your number — the prep list uses it. The app's range was ${R.lo}–${R.hi}. · Tu número; la lista lo usa.</div>`:''}
         ${d<T?'<div class="muted" style="font-size:11.5px">Not uploaded from Oracle yet · Falta el archivo de Oracle</div>':''}
@@ -7495,10 +7498,9 @@ function todayRangeHtml(o){
           <input class="qty" type="number" inputmode="numeric" placeholder="edit" style="width:74px" onchange="S.guestsOverride=Number(this.value)||null;render()">
           ${own?`<button class="btn-ghost btn-sm" onclick="S.guestsOverride=null;render()">Use the app's range</button>`:''}</div>`:''}`}
     ${lyBlock}
-    ${wxCard(d, range, ww, wxf, true)}
   </div>`;
   let yearCard=''; try{ yearCard=DOLLARS()?yearSalesHtml():yearBarsHtml(avgCheck); }catch(e){ console.warn('year bars',e); }
-  return `${todayAlertsHtml(d)}${tilesCard}${busyCard}${topCard}${yearCard}${selCard}${card86(d)}${eventsCard()}${can('admin.import')?dataCard(!!(S.settings||{}).bilingual):''}`;
+  return `${todayAlertsHtml(d)}${tilesCard}${busyCard}${selCard}</div>${topCard}${yearCard}${card86(d)}${eventsCard()}${can('admin.import')?dataCard(!!(S.settings||{}).bilingual):''}`;
 }
 // ================= DAN'S TODAY, NEW LOOK (Sep 25 2026 — mockups today-dan + today-dan-sales) =================
 // Dan: "for my screen i want you to have the same tile as the ones we made for everyone else.
@@ -7532,7 +7534,7 @@ function danWeekHtml(o){
     const R=dayRange(x);
     if(act!=null){ sumA+=act; sumPA+=proj; nA++; if(salesByDate[x]!=null) sumS+=salesByDate[x]; }
     const big=act!=null?act:(own?S.guestsOverride:proj), L=busyLv(big), W=t2Wx(x);
-    const sub=act!=null?'real ✓':(own?(es?'tu número':'your number'):(x<T?(es?'falta archivo':'no file yet'):(x===T?(es?'hoy':'today'):(es?'pronóstico':'forecast'))));
+    const sub=(es?'cubiertos · ':'covers · ')+(act!=null?'real ✓':(own?(es?'tu número':'your number'):(x<T?(es?'falta archivo':'no file yet'):(x===T?(es?'hoy':'today'):(es?'pronóstico':'forecast')))));
     const extra=act!=null?`proj ${proj} · ${t2Miss((proj-act)/act*100)}`:`${R.lo}–${R.hi}${frozen&&x<=T?(es?' · guardado':' · saved'):''}`;
     return `<div class="t2-tile lv${L.k}${x===d?' sel':''}" onclick="S.selDate='${x}';S.guestsOverride=null;render()">
       <div class="t2-lv">${es?L.es:L.en}</div><div class="t2-wx${W&&W.hot?' hot':''}">${W?`${W.ic} ${W.hi}°`:'&nbsp;'}</div><div class="t2-tw">${wdS(x)} <span>${dateObjLA(x).getDate()}</span></div>
@@ -7541,9 +7543,9 @@ function danWeekHtml(o){
   const tilesCard=`<div class="card t2-days">
     <div class="rg-hd"><h3 style="margin:0">Day by day · Día por día</h3>
       <span class="rg-nav no-print"><button onclick="shiftWeek(-1)" aria-label="previous week">‹</button><button onclick="shiftWeek(1)" aria-label="next week">›</button></span></div>
-    <div class="muted" style="font-size:11.5px">${isCur?'':(wk[0]>T?'Week ahead · ':'Past week · ')}${wdS(wk[0])} ${short(wk[0])} – ${wdS(wk[6])} ${short(wk[6])} · ${es?'toca un día — las horas fuertes lo siguen':'tap a day — the busy hours below follow it'}</div>
+    <div class="muted" style="font-size:11.5px">${isCur?'':(wk[0]>T?'Week ahead · ':'Past week · ')}${wdS(wk[0])} ${short(wk[0])} – ${wdS(wk[6])} ${short(wk[6])} · ${es?'cubiertos por día · toca un día — las horas fuertes lo siguen':'covers per day · tap a day — the busy hours below follow it'}</div>
     <div class="t2-tiles">${tiles}</div>
-    <div class="t2-leg">${BUSY_LV.map((b,i)=>`<span class="t2-lk lv${b.k}">${es?b.es:b.en}</span> ${i===0?(es?'menos de 140':'under 140'):(i===3?'280+':`${BUSY_LV[i-1].max}–${b.max}`)}`).join(' ')}</div>
+    <div class="t2-leg">${BUSY_LV.map((b,i)=>`<span class="t2-lk lv${b.k}">${es?b.es:b.en}</span> ${i===0?(es?'menos de 140':'under 140'):(i===3?'280+':`${BUSY_LV[i-1].max}–${b.max}`)}`).join(' ')} <span class="muted">${es?'cubiertos':'covers'}</span></div>
   </div>`;
   // ---- the week's sales: our guess (center) and its measured range, against what came in
   let salesCard='';
@@ -17074,10 +17076,10 @@ const TOURS={
   {el:()=>tq('.t2-busy'), en:'The day you picked, hour by hour: likely guests on top of each bar, the temperature under it. Orange = the rush. Up top: the day’s guests, last year, and the weather.', es:'El día que escogiste, hora por hora: los clientes probables arriba de cada barra y la temperatura abajo. Naranja = la hora pico. Arriba: los clientes del día, el año pasado y el clima.'},
   {el:()=>tq('.t2-top'), en:'The 20 plates that sell most, as a likely range for that day. The top 5 are the big ones.', es:'Los 20 platos que más se venden, como rango probable para ese día. Los 5 de arriba son los grandes.'},
   {when:()=>!!tq('.t2-year'), el:()=>tq('.t2-year'), en:()=>DOLLARS()?'The year, month by month: average sales a day. Last year in grey, this year in dark green, the coming months as a likely range. The dashed line is a $15k day.':'The year, month by month: last year in grey, this year in dark green, the coming months as a likely range. The dashed line is a $15k day.', es:()=>DOLLARS()?'El año, mes por mes: ventas promedio al día. El año pasado en gris, este año en verde oscuro, los meses que vienen como rango probable. La línea punteada es un día de $15k.':'El año, mes por mes: el año pasado en gris, este año en verde oscuro, los meses que vienen como rango probable. La línea punteada es un día de $15k.'},
-  {el:()=>tq('#t2-day'), en:'The day you picked: how many guests to expect. The prep list is built from the app’s number inside this range.', es:'El día que escogiste: cuántos clientes esperar. La lista de prep se arma con el número de la app dentro de este rango.'},
+  {el:()=>tq('#t2-day'), en:'The day you picked: how many covers to expect. The prep list is built from the app’s number inside this range.', es:'El día que escogiste: cuántos clientes esperar. La lista de prep se arma con el número de la app dentro de este rango.'},
   {when:()=>can('today.override'), el:()=>tq('#app input.qty[placeholder="edit"]'), en:'Know something the app doesn’t, like a party of 40? Type it here. Today’s prep list uses your number.', es:'¿Sabes algo que la app no, como un grupo de 40? Escríbelo aquí. La lista de hoy usa tu número.'},
   {when:()=>can('analytics.money'), el:()=>tq('.rg-ly'), en:'Same day last year, Friday against Friday. The gold dot shows where last year lands in this year’s range.', es:'El mismo día del año pasado, viernes contra viernes. El punto dorado muestra dónde cae el año pasado en el rango de este año.'},
-  {el:()=>tq('#app .wxbar'), en:'The day’s weather. Details shows it hour by hour.', es:'El clima del día. Details lo muestra hora por hora.'},
+  {when:()=>!!tq('#app .wxbar'), el:()=>tq('#app .wxbar'), en:'The day’s weather. Details shows it hour by hour.', es:'El clima del día. Details lo muestra hora por hora.'},
   {when:()=>can('86.log')||!!tCard('86 Board'), el:()=>tCard('86 Board'), en:()=>can('86.log')?'Ran out of something? Tap “86 something” and pick it, so everyone knows.':'What has run out today shows here.', es:()=>can('86.log')?'¿Se acabó algo? Toca “86 something” y escógelo, para que todos sepan.':'Aquí sale lo que se acabó hoy.'},
   {when:()=>sec('orders')&&!!tq('.or-card'), el:()=>tq('.or-card'), en:'On an order day a card shows up in the alerts. Start the count opens that vendor’s order guide.', es:'En día de pedido sale una tarjeta en los avisos. Start the count abre la guía de ese proveedor.'},
   {when:()=>can('admin.import'), el:()=>tCard('Data & files'), en:'Once a week: drop the Oracle zip here. It fills in the real guests and sales, and the ranges keep learning.', es:'Una vez a la semana: suelta aquí el zip de Oracle. Llena los clientes y ventas reales, y los rangos siguen aprendiendo.'}
