@@ -1061,6 +1061,8 @@
   .dv-strip{background:var(--sand-dark);border-radius:10px;padding:7px 11px;margin:0 0 10px;
     font-size:12px;color:var(--muted);cursor:pointer;line-height:1.4}
   .dv-strip b{color:var(--ink)}
+  .rc-fullbtn{margin-left:auto;font-size:12px;padding:5px 10px;white-space:nowrap}
+  .dv-photos{display:flex;gap:8px}.dv-photos .dv-photo{flex:1}
   .dv-photo{border:1.5px dashed var(--line);border-radius:10px;padding:15px;text-align:center;
     font-size:13.5px;color:var(--muted);background:#fff;cursor:pointer}
   .dv-photo.has{border-style:solid;border-color:var(--palm);background:#f2f7f3;color:var(--palm);font-weight:600}
@@ -1410,7 +1412,7 @@ const SB_KEY='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZ
 const TBID='9f8d7c6b-5a49-4e38-b271-06d5f00dbeef'; // Tommy Bahama tenant inside ChefOpsAI
 // Stamped by publish.sh at upload time. It is the only version label there is now —
 // one address, updated in place, so this tells you which build that address is serving.
-const BUILD='Oct 1, 2026 · Today combined + covers + ChefOpsAI everywhere';
+const BUILD='Oct 2, 2026 · crash fix + recipe button + bug photo picker';
 // ---------- IS THIS PHONE EVEN RUNNING THE LATEST BUILD? ----------
 // Sep 3 2026. Three prep fixes shipped and Dan still saw the old behaviour, because the app
 // installs to the home screen and an installed web app does not go back and re-fetch its own
@@ -1626,6 +1628,8 @@ async function secRecheck(){
 }
 
 const S = { user:null, staff:[], families:[], preps:[], model:null, settings:null,
+            // Why the forecast model is not here, when it is not. null means it loaded.
+            modelErr:null,
             view:'today', pin:'', counts:{}, countId:null, tasks:[], listId:null,
             rawUnit:{},   // raw count rows: which unit the box is typed in right now ('base' | 'alt')
             // Two counts can share a business date: the one taken when the kitchen opens
@@ -1817,12 +1821,39 @@ function esc(s){ return String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&
 function fmtTime(iso){ try{ return new Date(iso).toLocaleTimeString('en-US',{timeZone:'America/Los_Angeles',hour:'numeric',minute:'2-digit'}); }catch(e){ return ''; } }
 
 // ---------- forecast math ----------
+// Oct 1 2026 — dev note ec85ddfb. The forecast needs these three things to mean anything.
+// Anything less is a FAILED LOAD, not a model, and the difference matters: the old code let a
+// failed load arrive here as {} and then read weekday_guests off it, which threw
+// "Cannot read properties of undefined (reading 'Wednesday')" inside an async render nobody
+// was catching — and the app sat on "Loading · Cargando…" for ever. One check, in one place,
+// and every screen that paints a forecast asks it first.
+function modelUsable(m){
+  return !!(m && typeof m==='object' && m.weekday_guests && typeof m.weekday_guests==='object'
+            && m.seasonal_month_mult && typeof m.seasonal_month_mult==='object'
+            && Number(m.base_daily_guests)>0);
+}
+// The card every screen shows instead of a number it cannot honestly produce. Same shape as
+// the recipe-book failure card, because it is the same promise: say what broke, offer the retry.
+function modelDownCard(){
+  const es=isES();
+  return `<div class="card"><div class="up-warn" style="margin:0">
+    <b>${es?'No se pudo cargar el modelo del pronóstico':'Could not load the forecast model'}</b><br>
+    <span class="muted" style="font-size:12px">${es
+      ?'Sin él no se puede calcular el pronóstico de hoy, y no voy a inventar un número. Todo lo demás sigue funcionando.'
+      :'Without it today\'s forecast cannot be calculated, and the app will not invent a number. Everything else still works.'}</span><br>
+    ${S.modelErr?`<span class="muted" style="font-size:11.5px">${esc(String(S.modelErr))}</span><br>`:''}
+    <button class="btn-secondary btn-sm no-print" style="margin-top:8px" onclick="mdlRetry()">Try again · Reintentar</button>
+  </div></div>`;
+}
 // The BASE forecast: weekday pattern × seasonal multiplier, exactly as before.
+// The `||{}` guards are belt and braces, not the fix: with modelUsable gating the screens they
+// are unreachable. They are here so a half-loaded model can never again take the whole app
+// down — a wrong number is bad, a screen that never arrives is worse.
 function guestBase(dstr){
-  const m=S.model; const wd=weekdayOf(dstr);
+  const m=S.model||{}; const wd=weekdayOf(dstr);
   const month=String(dateObjLA(dstr).getMonth()+1);
-  const wg=m.weekday_guests[wd] ?? m.base_daily_guests;
-  const seas=m.seasonal_month_mult[month] ?? 1.0;
+  const wg=(m.weekday_guests||{})[wd] ?? m.base_daily_guests;
+  const seas=(m.seasonal_month_mult||{})[month] ?? 1.0;
   return Math.round(wg*seas);
 }
 // The self-correcting layer (approved Aug 13). Every scored day in tb_forecast_scores
@@ -2217,9 +2248,9 @@ function fcNoteHtml(d){
 
 // Last-year same-day ESTIMATE, rebuilt from 2025 System Financial totals × seasonal curve × weekday pattern
 function lastYearEst(dstr){
-  const m=S.model; if(!m.ly) return null;
+  const m=S.model||{}; if(!m.ly) return null;
   const month=String(dateObjLA(dstr).getMonth()+1);
-  const seas=m.seasonal_month_mult[month] ?? 1.0;
+  const seas=(m.seasonal_month_mult||{})[month] ?? 1.0;
   const wIdx=(m.weekday_index&&m.weekday_index[weekdayOf(dstr)])||1;
   return { guests: Math.round(m.ly.g_base*seas*wIdx), sales: Math.round(m.ly.s_base*seas*wIdx) };
 }
@@ -3218,7 +3249,27 @@ async function loadAll(){
   S.preps=allPreps.filter(p=>!p.removed);
   S.removedPreps=allPreps.filter(p=>p.removed);
   S.families=(fam.data||[]).map(f=>({...f}));
-  S.model=mo.data?.value||{}; S.settings=se.data?.value||{};
+  // Oct 1 2026 — dev note ec85ddfb, the root cause. This line used to read
+  //   S.model = mo.data?.value || {}
+  // so a `core` row that did not come back — a walk-in wifi blip, a 5xx, a request cut off
+  // when the tab was backgrounded — landed in memory as an EMPTY MODEL that every screen then
+  // treated as real. The forecast read weekday_guests off it and threw, and because loadAll is
+  // awaited inside an un-awaited render() the throw became a promise nobody caught: the app
+  // never finished painting. Worse, dailyRefresh calls loadAll again at midnight and after a
+  // ten-minute sleep, so one blip could replace a model that was working fine with nothing.
+  // An empty model is not a model. If the row did not come back, keep the one already in
+  // memory and record why, so the screens can say so instead of guessing.
+  if(modelUsable(mo.data&&mo.data.value)){ S.model=mo.data.value; S.modelErr=null; }
+  else {
+    S.modelErr=(mo.error&&(mo.error.message||mo.error.details||String(mo.error)))
+      || (mo.data ? 'The forecast model row came back incomplete.' : 'The forecast model did not come back.');
+    // Nothing good to fall back on. S.modelErr is what says so — this stays {} rather than
+    // null on purpose: eight places read S.model.something one level deep, and {} makes every
+    // one of them miss harmlessly where null would throw a brand new crash. modelUsable({})
+    // is false, so no screen paints a number off it either way.
+    if(!modelUsable(S.model)) S.model={};
+  }
+  S.settings=se.data?.value||{};
   // Same rule as the permission switches: an unsaved edit to the cut list survives a
   // background refresh instead of being quietly thrown away.
   if(!S.fcDirty) S.freshCuts=(fcm&&fcm.data)?fcm.data.value:{version:1,cuts:[]};
@@ -7682,6 +7733,10 @@ function danTopHtml(o){
 }
 async function viewToday(){
   const d=S.selDate||todayLA(); S.selDate=d;
+  // Oct 1 2026 — dev note ec85ddfb. Today IS the forecast; without the model there is no
+  // honest version of this screen, so it says so and offers the retry rather than crashing
+  // on the way to a number it cannot stand behind.
+  if(!modelUsable(S.model)){ shell(modelDownCard()); return; }
   // Sep 24 speed pass: the order-day card and the 86 list start loading NOW, in parallel with
   // the weather, instead of each waiting its turn — same data, fewer trips before Today shows.
   const pOr=(d===todayLA() && sec('orders')) ? orLoadToday(d).catch(()=>null) : null;
@@ -11090,11 +11145,14 @@ function rcResultsHtml(){
           ${(m.uncertain||[]).length?`<span class="badge" style="background:#fff4e5;color:#8a5a00" title="${(m.uncertain||[]).length} thing(s) to check against the photo">check ${(m.uncertain||[]).length}</span>`:''}
           <span class="muted" style="font-size:12px">${m.yield||''}</span>
         </div>
-        ${open?`<div style="padding:8px 0 4px 21px;position:relative">
-          <button class="btn-secondary btn-sm no-print" style="position:absolute;top:2px;right:0" onclick="openFull('${r.id}')">${ic('expand','ico-sm')}Full page · Pantalla completa</button>
-          <div style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:8px;padding-right:150px">
+        ${open?`<div style="padding:8px 0 4px 21px">
+          <div style="display:flex;gap:6px;flex-wrap:wrap;align-items:flex-start;margin-bottom:8px">
             ${m.yield?`<span class="st"><i>Yield</i><b>${m.yield}</b></span>`:''}
             ${rcpChips(r,m)}
+            <!-- Oct 2 2026 — Dan: on a phone this button sat on top of the Yield / Shelf life chips
+                 (it was pinned top-right over a 150px gap the phone-size label never fit in). Now it is
+                 the last item of the chip row: right-aligned when there is room, its own line when not. -->
+            <button class="btn-secondary btn-sm no-print rc-fullbtn" onclick="openFull('${r.id}')">${ic('expand','ico-sm')}${isES()?'Pantalla completa':'Full page'}</button>
           </div>
           ${(r.ingredients||[]).length?`<table style="margin:4px 0">${r.ingredients.map(i=>`<tr><td style="width:96px;font-variant-numeric:tabular-nums;color:var(--teal-dark)"><b>${i.qty}</b></td><td>${i.item}</td></tr>`).join('')}</table>`:''}
           ${(r.instructions||[]).length?`<ol style="margin:8px 0 4px;padding-left:20px">${r.instructions.map(s=>`<li style="margin:4px 0">${s}</li>`).join('')}</ol>`:''}
@@ -11129,6 +11187,28 @@ function rcLoadBook(){
 // Fire-and-forget from a keystroke: repaint when it lands, never block the typing.
 function rcKick(){ const p=rcLoadBook(); if(p&&p.then) p.then(()=>{ if(S.view==='recipes') rcPaint(); }); }
 window.rcRetry=()=>{ S._bookErr=null; S._bookErrAt=0; rcKick(); rcPaint(); };
+// Oct 1 2026 — fetch the forecast model and nothing else. The boot retry and the Try again
+// button both come here instead of re-running loadAll, which pulls a couple of thousand rows;
+// the model is one row, and one row is what is missing. Same rule as loadAll: a row that does
+// not come back never replaces a model that is already in memory.
+async function mdlLoad(){
+  try{
+    const r=await db.from('tb_model').select('value').eq('key','core').single();
+    if(modelUsable(r.data&&r.data.value)){ S.model=r.data.value; S.modelErr=null; return true; }
+    S.modelErr=(r.error&&(r.error.message||r.error.details||String(r.error)))
+      || (r.data ? 'The forecast model row came back incomplete.' : 'The forecast model did not come back.');
+  }catch(e){ S.modelErr=(e&&e.message)?e.message:String(e); }
+  if(!modelUsable(S.model)) S.model={};      // see loadAll: {} misses harmlessly, null throws
+  return false;
+}
+// The retry behind modelDownCard. Deliberately not location.reload(): a reload on a phone in
+// the walk-in with bad signal can come back to nothing at all, and this keeps what did load.
+window.mdlRetry=async()=>{
+  document.querySelectorAll('button[onclick="mdlRetry()"]').forEach(b=>{
+    b.disabled=true; b.textContent=isES()?'Reintentando…':'Trying again…'; });
+  await mdlLoad();
+  try{ await render(); }catch(e){}
+};
 async function viewRecipes(){
   await rcLoadBook();
   // A failed load is a card that says so with a retry, never a blank white screen and never
@@ -11602,8 +11682,8 @@ function fvaCorrHtml(){
   const worst=WD.filter(wd=>C.n&&C.n[wd]>0).sort((a,b)=>Math.abs((C.wd[b]||1)-1)-Math.abs((C.wd[a]||1)-1))[0];
   let example='';
   if(worst){
-    const m=S.model, month=String(dateObjLA(todayLA()).getMonth()+1);
-    const wg=m.weekday_guests[worst]??m.base_daily_guests, seas=m.seasonal_month_mult[month]??1;
+    const m=S.model||{}, month=String(dateObjLA(todayLA()).getMonth()+1);
+    const wg=(m.weekday_guests||{})[worst]??m.base_daily_guests, seas=(m.seasonal_month_mult||{})[month]??1;
     example=`<div class="muted" style="font-size:11px;margin-top:2px">Example — next ${worst}: ${wg} × ${seas} (season) × <b>${C.wd[worst].toFixed(2)}</b> = <b>${Math.max(1,Math.round(wg*seas*C.wd[worst]))}</b> covers (base said ${Math.round(wg*seas)}). One odd week moves a correction partway, never all the way; capped ×0.6–×1.4; re-learns on every upload.</div>`;
   }
   return `<h3 style="font-size:13.5px;color:var(--teal-dark);margin:12px 0 4px">What the engine did with the misses <span class="muted" style="font-weight:400;font-size:11px">automatic · damped · from ${C.nAll} scored day(s)</span></h3>
@@ -12151,6 +12231,9 @@ async function viewAnalytics(){
     shell(fvaCardHtml(S.weekReport.F, S.weekReport.isCurrent?(S._anaHist&&S._anaHist.fvaSuggs):null, S.weekReport.isCurrent));
     return;
   }
+  // Oct 1 2026 — dev note ec85ddfb. The season curve, the weekday shape and the forecast
+  // accuracy board are all read straight off the model. No model, no numbers — say so.
+  if(!modelUsable(S.model)){ shell(modelDownCard()); return; }
   const d=todayLA(), curM=Number(d.slice(5,7)), m=S.model;
   await loadHistory(); await loadTiming(); try{ await dynLoad(); }catch(e){}
   if(!S.wx.loaded) await loadWeather();
@@ -12173,7 +12256,7 @@ async function viewAnalytics(){
   const wkDelta=wkG? Math.round((nextG-wkG)/wkG*100):0;
 
   // ---- season curve
-  const season=MON.map((nm,i)=>({nm, mo:i+1, mult:Number(m.seasonal_month_mult[String(i+1)]||1)}));
+  const season=MON.map((nm,i)=>({nm, mo:i+1, mult:Number((m.seasonal_month_mult||{})[String(i+1)]||1)}));
   season.forEach(s=>s.g=Math.round(m.base_daily_guests*s.mult));
   const sMax=Math.max(...season.map(s=>s.g));
   const peak=season.reduce((a,b)=>b.g>a.g?b:a);
@@ -12182,7 +12265,7 @@ async function viewAnalytics(){
   const climb=cur.g? (peak.g/cur.g):1;
 
   // ---- weekday shape (this month)
-  const wdRows=WD.map(w=>({w, g:Math.round((m.weekday_guests[w]||m.base_daily_guests)*cur.mult)}));
+  const wdRows=WD.map(w=>({w, g:Math.round(((m.weekday_guests||{})[w]||m.base_daily_guests)*cur.mult)}));
   const wdMax=Math.max(...wdRows.map(r=>r.g));
   const wdHi=wdRows.reduce((a,b)=>b.g>a.g?b:a), wdLo=wdRows.reduce((a,b)=>b.g<a.g?b:a);
 
@@ -12246,7 +12329,7 @@ async function viewAnalytics(){
   const linked=kitchen.filter(p=>perG(p)>0);
   const unlinked=kitchen.filter(p=>perG(p)<=0 && (Number(p.min_par)||0)>0);
   const cross=linked.map(p=>({p, per:perG(p), g:(Number(p.min_par)||0)/((1+ss)*perG(p))})).sort((a,b)=>a.g-b.g);
-  const peakSat=Math.round((m.weekday_guests['Saturday']||m.base_daily_guests)*peak.mult);
+  const peakSat=Math.round(((m.weekday_guests||{})['Saturday']||m.base_daily_guests)*peak.mult);
   const liveNow=cross.filter(c=>c.g<=gToday).length;
   const livePeak=cross.filter(c=>c.g<=peakSat).length;
   const crossMax=Math.max(...cross.map(c=>c.g),1);
@@ -12757,8 +12840,13 @@ async function viewAdmin(){
   ${wxAdminCard()}
   ${EXACT()?`<div class="card">
     <h2>Forecast model</h2>
-    <div class="muted">Weekday guests (summer base): ${Object.entries(S.model.weekday_guests||{}).map(([k,v])=>`${k.slice(0,3)} ${v}`).join(' · ')}</div>
-    <div class="muted" style="margin-top:6px">Safety stock: ${(S.model.safety_stock*100).toFixed(0)}% · Season multipliers vs July=1.0 · YoY trend ${(S.model.yoy_trend*100).toFixed(1)}%</div>
+    ${!modelUsable(S.model)
+      // Oct 1 2026 — dev note ec85ddfb. With no model this card used to read
+      // "Safety stock: NaN% · YoY trend NaN%", which looks like a number and is not one.
+      ? `<div class="muted">Not loaded${S.modelErr?' — '+esc(String(S.modelErr)):''}</div>
+         <button class="btn-secondary btn-sm no-print" style="margin-top:8px" onclick="mdlRetry()">Try again · Reintentar</button>`
+      : `<div class="muted">Weekday guests (summer base): ${Object.entries(S.model.weekday_guests||{}).map(([k,v])=>`${k.slice(0,3)} ${v}`).join(' · ')}</div>
+         <div class="muted" style="margin-top:6px">Safety stock: ${(S.model.safety_stock*100).toFixed(0)}% · Season multipliers vs July=1.0 · YoY trend ${(S.model.yoy_trend*100).toFixed(1)}%</div>`}
   </div>`:''}
   <div class="card">
     <h2>Background · Fondo<span class="h2sub">this device only · solo este aparato</span></h2>
@@ -16422,12 +16510,18 @@ function devSheetPaint(){
         placeholder="${es?'Entre más detalle, más rápido lo arreglo.':'The more detail, the faster I can fix it.'}">${esc(f.detail)}</textarea>
 
       <label class="cl-lbl">${es?'Foto':'Photo'}</label>
+      <!-- Oct 2 2026 — Dan: "it opens the camera and there isnt a way to just choose a pic".
+           capture="environment" makes Android go straight to the camera. Two inputs now: one
+           opens the camera, the other the phone's picker (screenshots, gallery, files). -->
       <input type="file" id="dv-photo" accept="image/*" capture="environment" style="display:none" onchange="devPhotoPick(this)">
-      <div class="dv-photo${f.photo?' has':''}" onclick="${f.photoBusy?'':(f.photo?"devSet('photo',null)":"document.getElementById('dv-photo').click()")}">
+      <input type="file" id="dv-pick" accept="image/*" style="display:none" onchange="devPhotoPick(this)">
+      ${f.photoBusy||f.photo?`<div class="dv-photo${f.photo?' has':''}" onclick="${f.photoBusy?'':"devSet('photo',null)"}">
         ${f.photoBusy?`⏳ ${es?'Reduciendo la foto…':'Shrinking the photo…'}`
-         :f.photo?`✔ ${esc(f.photoName||'photo')} · ${(f.photo.size/1024).toFixed(0)} KB — ${es?'toca para quitar':'tap to remove'}`
-                 :`📷 ${es?'Tomar foto · añadir imagen':'Take a photo · add an image'}`}
-      </div>
+         :`✔ ${esc(f.photoName||'photo')} · ${(f.photo.size/1024).toFixed(0)} KB — ${es?'toca para quitar':'tap to remove'}`}
+      </div>`:`<div class="dv-photos">
+        <div class="dv-photo" onclick="document.getElementById('dv-pick').click()">🖼️ ${es?'Elegir foto o captura':'Choose a picture or screenshot'}</div>
+        <div class="dv-photo" onclick="document.getElementById('dv-photo').click()">📷 ${es?'Tomar foto':'Take a photo'}</div>
+      </div>`}
 
       <label class="cl-lbl">${es?'¿Qué tanto te estorba?':'How much is it in your way'}</label>
       <div style="display:flex;gap:6px;flex-wrap:wrap">
@@ -17323,6 +17417,11 @@ function tourTeamTag(id){ const v=(S.tourTeam||{})[id];
     if(SEC.mode==='secure' && !SEC.bound){ if(pData) await pData; await loadRoster(); }   // names only, until a PIN
     else if(pData){ await pData; if(!S.staff.length) await loadAll(); }
     else await loadAll();
+    // Oct 1 2026 — dev note ec85ddfb. The old retry fired only when the staff list came back
+    // empty, so a load that got everything EXCEPT the forecast model sailed through and Today
+    // died on the way to a number. One more go at the model alone — not another loadAll, which
+    // re-pulls a couple of thousand rows and is the last thing a phone on bad wifi needs.
+    if(!modelUsable(S.model)) await mdlLoad();
     S.dayStamp=todayLA(); S.lastSeen=Date.now();
     if(!S.staff.length) throw new Error('Connected, but no data came back. Tell Dan to check the database.');
     if(SEC.mode==='secure'){
