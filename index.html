@@ -610,6 +610,16 @@
   @media print{ .sheet-h{position:static;background:#eee;color:#000} }
   .count-row{flex-wrap:wrap}
   .count-row .cnt{margin-left:auto}
+  /* team layout: one bar per item, left to right — grip · name + chips · – box + */
+  body.tm .st-body .count-row{flex-wrap:nowrap;align-items:center;gap:6px}
+  body.tm .st-body .count-row:has(.raw-u){flex-wrap:wrap}
+  body.tm .st-body .count-row .nm{flex:1 1 auto;min-width:0}
+  body.tm .st-body .count-row .nm b{font-size:14px;line-height:1.2}
+  body.tm .st-body .count-row .grip{width:22px;flex:0 0 22px;margin-left:-6px}
+  body.tm .st-body .count-row .stp{flex:none;margin-left:0;gap:4px;align-items:flex-start}
+  body.tm .st-body .count-row .stp button{width:34px;height:40px;flex:0 0 34px;font-size:19px;border-radius:11px}
+  body.tm .st-body .count-row .stp input{width:50px;font-size:16px;padding:8px 2px}
+  body.tm .st-body .count-row .stp .u{max-width:52px}
   @media (max-width:560px){ .count-row .nm{flex:1 1 100%} .count-row .cnt input{width:56px} }
 
   /* ---------- station count: side rail + one station at a time (approved mockup B) ----------
@@ -1347,6 +1357,51 @@
   .gs-x{border:0;background:none;color:var(--muted);font-size:16px;cursor:pointer;padding:2px 6px}
   .gs-it{font-size:13.5px;padding:6px 0;border-bottom:1px solid var(--sand-dark)}.gs-it:last-of-type{border-bottom:0}.gs-it.ok{color:var(--lagoon)}
   @media print{.tour-ov,.tour-q,.gs-card{display:none!important}}
+  /* ---- team layout (Oct 3 2026): Today · Lists · Orders · Recipes · More for everyone but admin ---- */
+  .tm-quick{display:grid;grid-template-columns:repeat(auto-fit,minmax(90px,1fr));gap:8px;margin:0 0 12px}
+  .tm-quick button{background:var(--white);border:1px solid var(--line);border-radius:14px;padding:10px 4px;font-weight:800;font-size:13px;color:var(--ocean-dark);display:flex;flex-direction:column;align-items:center;gap:3px;cursor:pointer}
+  .tm-quick button .q{font-size:20px;line-height:1}
+  .tm-quick button.q86{color:var(--danger)}
+  .tm-back{margin:0 0 10px}
+  .tm-back button{background:var(--white);border:1px solid var(--line);border-radius:10px;padding:7px 12px;font-weight:700;font-size:13px;color:var(--ocean-dark);cursor:pointer}
+  details.tm-fold{background:var(--sand);border:1.5px dashed var(--line);border-radius:14px;margin:0 0 12px;padding:0}
+  details.tm-fold>summary{list-style:none;cursor:pointer;padding:12px 14px;font-weight:800;color:var(--ocean-dark);display:flex;align-items:center;gap:8px}
+  details.tm-fold>summary::-webkit-details-marker{display:none}
+  details.tm-fold>summary .s{display:block;font-weight:500;font-size:12px;color:var(--muted)}
+  details.tm-fold>summary::after{content:'▸';margin-left:auto;color:var(--muted);transition:transform .15s}
+  details.tm-fold[open]>summary::after{transform:rotate(90deg)}
+  details.tm-fold>.tm-fb{padding:0 8px 4px}
+  .tm-step{display:flex;gap:11px;align-items:center;padding:11px 0;border-bottom:1px solid var(--sand-dark);cursor:pointer}
+  .tm-step:last-child{border-bottom:0}
+  .tm-step .dot{width:28px;height:28px;border-radius:50%;border:2px solid var(--line);flex:none;display:flex;align-items:center;justify-content:center;font-size:12.5px;font-weight:800;color:var(--muted);background:#fff}
+  .tm-step.done .dot{background:var(--palm);border-color:var(--palm);color:#fff}
+  .tm-step.now .dot{border-color:var(--coral);color:var(--coral)}
+  .tm-step.off{cursor:default;opacity:.7}
+  .tm-step .nm{flex:1;min-width:0}.tm-step .nm b{display:block;font-size:14.5px;color:var(--ink)}.tm-step .nm span{font-size:12px;color:var(--muted)}
+  .tm-time{font-size:10.5px;font-weight:800;letter-spacing:1px;color:var(--muted);margin:12px 0 0}
+  .tm-flow{display:flex;align-items:center;gap:5px;margin-top:5px;font-size:10.5px;font-weight:800;color:var(--muted)}
+  .tm-flow i{font-style:normal;border-radius:999px;padding:2px 8px;background:var(--sand-dark);color:var(--muted)}
+  .tm-flow i.on{background:var(--ocean);color:#fff}.tm-flow i.ok{background:#e6f3ea;color:var(--palm)}
+  .tm-st{font-size:11px;font-weight:800;border-radius:999px;padding:3px 10px;white-space:nowrap;background:var(--sand-dark);color:var(--ocean-dark)}
+  .tm-st.ok{background:#e6f3ea;color:var(--palm)}.tm-st.no{background:#fbe3dc;color:#9b2f1d}.tm-st.go{background:var(--ocean);color:#fff}
+  .tm-row{display:flex;align-items:center;gap:11px;padding:11px 0;border-bottom:1px solid var(--sand-dark);cursor:pointer}
+  .tm-row:last-child{border-bottom:0}
+  .tm-row .av{width:36px;height:36px;border-radius:10px;background:var(--ocean);color:#fff;display:flex;align-items:center;justify-content:center;flex:none}
+  .tm-row .av .ico{width:19px;height:19px}
+  .tm-row .nm{flex:1;min-width:0}.tm-row .nm b{display:block;font-size:14.5px}.tm-row .nm span{font-size:12px;color:var(--muted)}
+  .tm-row .chev{color:var(--muted);font-size:18px}
+  .tm-prow{display:flex;align-items:center;gap:9px;padding:9px 0;border-bottom:1px solid var(--sand-dark)}
+  .tm-prow input[type=checkbox]{width:22px;height:22px;flex:none}
+  .tm-prow .nm{flex:1;min-width:0;cursor:pointer}.tm-prow .nm b{display:block;font-size:14px}.tm-prow .nm span{font-size:12px;color:var(--muted)}
+  .tm-prow.done .nm b{text-decoration:line-through;color:var(--muted)}
+  .tm-prow select.reassign{max-width:108px}
+  .tm-pdet{background:var(--sand);border-radius:12px;padding:9px 10px;margin:2px 0 8px}
+  .tm-pdet .stats{display:flex;flex-wrap:wrap;gap:6px}
+  .tm-tools{display:flex;gap:8px;flex-wrap:wrap;margin-top:10px}
+  .og-bx.comes{background:var(--white);border:1px solid var(--line);flex:1.25}
+  .og-bx.comes .cm{display:flex;align-items:center;justify-content:center;gap:4px;font-weight:800;font-size:12px;color:var(--ocean-dark)}
+  .og-bx.comes .glyph{width:20px;height:20px}
+  @media print{.tm-quick,.tm-back,details.tm-fold>summary{display:none!important}}
 </style>
 <script>
 // The background choice is a per-device thing — Dan's phone and the kitchen tablet can
@@ -1377,6 +1432,9 @@
   <symbol id="i-back" viewBox="0 0 24 24"><path d="M20 12H4.5M10.4 5.6 4 12l6.4 6.4"/></symbol>
   <symbol id="i-plus" viewBox="0 0 24 24"><path d="M12 4.5v15M4.5 12h15"/></symbol>
   <symbol id="i-search" viewBox="0 0 24 24"><circle cx="10.8" cy="10.8" r="6.6"/><path d="M15.6 15.6 20.5 20.5"/></symbol>
+  <symbol id="i-lists" viewBox="0 0 24 24"><rect x="4" y="3.5" width="16" height="17" rx="2.5"/><path d="M7.6 8.6l1.3 1.3 2.4-2.6M7.6 14.6l1.3 1.3 2.4-2.6M13.6 8.8h3.2M13.6 14.8h3.2"/></symbol>
+  <symbol id="i-bug" viewBox="0 0 24 24"><rect x="7.5" y="8.5" width="9" height="11" rx="4.5"/><path d="M9.5 8.6a2.5 2.5 0 0 1 5 0M12 12v7.4M4.5 11h3M16.5 11h3M4.5 16h3M16.5 16h3M8 5.2l1.4 1.6M16 5.2l-1.4 1.6"/></symbol>
+  <symbol id="i-more" viewBox="0 0 24 24"><path d="M4.5 6.5h15M4.5 12h15M4.5 17.5h15"/></symbol>
   <symbol id="i-checklist" viewBox="0 0 24 24"><rect x="4" y="3.5" width="16" height="17" rx="2.5"/><path d="M8 9.2l1.8 1.8 3.4-3.6M8 15.2l1.8 1.8 3.4-3.6"/><path d="M15 9h2.5M15 15h2.5"/></symbol>
   <symbol id="i-check" viewBox="0 0 24 24"><path d="M4.5 12.6 9.6 17.7 19.5 6.9"/></symbol>
   <symbol id="i-caret" viewBox="0 0 24 24"><path d="M9.5 5.5 16 12l-6.5 6.5"/></symbol>
@@ -1404,6 +1462,8 @@
   <button data-v="orders"><svg class="ico"><use href="#i-orders"/></svg>Orders</button>
   <button data-v="analytics"><svg class="ico"><use href="#i-analytics"/></svg>Analytics</button>
   <button data-v="admin"><svg class="ico"><use href="#i-admin"/></svg><span>Admin/<wbr>Settings</span></button>
+  <button data-v="lists" style="display:none"><svg class="ico"><use href="#i-lists"/></svg>Lists</button>
+  <button data-v="more" style="display:none"><svg class="ico"><use href="#i-more"/></svg>More</button>
 </nav>
 
 <script>
@@ -1412,7 +1472,7 @@ const SB_KEY='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZ
 const TBID='9f8d7c6b-5a49-4e38-b271-06d5f00dbeef'; // Tommy Bahama tenant inside ChefOpsAI
 // Stamped by publish.sh at upload time. It is the only version label there is now —
 // one address, updated in place, so this tells you which build that address is serving.
-const BUILD='Oct 2, 2026 · crash fix + recipe button + bug photo picker';
+const BUILD='Oct 3, 2026 · team layout B + new onboarding';
 // ---------- IS THIS PHONE EVEN RUNNING THE LATEST BUILD? ----------
 // Sep 3 2026. Three prep fixes shipped and Dan still saw the old behaviour, because the app
 // installs to the home screen and an installed web app does not go back and re-fetch its own
@@ -3085,6 +3145,22 @@ function sec(v){ const u=pu(); if(!u||!S.perms) return false; const r=pRole(u);
 function can(c){ const u=pu(); if(!u||!S.perms) return false; const r=pRole(u);
   if(r==='admin') return true; const R=S.perms.roles[r];
   return !!(R&&R.caps&&R.caps[c]); }
+// ---- Team layout (Oct 3 2026) ----------------------------------------------------------------
+// Dan: "for the users lets use this simple version … i want to keep my screen". Everyone but the
+// admin role gets layout B — Today · Lists · Orders · Recipes · More — unless Dan flips the
+// switch in Admin to Classic, which puts every phone back on the old screens with no push.
+// pu() is used on purpose: "Preview as" shows Dan exactly what that person gets.
+function TM(){ const u=pu(); if(!u||pRole(u)==='admin') return false; return ((S.settings||{}).team_layout||'new')!=='classic'; }
+const TM_TABS=['today','lists','orders','recipes','more'];
+function tmTabOn(v){
+  if(v==='today') return sec('today');
+  if(v==='lists') return sec('count')||sec('prep')||sec('checklist');
+  if(v==='orders') return sec('orders');
+  if(v==='recipes') return sec('recipes');
+  if(v==='more') return sec('waste')||sec('analytics')||sec('admin');
+  return false; }
+// which tab lights up for a screen opened from inside Lists or More
+function tmTabOf(view){ if(S.tmFrom && S.tmFrom.view===view) return S.tmFrom.tab; return ({count:'lists',prep:'lists',checklist:'lists',waste:'more',analytics:'more',admin:'more',pars:'more',dev:'more',items:'more'})[view]||view; }
 // Every write handler asks this first. Preview is strictly read-only: while Dan is inside
 // somebody else's view, nothing writes — otherwise a tap made "as Adan" would be recorded
 // under Dan's name and the log would lie.
@@ -4198,7 +4274,7 @@ function countJumpBar(){
       <button class="cjb-x" onclick="cqClear()" aria-label="Clear · Limpiar">✕</button>
     </div>
     <div class="cjb-drop" id="cjdrop"></div>
-    ${S.cqUsed?'':`<div class="cjb-hint" id="cjhint">Type a few letters, tap a result — the list stays where it is. · La lista no se mueve.</div>`}
+    ${S.cqUsed||TM()?'':`<div class="cjb-hint" id="cjhint">Type a few letters, tap a result — the list stays where it is. · La lista no se mueve.</div>`}
   </div>`;
 }
 // Every countable item, with the station it belongs to. Same source as the rail, so the bar can
@@ -6195,7 +6271,7 @@ function shell(inner){
     <div class="who">${S.user? `<b>${S.user.name}</b>
       <span class="langtg no-print"><span class="${S.user.lang!=='es'?'on':''}" onclick="setLang('en')">EN</span><span class="${S.user.lang==='es'?'on':''}" onclick="setLang('es')">ES</span></span><button class="tour-q no-print" onclick="tourHelp()" title="How this screen works · Cómo funciona" aria-label="Help">?</button><br>
       <a href="#" onclick="logout();return false" title="salir / exit">${ic('exit','ico-sm')}<span class="lbl">salir / exit</span></a>`:''}</div>
-  </header>${(typeof devStrip==='function'?devStrip():'')}${inner}`;
+  </header>${(typeof devStrip==='function'?devStrip():'')}${tmBackBar()}${inner}`;
   // Drag handles are wired after every paint, because innerHTML throws the old listeners away
   // with the old nodes. No-op on every screen that has no station list.
   if(typeof initStationDrag==='function') initStationDrag();
@@ -7550,6 +7626,9 @@ function todayRangeHtml(o){
     ${lyBlock}
   </div>`;
   let yearCard=''; try{ yearCard=DOLLARS()?yearSalesHtml():yearBarsHtml(avgCheck); }catch(e){ console.warn('year bars',e); }
+  // Oct 3 2026 — team layout: quick buttons on top; "The year" and "Data & files" are not on
+  // the team's Today; Top 20 sits folded. Classic keeps every card exactly as it was.
+  if(TM()) return `${tmQuickHtml()}${todayAlertsHtml(d)}${tilesCard}${busyCard}${selCard}</div>${card86(d)}${topCard?tmFold('t20', es?'Lo más vendido · 20':'Top 20 sellers', es?'platos probables hoy':'likely plates today', topCard):''}${eventsCard()}`;
   return `${todayAlertsHtml(d)}${tilesCard}${busyCard}${selCard}</div>${topCard}${yearCard}${card86(d)}${eventsCard()}${can('admin.import')?dataCard(!!(S.settings||{}).bilingual):''}`;
 }
 // ================= DAN'S TODAY, NEW LOOK (Sep 25 2026 — mockups today-dan + today-dan-sales) =================
@@ -9320,6 +9399,7 @@ async function viewPrep(){
     const byPerson={};
     for(const t of S.tasks){ const k=t.assigned_to||'unassigned'; (byPerson[k]=byPerson[k]||[]).push(t); }
     const assigned=new Set(S.tasks.map(t=>t.assigned_to).filter(Boolean));
+    if(TM()) inner+=tmPrepHtml(d, activeStaff, bil); else {
     inner+=`<div class="card no-print prep-chrome">
       <div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center">
         ${can('prep.print')?`<button class="btn-ghost btn-sm" onclick="tbPrint()">${ic('print','ico-sm')}Print · Imprimir</button>
@@ -9398,6 +9478,7 @@ async function viewPrep(){
         ${cookSheet(person?person.name:'SIN ASIGNAR · UNASSIGNED', ts, d)}
       </div>`;
     }
+    }
     inner+=platesAlsoHtml(new Set(S.tasks.filter(t=>t.status!=='removed').map(t=>{ const p=S.preps.find(x=>x.id===t.prep_item_id); return p?prepKey(p):String(t.item_name||'').trim().toLowerCase(); })));
     // The bottom bar + add picker (Dan, Aug 21 2026). The bar never prints.
     if(S.prepAdd&&can('prep.generate')) inner+=prepAddCard();
@@ -9412,7 +9493,7 @@ async function viewPrep(){
     +(S.prepReview?prepReviewHtml():'')
     +(S.repView?prepReportView():'')
     // Sep 25 2026 — Dan: cooks don't see the logs. The list history is for whoever runs the list.
-    +(can('logs.view')?`<div class="prep-chrome">${prepLog()}</div>`:''));
+    +(can('logs.view')&&(!TM()||S.tmPrepLog)?`<div class="prep-chrome" id="tm-preplog">${prepLog()}</div>`:''));
 }
 function fmtQ(v){ v=Number(v)||0; return v>0&&v<10 ? (Math.round(v*10)/10).toString() : Math.round(v).toString(); }
 // ---- the printed cook sheet (approved mockup, Aug 21 2026) ------------------------------
@@ -9885,7 +9966,7 @@ window.toggleEv=(id)=>{ S.evOpen[id]=!S.evOpen[id]; render(); };
 function listCard(key, title, es, summary, body, opts){
   const o=opts||{};
   const open=!!S.listOpen[key];
-  return `<div class="card lcard${open?' on':''}">
+  return `<div class="card lcard${open?' on':''}" data-lk="${key}">
     <button class="lhead" onclick="toggleList('${key}')" aria-expanded="${open?'true':'false'}">
       <span class="lh-t"><b>${esc(title)}</b>${es?`<span class="es"> · ${esc(es)}</span>`:''}
         ${o.sub?`<span class="lh-sub">${o.sub}</span>`:''}</span>
@@ -10392,18 +10473,18 @@ async function viewCount(){
       </div></div>`);
     return;
   }
-  shell(dayBar+proteinList+prepList(`<div class="card">
+  shell(dayBar+proteinList+prepList(`${TM()?`<div class="card" style="padding:11px 14px"><div class="muted" style="font-size:12px">Started ${t(c.started_at)}${c.counted_by?` by ${esc(c.counted_by)}`:''} · ${isES()?'cada número se guarda al tocarlo':'every number saves the moment you tap it'}</div></div>`:`<div class="card">
     <div class="muted">Count one place at a time. Pick the station on the rail — <b>any station, any order</b>, so the walk-in first and the line first are both fine, and an early line count before the cooks are on it is just a count taken early.<br>
     Cuenta un lugar a la vez. Escoge la estación en la barra — <b>cualquiera, en cualquier orden</b>.</div>
     <div class="muted" style="font-size:12px;margin-top:8px">${close
       ? 'Count it the way you leave it. Whatever is on the line stays on the line overnight — do not carry it back to the walk-in just for the count, or tomorrow\'s list will be built against the wrong shelf.'
       : 'Count it before anybody starts pulling product for the day, or the numbers will already be stale by the time you submit.'}</div>
     <div class="muted" style="font-size:12px;margin-top:8px">Started ${t(c.started_at)}${c.counted_by?` by ${esc(c.counted_by)}`:''} · every number saves the moment you tap it, so you can stop and come back.</div>
-  </div>
+  </div>`}
   <div class="card">
-    <div class="muted" style="font-size:12px;margin:-2px 0 12px">Each item now belongs to <b>one place and carries one number</b>. The same product kept in two places — guacamole in the walk-in and a working pan on the fryer — is <b>two separate rows with two separate pars</b>, so counting one never stands in for the other.<br>
+    ${TM()?`<div class="muted" style="font-size:12px;margin:-2px 4px 10px">${isES()?'— = sin contar · 0 = no hay. Mantén ⋮⋮ para reordenar.':'— means not counted · 0 means none. Hold ⋮⋮ to rearrange.'}</div>`:`<div class="muted" style="font-size:12px;margin:-2px 0 12px">Each item now belongs to <b>one place and carries one number</b>. The same product kept in two places — guacamole in the walk-in and a working pan on the fryer — is <b>two separate rows with two separate pars</b>, so counting one never stands in for the other.<br>
       <b>–</b> and <b>+</b> move a whole at a time. A half or a quarter still goes straight into the box by hand and is kept exactly as typed.
-      Drag an item by its grip to put the list in the order you actually walk the station, and the trash takes it off the list without deleting anything.</div>
+      Drag an item by its grip to put the list in the order you actually walk the station, and the trash takes it off the list without deleting anything.</div>`}
     <div class="st-wrap">
       <nav class="st-rail no-print" aria-label="Station · Estación">
         ${secs.map(s=>{
@@ -10455,11 +10536,11 @@ async function viewCount(){
           <button class="chip btn-sm${rawUnitOf(p)==='alt'?' on':''}" data-u="alt" onclick="rawUnitSet('${p.id}','alt')">${esc(rawUnitLabel(p,'alt'))}</button>
           <span class="muted" id="co-${p.id}" style="font-size:11px;margin-left:auto">${rawOtherTxt(p)}</span>
         </div>`:''}
-        <div class="no-print" style="flex:1 1 100%;display:flex;gap:6px;flex-wrap:wrap;padding:2px 0 0 0">
+        ${TM()?'':`<div class="no-print" style="flex:1 1 100%;display:flex;gap:6px;flex-wrap:wrap;padding:2px 0 0 0">
           <button class="chip btn-sm ${S.zeroMark[p.id]?'on':''}" style="font-size:11px${S.zeroMark[p.id]?';background:var(--palm);border-color:var(--palm);color:#fff':''}" onclick="markNotPrepped('${p.id}')" title="A real zero — nothing of this exists right now. Counts as measured.">${p.raw?'⌀ None in house · No hay':'⌀ Not prepped · No preparado'}</button>
           <button class="chip btn-sm ${S.cantCount[p.id]?'on':''}" style="font-size:11px${S.cantCount[p.id]?';background:#b78300;border-color:#b78300;color:#fff':''}" onclick="markCantCount('${p.id}')" title="Could not count this one — an honest unknown, never assumed to be zero by you.">? Can't count · Sin contar</button>
           ${can('admin.items')?`<button class="chip btn-sm cnt-mv" style="font-size:12px;margin-left:auto" onclick="cntMoveAsk('${p.id}')" title="Move this item to another station · Mover a otra estación">⇄ Move</button><button class="chip btn-sm trash-btn" style="font-size:11px" onclick="trashStationItem('${p.id}')" title="Take this off the count list. It is kept in the database with its station, and goes back in one tap from Admin.">${ic('trash','ico-sm')}</button>`:''}
-        </div>`
+        </div>`}`
         :`<div class="cnt"><div><label>Counted · Contado</label><div class="tot" id="tot-${p.id}">${S.counts[p.id]!=null?fmtQ(S.counts[p.id]):'—'}</div></div></div>`}
       </div>`;}).join('')}</div>`).join('')}
     ${can('inv.edit')&&curSec.key!=='other'?`<div class="addrow no-print">
@@ -12798,6 +12879,7 @@ async function viewAdmin(){
   </div>`;
   shell(`
   ${parLauncher}
+  ${can('admin.perms')&&!S.previewUser?tmAdminCard():''}
   ${devAdminCard()}
   ${rolesCard()}
   ${can('admin.perms')?backupCard():''}
@@ -14583,16 +14665,16 @@ function ogPairCardHtml(it, members){
   const packs=members.map(m=>`${esc(m.pack||'?')} = ${fmtCase(m.pair_n)}`).join(' · ');
   return `<div class="og-card pair ${state}${counted?' counted':''}" id="ogrow-${it.id}" data-pid="${it.id}">
     <div class="og-hd"><b>${esc(it.item)}</b><span class="og-pk">counted in ${esc(u)}s</span>${it.category?`<span class="og-tag">${esc(it.category)}</span>`:''}${counted?'<span class="og-done">✓ counted</span>':''}</div>
-    ${ogPriceLine(it)}
-    <div class="og-boxes">${parBox}${ohBox}${ordBox}</div>
+    ${TM()?'':ogPriceLine(it)}
+    <div class="og-boxes">${TM()?ogComesBox(it):''}${parBox}${ohBox}${ordBox}</div>
     ${counted?`<div class="og-plan">${st.plan&&st.plan.cases.length
       ? `sends ${ogPlanText(st.plan)}${st.plan.over>0?` <span class="ovr">(${us(st.plan.over)} spare — smallest combination)</span>`:''}`
       : 'enough on hand — nothing to order'}</div>`
      :`<div class="og-tail">Two case sizes, one thing. ${esc(packs)} ${esc(u)}s per case — count the ${esc(u)}s and the cases work themselves out.</div>`}
-    ${ogHistHtml(it)}
+    ${TM()?'':ogHistHtml(it)}
     ${S.ogWalk.openEdit===it.id?ogEditPadHtml(it):''}
     ${ogPromptHtml(it)}
-    ${ed?`<div class="og-acts no-print">
+    ${ed&&!TM()?`<div class="og-acts no-print">
       <button onclick="ogMoveAsk('${it.id}')">⇄ Move to another ${ogMode()==='places'?'room':'category'}</button>
       <button class="del" onclick="ogEraseAsk('${it.id}')">Take off this guide</button></div>`:''}
   </div>`;
@@ -14663,14 +14745,14 @@ function ogCardHtml(it){
       const t = ogMode()==='places' ? it.category : it.room;
       return t?`<span class="og-tag">${esc(t)}</span>`:'';
     })()}</div>
-    ${ogPriceLine(it)}
+    ${TM()?'':ogPriceLine(it)}
     ${unitSw}
-    <div class="og-boxes">${parBox}${ohBox}${ordBox}</div>
+    <div class="og-boxes">${TM()?ogComesBox(it):''}${parBox}${ohBox}${ordBox}</div>
     ${tail}
-    ${ogHistHtml(it)}
+    ${TM()?'':ogHistHtml(it)}
     ${S.ogWalk.openEdit===it.id?ogEditPadHtml(it):''}
     ${ogPromptHtml(it)}
-    ${can('orders.edit')?`<div class="og-acts no-print">
+    ${can('orders.edit')&&!TM()?`<div class="og-acts no-print">
       <button onclick="ogMoveAsk('${it.id}')">⇄ Move to another ${ogMode()==='places'?'room':'category'}</button>
       <button class="del" onclick="ogEraseAsk('${it.id}')">Take off this guide</button></div>`:''}
   </div>`;
@@ -15590,6 +15672,20 @@ async function viewOrders(){
     // way to the buttom". The guides are what he opens this screen to USE; everything else is
     // something to read afterwards. So: guides, then what actually got billed, then the
     // measurements, then the reference.
+    if(TM()){
+      const es=isES();
+      shell(`${orWeekHtml()}
+    ${OG_VENDORS.map(v=>`
+      <div class="card" style="display:flex;align-items:center;gap:11px;${v.pending?'opacity:.55':''};cursor:pointer" onclick="ogOpen('${v.key}')">
+        <div style="width:38px;height:38px;border-radius:10px;background:${v.color};color:var(--sand);display:flex;align-items:center;justify-content:center;font-weight:800;flex:0 0 auto">${v.ini}</div>
+        <div style="flex:1;min-width:0"><b style="font-size:14.5px;color:var(--ocean-dark)">${v.label}</b>
+          <div class="muted" style="font-size:11px">${v.pending?v.sub:`${counts[v.key]||0} items · ${v.sub}${last[v.key]?` · last: ${fmtDate(last[v.key].order_date)}`:''}`}</div></div>
+        <div class="muted" style="font-size:20px">${v.pending?'·':'›'}</div>
+      </div>`).join('')}
+    ${tmFold('inv', es?'Facturas':'Invoices', es?'subir facturas · lo facturado':'upload invoices · what got billed', ogUploadCard()+ogInvoiceBook())}
+    ${tmFold('ordrep', es?'Cómo van los pedidos':'How ordering is going', es?'libro de pedidos · qué se acaba · ritmo · precios':'order book · runs out first · your rhythm · price moves', ogBookSummary(S.og.book)+ogBookHtml(S.og.book, true)+ogDashHtml()+ogPriceMovesHtml())}`);
+      return;
+    }
     shell(`<div class="card">
       <h2>Order guides · Guías de pedido<span class="h2sub">count what's on hand — the order builds itself</span></h2>
       <div class="muted" style="font-size:12.5px">Item lists, packs and pars come straight off your printed sheets (transcribed Aug 11). A ? on a par means the printed column was hard to read — tap the item in Admin/Settings → Edit items to fix it, or tell me.${bil?'<br><span style="opacity:.85">Las listas vienen de tus hojas impresas.</span>':''}</div>
@@ -15705,7 +15801,7 @@ async function viewOrders(){
       ${can('orders.edit')?`<div style="margin-top:9px;display:flex;gap:8px;flex-wrap:wrap">
         <button class="btn-ghost btn-sm" onclick="ogStartFresh()">Start a clean count · Empezar de nuevo</button></div>`:''}
     </div>`:''}
-    ${(()=>{const D=S.og.dial||{};const first=D.days&&D.days.length?fmtDate(D.days[0]):'';const lastd=D.days&&D.days.length?fmtDate(D.days[D.days.length-1]):'';
+    ${(h=>TM()?`<div style="margin-top:10px">${tmFold('ogmath', isES()?'Cómo se calcula este pedido':'How this order is figured', isES()?'días de pedido · tiempo de entrega · la fórmula':'order days · delivery lead time · the formula', h)}</div>`:h)((()=>{const D=S.og.dial||{};const first=D.days&&D.days.length?fmtDate(D.days[0]):'';const lastd=D.days&&D.days.length?fmtDate(D.days[D.days.length-1]):'';
     const dows=ogOrderDows(S.og.vendor)||[];
     const chips=['Sunday','Monday','Tuesday','Wednesday','Thursday','Friday','Saturday'].map(dy=>{
       const on=dows.includes(dy);
@@ -15733,7 +15829,7 @@ async function viewOrders(){
           : `Set to <b>${L.days===0?'same day':L.days+' day'+(L.days===1?'':'s')}</b> — the window this order has to cover starts when it actually lands.`}</div></div>`;})()}
       <div class="muted" style="font-size:11px;margin-top:5px"><b>The formula, in the open:</b> ORDER = printed par × day dial − on hand, rounded up to whole cases (quarter steps when the target is under 1). The day dial = average forecast covers over the days this order has to cover (from the order day picked above, until the next one) ÷ a typical August-2026 day — August because that is when these pars were transcribed, so they are <i>treated</i> as right for an average August day. That anchor is an assumption and stays labeled until pars get re-set from real usage. The cover forecast is the same weekday × season × weather number the count and prep list already run on.</div>
     </div>
-    <div class="muted" style="font-size:11px;margin-top:6px">Laid out like the paper sheet: <b>MIN PAR</b> on the left, count into <b>ON HAND</b>, and <b>ORDER</b> fills itself — same as count → prep. <b>Tap a MIN PAR to set or fix it</b> — it saves for every future order and the ORDER column recalculates on the spot. Tap the order number to override the suggestion — yours always wins, and both numbers are kept. A skipped row saves as not counted, never zero.</div>`;})()}
+    <div class="muted" style="font-size:11px;margin-top:6px">Laid out like the paper sheet: <b>MIN PAR</b> on the left, count into <b>ON HAND</b>, and <b>ORDER</b> fills itself — same as count → prep. <b>Tap a MIN PAR to set or fix it</b> — it saves for every future order and the ORDER column recalculates on the spot. Tap the order number to override the suggestion — yours always wins, and both numbers are kept. A skipped row saves as not counted, never zero.</div>`;})())}
   </div>
   ${(()=>{
     // ---- one room at a time, behind a rail: the station count's shape, applied to ordering ----
@@ -16362,6 +16458,223 @@ const DEV_SCREENS={today:'Today',count:'Count/Lists',prep:'Prep',recipes:'Recipe
 // Shipped ON — we are mid-development. One switch in Admin turns the whole thing off the day
 // this reaches its final stage, with no rebuild and no waiting on me.
 // The background usage log (every tap, timings) — this is what the Settings switch controls.
+// ================= TEAM LAYOUT (Oct 3 2026) =================
+function tmVisible(el){ return !!(el && el.getClientRects && el.getClientRects().length); }
+// A folded card: native <details>, so the card inside keeps every handler it already had.
+function tmFold(id, title, sub, body){ S.tmOpen=S.tmOpen||{};
+  return `<details class="tm-fold" id="${id}"${S.tmOpen[id]?' open':''} ontoggle="S.tmOpen=S.tmOpen||{};S.tmOpen['${id}']=this.open"><summary><span>${esc(title)}<span class="s">${esc(sub)}</span></span></summary><div class="tm-fb">${body}</div></details>`; }
+function tmQuickHtml(){ const es=isES(); const b=[];
+  if(can('86.log')) b.push(`<button class="q86" onclick="tmQuick('86')"><span class="q">⚠</span>${es?'Se acabó algo':'86 something'}</button>`);
+  if(sec('waste')&&can('waste.log')) b.push(`<button onclick="tmQuick('waste')"><span class="q">🗑</span>${es?'Registrar merma':'Log waste'}</button>`);
+  if(can('dev.report')) b.push(`<button onclick="tmQuick('bug')"><span class="q">🐞</span>${es?'Reportar':'Report'}</button>`);
+  return b.length?`<div class="tm-quick no-print">${b.join('')}</div>`:''; }
+window.tmQuick=(k)=>{
+  if(k==='86'){ S.s86.open=true; S.tmScroll='86'; if(S.view!=='today'){ S.view='today'; } render(); return; }
+  if(k==='waste'){ go('waste'); return; }
+  if(k==='bug'){ if(typeof devOpenSheet==='function') devOpenSheet(); }
+};
+function tmBackBar(){
+  if(!TM()) return '';
+  const t=tmTabOf(S.view); if(t===S.view || !TM_TABS.includes(t) || !tmTabOn(t)) return '';
+  const es=isES(); const lab=t==='lists'?(es?'Listas':'Lists'):(es?'Más':'More');
+  return `<div class="tm-back no-print"><button onclick="go('${t}')">‹ ${lab}</button></div>`; }
+function tmAfterRender(){
+  const k=S.tmScroll; if(!k) return; S.tmScroll=null;
+  setTimeout(()=>{ let el=null;
+    if(k==='86') el=[...document.querySelectorAll('#app .card h2')].find(h=>/86 Board/.test(h.textContent));
+    else if(k==='preplog') el=document.getElementById('tm-preplog');
+    else el=document.querySelector(`#app [data-lk="${k}"]`);
+    if(el){ try{ (el.closest('.card')||el).scrollIntoView({block:'start'}); window.scrollBy(0,-8); }catch(e){} } },80); }
+// ---- Lists: the day's checklists, the count and the prep list, in the order the day happens
+window.tmCk=async(shift)=>{ const d=todayLA(); S.view='checklist'; const C=ckState();
+  const run=ckRun(d,shift);
+  if((run&&run.status!=='open') || S.previewUser || !can('checklist.do') || !ckItems(shift).length){ C.page='home'; render(); return; }
+  await ckStart(shift);
+  if(S.view==='checklist' && !ckRun(d,shift)){ C.page='home'; render(); } };
+window.tmGoCount=(key,from)=>{ const d=todayLA(); S.selDate=d; S.countWhen='open'; S.countWhenFor=d;
+  S.listOpen={[key]:true}; S.tmScroll=key; S.tmFrom=from?{tab:from,view:'count'}:null; go('count'); };
+window.tmGoPrep=(from)=>{ S.selDate=todayLA(); S.guestsOverride=null; S.editPlan=false; S.tmFrom=from?{tab:from,view:'prep'}:null; if(!from) S.tmPrepLog=false; go('prep'); };
+function tmStep(cls, dot, title, sub, right, onclick, extra){
+  return `<div class="tm-step ${cls}" ${onclick?`onclick="${onclick}" role="button" tabindex="0"`:''}><div class="dot">${dot}</div><div class="nm"><b>${title}</b><span>${sub}</span>${extra||''}</div>${right||''}</div>`; }
+function tmListsLeft(){ return S.tmLeft==null?0:S.tmLeft; }
+async function viewLists(){
+  const d=todayLA(), es=isES(); S.selDate=S.selDate||d;
+  const jobs=[];
+  if(sec('checklist')) jobs.push(ckLoad(d));
+  if(sec('count')) jobs.push(loadCounts(d), loadProteins(d));
+  if(sec('prep')||sec('count')) jobs.push(loadTasks(d));
+  await Promise.all(jobs.map(p=>Promise.resolve(p).catch(()=>{})));
+  let n=0, left=0; const html=[];
+  const ckStep=(shift)=>{
+    const items=ckItems(shift); const run=ckRun(d,shift); const log=ckLogOf(run);
+    const done=items.filter(i=>log[i.id]&&log[i.id].result!=='skipped').length;
+    const lab=shift==='closing'?(es?'Lista de cierre':'Closing checklist'):(es?'Lista de apertura':'Opening checklist');
+    n++;
+    if(run&&run.status!=='open') return tmStep('done','✓',lab,`${es?'cerrada por':'closed by'} ${esc(run.closed_by||'')} · ${done}/${items.length}`,'',`tmCk('${shift}')`);
+    left++;
+    if(run) return tmStep('now',n,lab,`${es?'en curso':'in progress'} · ${done}/${items.length}`,`<span class="tm-st go">${es?'Seguir':'Continue'}</span>`,`tmCk('${shift}')`);
+    return tmStep('',n,lab,`${items.length} ${es?'puntos · unos':'items · about'} ${Math.max(2,Math.round(items.length*0.8))} min`,`<span class="tm-st go">${es?'Empezar':'Start'}</span>`,`tmCk('${shift}')`);
+  };
+  if(sec('checklist')||sec('count')) html.push(`<div class="tm-time">${es?'AL ABRIR':'START OF DAY'}</div>`);
+  if(sec('checklist')) html.push(ckStep('opening'));
+  if(sec('count')&&typeof protItems==='function'&&protItems().length){
+    const items=protItems();
+    const pd=items.filter(it=>{const r=S.protein&&S.protein.rows&&S.protein.rows[it.key]; return r && ['beg','add_on','sold','end_inv'].every(f=>r[f]!=null&&r[f]!=='');}).length;
+    n++; if(pd<items.length) left++;
+    html.push(tmStep(pd===items.length?'done':'', pd===items.length?'✓':n, es?'Conteo de proteínas':'Protein count', es?'de la hoja impresa PROTEIN COUNT':'from the printed PROTEIN COUNT sheet', `<span class="tm-st${pd===items.length?' ok':''}">${pd}/${items.length}</span>`, `tmGoCount('protein')`));
+  }
+  if(sec('prep')||sec('count')){
+    html.push(`<div class="tm-time">${es?'CONTEO Y PREP':'COUNT & PREP'}</div>`); n++;
+    const mgr=can('prep.generate')||can('prep.assign'); const me=pu();
+    const tasks=(S.tasks||[]).filter(t=>t.status!=='removed');
+    const mine=mgr?tasks:tasks.filter(t=>t.assigned_to===(me&&me.id));
+    const dn=mine.filter(t=>t.status==='done').length;
+    if(S.listId && sec('prep')){
+      if(dn<mine.length) left++;
+      html.push(`<div id="tm-cp">${tmStep(mine.length&&dn===mine.length?'done':'now', mine.length&&dn===mine.length?'✓':n, es?'Lista de prep':'Prep list',
+        mgr?`${tasks.length} ${es?'artículos · armada con el conteo':'items · built from the count'}`:(mine.length?`${mine.length} ${es?'tuyos de':'yours of'} ${tasks.length}`:`${es?'nada asignado a ti todavía':'nothing assigned to you yet'} · ${tasks.length} ${es?'en la lista':'on the list'}`),
+        (mgr||mine.length)?`<span class="tm-st${mine.length&&dn===mine.length?' ok':''}">${dn}/${mine.length}</span>`:'', `tmGoPrep()`,
+        sec('count')?`<div class="tm-flow"><i class="ok">1 ${es?'Conteo':'Count'} ✓</i>→<i class="on">2 ${es?'Lista de prep':'Prep list'}</i></div>`:'')}</div>`);
+    } else if(sec('count')){
+      left++;
+      const r=S.countRows&&S.countRows.open, kitchen=S.preps.filter(p=>p.station!=='bar').length;
+      const st=!r?`<span class="tm-st no">${es?'sin empezar':'not started'}</span>`
+        :r.status==='completed'?`<span class="tm-st ok">${es?'enviado':'submitted'}</span>`
+        :`<span class="tm-st">${r.n}/${kitchen}</span>`;
+      html.push(`<div id="tm-cp">${tmStep('now', n, es?'Conteo':'Count', es?'cámara + 3 estaciones · luego se arma la lista de prep':'walk-in + 3 line stations · then the prep list builds', st, `tmGoCount('prep')`,
+        `<div class="tm-flow"><i class="on">1 ${es?'Conteo':'Count'}</i>→<i>2 ${es?'Lista de prep':'Prep list'}</i></div>`)}</div>`);
+    } else {
+      html.push(`<div id="tm-cp">${tmStep('off', n, es?'Lista de prep':'Prep list', es?'Todavía no hay lista. Sale aquí cuando se envíe el conteo.':'No list yet. It shows up here once the count is in.', '', '')}</div>`);
+    }
+  }
+  if(sec('checklist')){ html.push(`<div class="tm-time">${es?'AL CERRAR':'END OF DAY'}</div>`); html.push(ckStep('closing')); }
+  S.tmLeft=left;
+  shell(`${tmQuickHtml()}<div class="card" id="tm-lists"><h2 style="margin-bottom:0">${fmtDate(d)}</h2><div class="muted" style="font-size:12px">${es?'las listas del día, en el orden del día':'the day’s lists, in the order the day happens'}</div>${html.join('')}</div>
+    ${sec('count')?`<div class="card" style="padding:4px 14px">${`<div class="tm-row" onclick="tmGoCount('pars')"><div class="av">${ic('pars','')}</div><div class="nm"><b>${es?'Fijar pares':'Setting pars'}</b><span>${es?'lo que siempre debe haber':'what should always be on hand'}</span></div><span class="chev">›</span></div>`}</div>`:''}`);
+  tmBadge();
+}
+// the red number on the Lists tab: today's steps still open
+function tmBadge(){ const b=document.querySelector('#tabs button[data-v="lists"]'); if(!b) return;
+  let x=b.querySelector('.tm-badge'); const n=TM()?(S.tmLeft||0):0;
+  if(!n){ if(x) x.remove(); return; }
+  if(!x){ x=document.createElement('span'); x.className='or-badge tm-badge'; b.appendChild(x); }
+  x.textContent=n; }
+// ---- More: what is not every shift
+async function viewMore(){ const es=isES(); const rows=[];
+  const row=(icon,t,sub,on,bg)=>`<div class="tm-row" onclick="${on}" role="button" tabindex="0"><div class="av" style="${bg?'background:'+bg:''}">${ic(icon,'')}</div><div class="nm"><b>${t}</b><span>${sub}</span></div><span class="chev">›</span></div>`;
+  if(sec('waste')) rows.push(row('waste',es?'Merma':'Waste',es?'registrar · lo que se tiró':'log something · what got thrown out',"go('waste')",'#9b2f1d'));
+  if(sec('analytics')) rows.push(row('analytics',es?'Reportes':'Reports',es?'mensual · reporte del día · análisis':'monthly · day report · deep dives',"go('analytics')"));
+  if(sec('admin')) rows.push(row('admin',es?'Ajustes':'Settings',es?'artículos · clima · equipo · fondo':'items · weather · team · background',"go('admin')"));
+  const logs=[];
+  if(sec('count')) logs.push(row('count',es?'Historial de conteos':'Count log',es?'cada conteo que se ha empezado':'every count ever started',"tmGoCount('log','more')"));
+  if(sec('prep')&&can('logs.view')) logs.push(row('prep',es?'Historial de listas':'Prep list log',es?'cada lista de prep que se ha hecho':'every prep list generated',"S.tmPrepLog=true;S.tmScroll='preplog';tmGoPrep('more')"));
+  if(devOn()&&can('dev.board')) logs.push(row('bug',es?'Notas y reportes':'Notes & reports',es?'lo que se ha mandado con 🐞':'what was sent with the 🐞 button',"S.dev.tab='notes';S.dev.scope=null;go('dev')"));
+  shell(`<div class="card" id="tm-more" style="padding:4px 14px">${rows.join('')||`<div class="muted" style="padding:10px 0">${es?'Nada más aquí para tu puesto.':'Nothing else here for your role.'}</div>`}</div>
+    ${logs.length?`<div class="tm-time" style="margin:4px 4px 6px">${es?'HISTORIALES':'LOGS'}</div><div class="card" style="padding:4px 14px">${logs.join('')}</div>`:''}`);
+}
+// ---- Prep, team layout: one line per item for whoever runs the list
+window.tmPrepOpen=(id)=>{ S.tmPrepOpen=(S.tmPrepOpen===id?null:id); render(); };
+function tmPrepHtml(d, activeStaff, bil){ const es=isES();
+  const tasks=S.tasks; const doneN=tasks.filter(t=>t.status==='done').length;
+  const assigned=new Set(tasks.map(t=>t.assigned_to).filter(Boolean));
+  let h=`<div class="card no-print prep-chrome">
+    <div style="display:flex;gap:10px;align-items:center">
+      <span class="muted" style="font-variant-numeric:tabular-nums;white-space:nowrap"><b style="color:var(--ocean-dark);font-size:16px">${doneN}/${tasks.length}</b> ${es?'hecho':'done'}</span>
+      <span style="flex:1">${prog(doneN, tasks.length)}</span>
+      <button class="btn-ghost btn-sm" style="width:auto" onclick="S.tmTools=!S.tmTools;render()">⋯ ${es?'Herramientas':'Tools'}</button>
+    </div>
+    ${S.tmTools?`<div class="tm-tools">
+        ${can('prep.print')?`<button class="btn-ghost btn-sm" onclick="tbPrint()">${ic('print','ico-sm')}${es?'Imprimir':'Print'}</button>
+        <button class="btn-primary btn-sm" onclick="prepSheetPDF()">${ic('print','ico-sm')}${es?'Hoja PDF':'PDF prep sheet'}</button>`:''}
+        ${can('prep.assign')?`<button class="btn-ghost btn-sm" onclick="S.editPlan=true;render()">${ic('pencil','ico-sm')}${es?'Cambiar quién prepara':'Change who’s prepping'}</button>
+        <button class="btn-ghost btn-sm" onclick="rebalance()">${ic('swap','ico-sm')}${es?'Repartir':'Split evenly'}</button>`:''}
+        ${can('prep.generate')?`<button class="btn-ghost btn-sm" onclick="rebuildList()">↻ ${es?'Rehacer con el conteo':'Rebuild from counts'}</button>
+        <button class="btn-danger btn-sm" onclick="regenList()">${ic('trash','ico-sm')}${es?'Borrar lista':'Delete list'}</button>`:''}
+      </div>
+      ${can('prep.assign')?`<div class="muted" style="font-size:12px;margin:10px 0 6px">${es?'En la lista hoy — toca un nombre para agregarlo o quitarlo, luego Repartir:':'On the list today — tap a name to add or remove them, then Split evenly:'}</div>
+      <div style="display:flex;gap:8px;flex-wrap:wrap">${activeStaff.map(s=>`<span class="chip ${S.workingIds.has(s.id)?'on':''}" onclick="togglePerson('${s.id}')">${esc(s.name)}${assigned.has(s.id)?'':` <span style="opacity:.6;font-weight:500">· ${es?'nada aún':'nothing yet'}</span>`}</span>`).join('')}</div>`:''}`:''}
+  </div>`;
+  const byPerson={};
+  for(const t of tasks){ const k=t.assigned_to||'unassigned'; (byPerson[k]=byPerson[k]||[]).push(t); }
+  for(const [pid,ts] of Object.entries(byPerson)){
+    const person=S.staff.find(s=>s.id===pid);
+    const mins=ts.reduce((a,t)=>a+Number(t.est_minutes||0),0);
+    const dn=ts.filter(t=>t.status==='done').length;
+    h+=`<div class="card print-page">
+      <table class="ptbl scr-tbl"><thead><tr><th>
+        <div style="display:flex;align-items:baseline;gap:10px"><span class="assign-name">${person?esc(person.name):(es?'Sin asignar':'Unassigned')}</span>
+        <span class="muted">${dn}/${ts.length} · ~${Math.round(mins)} min</span></div>
+      </th></tr></thead><tbody><tr><td>
+      ${ts.map(t=>{
+        const p=S.preps.find(x=>x.id===t.prep_item_id)||{};
+        const nm=esc(isES()&&p.name_es?p.name_es:(p.name_en||t.item_name||'?'));
+        const cont=t.container||p.container||'';
+        const open=S.tmPrepOpen===t.id;
+        let det='';
+        if(open){
+          const ohg=p.id?prepGroups().find(g=>g.ids.indexOf(p.id)>=0):null;
+          const oh=t.on_hand!=null?t.on_hand:(ohg?groupOnHand(ohg,S.counts):(S.counts[t.prep_item_id]??'—'));
+          const rcp=p.recipe_id?(S.allRecipes||[]).find(x=>x.id===p.recipe_id):null;
+          const rcChip=(rcp&&(rcp.ingredients||[]).length&&Number(t.final_qty)>0)?`<button class="rc-chip no-print" onclick="openScaled('${t.id}')">📖 ${es?'Receta':'Recipe'} <span class="x">×${fmtQ(t.final_qty)}</span></button>`:'';
+          det=`<div class="tm-pdet"><div class="stats">
+              <span class="st"><i>${es?'Venta est.':'Sell est'}</i><b>${t.forecast_qty==null?'—':'~'+fmtQ(t.forecast_qty)}</b></span>
+              <span class="st${p.id?' parchip':''}" ${p.id?`onclick="parSheetOpen('${p.id}')"`:''}><i>${es?'Par mín.':'Min par'} (${esc(cont)})</i><b>${fmtQ(Number(t.min_par)||0)}</b></span>
+              <span class="st"><i>${es?'Hay':'On hand'}</i><b>${t.not_counted?'0*':oh}</b></span>
+              ${dynThruHtml(t.dyn)}
+            </div>
+            <div class="yield" style="justify-content:flex-start;margin-top:6px"><span class="y-cont">${contGlyph(cont)}<span class="cname">${esc(cont)}</span></span></div>
+            <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin-top:8px">${rcChip}
+              ${can('prep.generate')?`<input class="qty" type="number" value="${Number(t.final_qty)}" onchange="editQty('${t.id}',this.value)" style="width:72px"><span class="muted qty-lbl">${es?'lotes':'batches'}</span>
+              <button class="task-x no-print" onclick="removeTask('${t.id}')" title="${es?'Quitar de la lista de hoy':'Take this off today’s list'}">✕</button>`:''}
+            </div></div>`;
+        }
+        return `<div class="tm-prow${t.status==='done'?' done':''}">
+          <input type="checkbox" ${t.status==='done'?'checked':''} ${can('prep.check')?`onchange="markDone('${t.id}',this.checked)"`:'disabled'} aria-label="${es?'Hecho':'Done'}">
+          <div class="nm" onclick="tmPrepOpen('${t.id}')"><b>${nm}</b><span>${fmtQ(t.final_qty)} ${esc(cont)} · ~${Math.round(Number(t.est_minutes)||0)} min${t.not_counted?` · <span style="color:var(--coral)">${es?'sin contar':'not counted'}</span>`:''} ${open?'▴':'▾'}</span></div>
+          ${can('prep.assign')?`<select class="reassign no-print" onchange="reassign('${t.id}',this.value)" title="${es?'Pasar a otra persona':'Move to another person'}">
+            ${activeStaff.map(s=>`<option value="${s.id}" ${s.id===t.assigned_to?'selected':''}>${esc(s.name)}</option>`).join('')}
+            <option value="" ${!t.assigned_to?'selected':''}>— ${es?'sin asignar':'unassigned'}</option></select>`:''}
+        </div>${det}`; }).join('')}
+      </td></tr></tbody></table>
+      ${cookSheet(person?person.name:'SIN ASIGNAR · UNASSIGNED', ts, d)}
+    </div>`;
+  }
+  return h; }
+// ---- Orders, team layout: how the item comes, as its own square
+function ogUnitGlyph(u){
+  const W=(w,b)=>`<svg class="glyph" viewBox="0 0 ${w} 30" width="${Math.round(w*0.8)}" height="24" aria-hidden="true">${b}</svg>`;
+  const F='fill="#cfe1dd" stroke="#5c7f7b" stroke-width="1.4" stroke-linejoin="round"';
+  switch(String(u||'CS').toUpperCase()){
+    case 'CS': case 'BOX': return W(30,`<path d="M3 9 L15 4 L27 9 L27 24 L15 28 L3 24 Z" ${F}/><path d="M3 9 L15 13 L27 9 M15 13 L15 28" fill="none" stroke="#5c7f7b" stroke-width="1.2"/>`);
+    case 'BAG': return contGlyph('bag');
+    case 'TUB': return contGlyph('quart');
+    case 'GAL': case 'JUG': return W(24,`<path d="M7 3 h6 v4 h5 q3 0 3 3 v15 q0 3 -3 3 h-13 q-3 0 -3 -3 v-12 q0 -3 3 -4 h2 z" ${F}/>`);
+    case 'JAR': return W(22,`<rect x="5" y="2" width="12" height="5" rx="1.5" fill="#5c7f7b"/><rect x="3" y="7" width="16" height="20" rx="4" ${F}/>`);
+    case 'CAN': return W(22,`<ellipse cx="11" cy="6" rx="8" ry="3" ${F}/><path d="M3 6 v18 q8 5 16 0 v-18" ${F}/>`);
+    case 'CLAM': return W(28,`<path d="M3 12 h22 v10 q0 4 -4 4 h-14 q-4 0 -4 -4 z" ${F}/><path d="M3 12 q11 -10 22 0" ${F}/>`);
+    case 'LB': return W(26,`<path d="M6 9 h14 l3 17 h-20 z" ${F}/><circle cx="13" cy="6" r="3" fill="none" stroke="#5c7f7b" stroke-width="1.4"/>`);
+    default: return W(22,`<circle cx="11" cy="16" r="8" ${F}/>`);
+  } }
+const OG_UNIT_WORD={CS:['case','caja'],EA:['each','pieza'],BAG:['bag','bolsa'],BOX:['box','caja'],TUB:['tub','bote'],GAL:['gallon','galón'],JAR:['jar','frasco'],CAN:['can','lata'],JUG:['jug','garrafa'],CLAM:['clam','clam'],LB:['lb','lb']};
+function ogComesBox(it){ const u=String(it.unit_code||'CS').toUpperCase(); const w=OG_UNIT_WORD[u]||[u.toLowerCase(),u.toLowerCase()];
+  return `<div class="og-bx comes"><span class="lb">${isES()?'VIENE EN':'COMES IN'}</span><span class="cm">${ogUnitGlyph(u)}${esc(w[isES()?1:0])}</span></div>`; }
+// ---- Admin: the switch that puts everyone back on the old screens, no push needed
+function tmAdminCard(){ const cur=((S.settings||{}).team_layout||'new')!=='classic'?'new':'classic';
+  return `<div class="card" id="tm-admin">
+    <h2>Team layout · Diseño del equipo<span class="h2sub">everyone but you</span></h2>
+    <div class="muted" style="font-size:12.5px">New = Today · Lists · Orders · Recipes · More, with the simpler count, prep and order screens. Classic = the screens as they were before Oct 3. Your own screen never changes. Phones pick it up the next time the app is opened or refreshed.</div>
+    <div style="display:flex;gap:8px;margin-top:10px;flex-wrap:wrap">
+      <button class="${cur==='new'?'btn-primary':'btn-ghost'} btn-sm" style="width:auto" onclick="tmLayoutSet('new')">${cur==='new'?'✓ ':''}New</button>
+      <button class="${cur==='classic'?'btn-primary':'btn-ghost'} btn-sm" style="width:auto" onclick="tmLayoutSet('classic')">${cur==='classic'?'✓ ':''}Classic</button>
+    </div></div>`; }
+window.tmLayoutSet=async(v)=>{
+  if(!guard('admin.perms')) return;
+  const next=Object.assign({},(S.settings||{}),{team_layout:v==='classic'?'classic':'new'});
+  const {error}=await db.from('tb_settings').update({value:next}).eq('key','app');
+  if(error){ toast('Did NOT save — '+(error.message||error)); return; }
+  S.settings=next; render();
+  toast(v==='classic'?'Team is back on the Classic screens':'Team is on the new layout');
+};
 function devOn(){ return !S.settings || S.settings.dev_mode!==false; }
 // Being able to SAY something is broken is not a feature that gets switched off. Dan turned the
 // switch off on 13 Sep, the 🐞 vanished, and four days of crashes had nowhere to go. The button
@@ -17013,19 +17326,23 @@ async function render(){
     return; }
   // 'pars' is no longer a tab — it lives inside Admin/Settings (Dan, Aug 11) — but it is
   // still a real view, reachable by anyone who can see Admin/Settings.
-  if(!allowed.includes(S.view) && !(S.view==='pars' && sec('admin')) && !(S.view==='dev' && devOn() && can('dev.report'))) S.view=allowed[0];
+  if(!allowed.includes(S.view) && !(S.view==='pars' && sec('admin')) && !(S.view==='dev' && devOn() && can('dev.report'))
+     && !(TM() && (S.view==='lists'||S.view==='more') && tmTabOn(S.view))) S.view=allowed[0];
+  if(!TM() && (S.view==='lists'||S.view==='more')) S.view=allowed[0];
   $('#tabs').style.display='flex';
   // This table is what the tab bar actually shows — the labels in the static markup are only
   // a first paint and get replaced here on every render.
-  const TABL={today:['Today','Hoy'],count:['Count/Lists','Conteo/Listas'],prep:['Prep','Prep'],checklist:['Checklist','Lista'],recipes:['Recipes','Recetas'],waste:['Waste','Merma'],orders:['Orders','Pedidos'],analytics:['Analytics','Análisis'],admin:['Admin/Settings','Admin/Ajustes']};
+  const TABL={today:['Today','Hoy'],count:['Count/Lists','Conteo/Listas'],prep:['Prep','Prep'],checklist:['Checklist','Lista'],recipes:['Recipes','Recetas'],waste:['Waste','Merma'],orders:['Orders','Pedidos'],analytics:['Analytics','Análisis'],lists:['Lists','Listas'],more:['More','Más'],admin:['Admin/Settings','Admin/Ajustes']};
   document.querySelectorAll('#tabs button').forEach(b=>{
     const v=b.dataset.v;
     // Two-word labels break only at the slash ("Admin/<wbr>Settings"), never mid-word, and only
     // when the bar is out of room — Oct 1:
     // with Android's bigger text setting it read "Admin/Setting" + "s" on Dan's phone.
     b.innerHTML=`<svg class="ico"><use href="#i-${v}"/></svg>`+String(TABL[v]?TABL[v][isES()?1:0]:v).replace('/','/<wbr>');
-    b.style.display=sec(v)?'':'none';
-    b.classList.toggle('active',v===S.view || ((S.view==='pars'||S.view==='dev') && v==='admin'));
+    const tm=TM(); document.body.classList.toggle('tm',tm);
+    b.style.display=tm?((TM_TABS.includes(v)&&tmTabOn(v))?'':'none'):((v!=='lists'&&v!=='more'&&sec(v))?'':'none');
+    b.style.order=tm?String(TM_TABS.indexOf(v)):'';
+    b.classList.toggle('active', tm ? v===tmTabOf(S.view) : (v===S.view || ((S.view==='pars'||S.view==='dev') && v==='admin')));
   });
   if(S.view!=='today' && sec('orders') && !(S.orDay&&S.orDay.d===todayLA())) orLoadToday(todayLA()).then(orPaintBadge); else orPaintBadge();
   // How long he stayed on the screen he is leaving — the "where the time went" bars.
@@ -17042,6 +17359,9 @@ async function render(){
   else if(S.view==='analytics') await viewAnalytics();
   else if(S.view==='admin') await viewAdmin();
   else if(S.view==='dev') await viewDev();
+  else if(S.view==='lists') await viewLists();
+  else if(S.view==='more') await viewMore();
+  try{ tmAfterRender(); tmBadge(); }catch(e){}
   try{ devEvent('screen', S.view, ((window.performance&&performance.now)?performance.now():Date.now())-_t0); devFabPaint(); }catch(e){}
   try{ tourAfterRender(); }catch(e){}
   // the editor's numbers are computed, not stored — recompute them the moment it appears
@@ -17089,7 +17409,9 @@ document.addEventListener('visibilitychange',()=>{
 const TOUR={st:{}, loadedFor:null, cur:null, loading:null};
 const TOUR_RANK={done:3, skipped:2, started:1};
 function tourTier(u){ const r=pRole(u||S.user); return r==='admin'?'A':r==='manager'?'B':r==='lead'?'C':r==='line'?'D':'E'; }
-function tourSave(){ try{ if(S.user) localStorage.setItem('tb_tour_'+S.user.id, JSON.stringify(TOUR.st)); }catch(e){} }
+// Oct 3 2026 — onboarding restarted for the team layout. 'g2:' marks the new generation.
+const TOUR_GEN='g2:';
+function tourSave(){ try{ if(S.user) localStorage.setItem('tb_tour_g2_'+S.user.id, JSON.stringify(TOUR.st)); }catch(e){} }
 function tourSet(name, detail){
   const cur=TOUR.st[name];
   if(cur && (TOUR_RANK[cur]||0)>(TOUR_RANK[detail]||0)) return false;   // never downgrade done → started
@@ -17101,9 +17423,9 @@ async function tourLoad(){
   if(TOUR.loading) return TOUR.loading;
   TOUR.loading=(async()=>{
     TOUR.st={};
-    try{ Object.assign(TOUR.st, JSON.parse(localStorage.getItem('tb_tour_'+u.id)||'{}')); }catch(e){}
-    try{ const q=await db.from('tb_dev_events').select('name,detail').eq('kind','tour').eq('who_id',u.id).limit(1000);
-      (q.data||[]).forEach(r=>tourSet(r.name, r.detail)); }catch(e){}
+    try{ Object.assign(TOUR.st, JSON.parse(localStorage.getItem('tb_tour_g2_'+u.id)||'{}')); }catch(e){}
+    try{ const q=await db.from('tb_dev_events').select('name,detail').eq('kind','tour').eq('who_id',u.id).like('name',TOUR_GEN+'%').limit(1000);
+      (q.data||[]).forEach(r=>tourSet(String(r.name).slice(TOUR_GEN.length), r.detail)); }catch(e){}
     TOUR.loadedFor=u.id; TOUR.loading=null;
   })();
   return TOUR.loading;
@@ -17111,7 +17433,7 @@ async function tourLoad(){
 function tourLog(name, detail){
   if(!S.user || S.previewUser) return;
   if(!tourSet(name, detail) && detail!=='started') return;
-  try{ db.from('tb_dev_events').insert({restaurant_id:TBID, kind:'tour', name, detail, on_date:todayLA(),
+  try{ db.from('tb_dev_events').insert({restaurant_id:TBID, kind:'tour', name:TOUR_GEN+name, detail, on_date:todayLA(),
     who:S.user.name, who_id:S.user.id, build:BUILD}).then(()=>{},()=>{}); }catch(e){}
 }
 function gsTick(key){ if(S.user && !S.previewUser && TOUR.st[key]!=='done'){ tourLog(key,'done'); if(S.view==='today') setTimeout(()=>{ try{ gsPaint(); }catch(e){} },50); } }
@@ -17138,7 +17460,7 @@ function gsCardHtml(){
   return `<div id="gs-card" class="card gs-card no-print">
     <div class="gs-h"><b>${es?'Para empezar':'Getting started'} · ${n} ${es?'de':'of'} ${L.length}</b>
       <button class="gs-x" onclick="gsTick('gs-x')" aria-label="Hide · Ocultar">✕</button></div>
-    ${L.map(x=>`<div class="gs-it${gsDone(x[0])?' ok':''}">${gsDone(x[0])?'✓':'○'} ${esc(es?x[2]:x[1])}</div>`).join('')}
+    ${L.map(x=>{ const t=(TM()&&x[0]==='v:waste')?['','Open Waste (under More)','Abre Merma (en Más)']:x; return `<div class="gs-it${gsDone(x[0])?' ok':''}">${gsDone(x[0])?'✓':'○'} ${esc(es?t[2]:t[1])}</div>`; }).join('')}
     <div class="muted" style="font-size:11px;margin-top:4px">${es?'Se marca solo cuando lo haces.':'Ticks itself as you do each thing.'}</div></div>`;
 }
 function gsPaint(){ const el=document.getElementById('gs-card'); if(el) el.outerHTML=gsCardHtml(); }
@@ -17163,19 +17485,21 @@ const TOURS={
    en:'Your getting-started list. It ticks itself as you do each thing, then disappears.', es:'Tu lista para empezar. Se marca sola conforme lo haces, y luego desaparece.'}
  ],
  today:()=>[
+  {when:()=>TM()&&!!tq('.tm-quick'), el:()=>tq('.tm-quick'), en:'Quick buttons: 86 something, log waste, or tell Dan about a problem. Always at the top.', es:'Botones rápidos: algo se acabó, registrar merma, o avisarle a Dan de un problema. Siempre arriba.'},
   {when:()=>!!tq('.t2-alerts'), el:()=>tq('.t2-alerts'), en:'Alerts from the rest of the app land here first: a $15k day coming, an order day, your getting-started list.', es:'Los avisos del resto de la app salen aquí primero: un día de $15k que viene, un día de pedido, tu lista para empezar.'},
   {when:()=>!!tq('#t2-big'), el:()=>tq('#t2-big'), en:'When a $15k day is coming, this card shows up. Tap it: how much to prep, what to order and by when, and when to staff up.', es:'Cuando viene un día de $15k, sale esta tarjeta. Tócala: cuánto preparar, qué pedir y para cuándo, y cuándo poner más gente.'},
   {el:()=>tq('.t2-days'), en:'Each day this week, Monday to Sunday: the weather, the likely range of guests and how busy it will be. ✓ means the real number is in. Tap a day and everything below follows it. ‹ › changes the week.', es:'Cada día de la semana, de lunes a domingo: el clima, el rango probable de clientes y qué tan movido va a estar. ✓ quiere decir que ya está el número real. Toca un día y todo lo de abajo lo sigue. ‹ › cambia de semana.'},
   {el:()=>tq('.t2-busy'), en:'The day you picked, hour by hour: likely guests on top of each bar, the temperature under it. Orange = the rush. Up top: the day’s guests, last year, and the weather.', es:'El día que escogiste, hora por hora: los clientes probables arriba de cada barra y la temperatura abajo. Naranja = la hora pico. Arriba: los clientes del día, el año pasado y el clima.'},
-  {el:()=>tq('.t2-top'), en:'The 20 plates that sell most, as a likely range for that day. The top 5 are the big ones.', es:'Los 20 platos que más se venden, como rango probable para ese día. Los 5 de arriba son los grandes.'},
+  {when:()=>tmVisible(tq('.t2-top')), el:()=>tq('.t2-top'), en:'The 20 plates that sell most, as a likely range for that day. The top 5 are the big ones.', es:'Los 20 platos que más se venden, como rango probable para ese día. Los 5 de arriba son los grandes.'},
   {when:()=>!!tq('.t2-year'), el:()=>tq('.t2-year'), en:()=>DOLLARS()?'The year, month by month: average sales a day. Last year in grey, this year in dark green, the coming months as a likely range. The dashed line is a $15k day.':'The year, month by month: last year in grey, this year in dark green, the coming months as a likely range. The dashed line is a $15k day.', es:()=>DOLLARS()?'El año, mes por mes: ventas promedio al día. El año pasado en gris, este año en verde oscuro, los meses que vienen como rango probable. La línea punteada es un día de $15k.':'El año, mes por mes: el año pasado en gris, este año en verde oscuro, los meses que vienen como rango probable. La línea punteada es un día de $15k.'},
   {el:()=>tq('#t2-day'), en:'The day you picked: how many covers to expect. The prep list is built from the app’s number inside this range.', es:'El día que escogiste: cuántos clientes esperar. La lista de prep se arma con el número de la app dentro de este rango.'},
   {when:()=>can('today.override'), el:()=>tq('#app input.qty[placeholder="edit"]'), en:'Know something the app doesn’t, like a party of 40? Type it here. Today’s prep list uses your number.', es:'¿Sabes algo que la app no, como un grupo de 40? Escríbelo aquí. La lista de hoy usa tu número.'},
   {when:()=>can('analytics.money'), el:()=>tq('.rg-ly'), en:'Same day last year, Friday against Friday. The gold dot shows where last year lands in this year’s range.', es:'El mismo día del año pasado, viernes contra viernes. El punto dorado muestra dónde cae el año pasado en el rango de este año.'},
   {when:()=>!!tq('#app .wxbar'), el:()=>tq('#app .wxbar'), en:'The day’s weather. Details shows it hour by hour.', es:'El clima del día. Details lo muestra hora por hora.'},
   {when:()=>can('86.log')||!!tCard('86 Board'), el:()=>tCard('86 Board'), en:()=>can('86.log')?'Ran out of something? Tap “86 something” and pick it, so everyone knows.':'What has run out today shows here.', es:()=>can('86.log')?'¿Se acabó algo? Toca “86 something” y escógelo, para que todos sepan.':'Aquí sale lo que se acabó hoy.'},
+  {when:()=>TM()&&!!tq('#t20'), el:()=>tq('#t20'), en:'The top 20 plates are folded here. Tap to open.', es:'Los 20 platos más vendidos están aquí. Toca para abrir.'},
   {when:()=>sec('orders')&&!!tq('.or-card'), el:()=>tq('.or-card'), en:'On an order day a card shows up in the alerts. Start the count opens that vendor’s order guide.', es:'En día de pedido sale una tarjeta en los avisos. Start the count abre la guía de ese proveedor.'},
-  {when:()=>can('admin.import'), el:()=>tCard('Data & files'), en:'Once a week: drop the Oracle zip here. It fills in the real guests and sales, and the ranges keep learning.', es:'Una vez a la semana: suelta aquí el zip de Oracle. Llena los clientes y ventas reales, y los rangos siguen aprendiendo.'}
+  {when:()=>can('admin.import')&&tmVisible(tCard('Data & files')), el:()=>tCard('Data & files'), en:'Once a week: drop the Oracle zip here. It fills in the real guests and sales, and the ranges keep learning.', es:'Una vez a la semana: suelta aquí el zip de Oracle. Llena los clientes y ventas reales, y los rangos siguen aprendiendo.'}
  ],
  count:()=>[
   {el:()=>tCard('Every list below'), en:'Every list on this tab is for the day shown. Only change the date to fix an old count.', es:'Todo en esta pestaña es del día que se ve. Cambia la fecha solo para corregir un conteo viejo.'},
@@ -17184,15 +17508,16 @@ const TOURS={
    en:'Opening count (morning) builds today’s list. Closing count (night) builds tomorrow’s, so the morning crew walks in to it.', es:'El conteo de apertura (mañana) arma la lista de hoy. El de cierre (noche) arma la de mañana, y el turno de la mañana llega con la lista.'},
   {el:()=>tq('.st-rail'), en:'Once a count is started, the stations are on the left: walk-in, fryer, flat top, sauté. Count in any order.', es:'Ya empezado el conteo, las estaciones están a la izquierda: cámara, freidora, plancha, salteado. En el orden que quieras.'},
   {el:()=>tq('.count-row'), en:'– and + move whole containers, or type halves and quarters. Every tap saves right away.', es:'– y + mueven envases completos, o escribe medios y cuartos. Cada toque se guarda al instante.'},
-  {el:()=>{ const r=tq('.count-row'); return r?[...r.querySelectorAll('button,.chip,span')].find(b=>/Not prepped/.test(b.textContent)&&b.textContent.length<40)||null:null; },
+  {when:()=>TM()&&!!tq('.count-row'), el:()=>tq('.count-row .stp input'), en:'Empty box = not counted (—). Type 0 when there is none — it saves as a real zero.', es:'Caja vacía = sin contar (—). Escribe 0 cuando no hay — se guarda como cero de verdad.'},
+  {when:()=>!TM(), el:()=>{ const r=tq('.count-row'); return r?[...r.querySelectorAll('button,.chip,span')].find(b=>/Not prepped/.test(b.textContent)&&b.textContent.length<40)||null:null; },
    en:'An empty box is NOT zero. “Not prepped” = a real zero. “Can’t count” = you couldn’t look.', es:'Una caja vacía NO es cero. “No preparado” = cero de verdad. “Sin contar” = no pudiste ver.'},
-  {when:()=>can('admin.items')&&typeof window.cntMoveAsk==='function', el:()=>tq('.count-row .cnt-mv'), en:'⇄ moves an item to another station. What you counted, its pars and its history go with it.', es:'⇄ mueve un artículo a otra estación. Lo contado, sus pares y su historial se van con él.'},
+  {when:()=>!TM()&&can('admin.items')&&typeof window.cntMoveAsk==='function', el:()=>tq('.count-row .cnt-mv'), en:'⇄ moves an item to another station. What you counted, its pars and its history go with it.', es:'⇄ mueve un artículo a otra estación. Lo contado, sus pares y su historial se van con él.'},
   {el:()=>tq('#cjq'), en:'Looking for one item? Type a few letters here to jump straight to it.', es:'¿Buscas un artículo? Escribe unas letras aquí y te lleva directo.'},
   {el:()=>tq('#cnt-blank'), en:'At the end: anything left blank? Choose to treat it as empty (prep to par) or leave it off the list.', es:'Al final: ¿quedó algo en blanco? Escoge tratarlo como vacío (preparar al par) o dejarlo fuera de la lista.'},
   {el:()=>tBtn('Submit — build the list')||tBtn('Start the'), en:'Submit builds the prep list: you pick who’s prepping and it opens on Prep. Left mid-count? Nothing is lost.', es:'Enviar arma la lista de prep: escoges quién prepara y se abre en Prep. ¿Te saliste a medias? No se pierde nada.'},
   {el:()=>tBtn('Reopen count'), en:'Made a mistake after submitting? Reopen, fix it, submit again. The list rebuilds (its ticks clear).', es:'¿Error después de enviar? Corregir, arréglalo y envía otra vez. La lista se rehace (se borran las palomitas).'},
   {el:()=>document.querySelectorAll('#app .card.lcard')[0]||null, en:'Protein count: same as the paper sheet — beginning, add on, sold, end.', es:'Conteo de proteínas: igual que la hoja — inicio, agregado, vendido, final.'},
-  {el:()=>document.querySelectorAll('#app .card.lcard')[3]||null, en:'Count log: every count ever taken, week by week.', es:'Historial: cada conteo que se ha hecho, semana por semana.'}
+  {when:()=>!TM(), el:()=>document.querySelectorAll('#app .card.lcard')[3]||null, en:'Count log: every count ever taken, week by week.', es:'Historial: cada conteo que se ha hecho, semana por semana.'}
  ],
  prep:()=>{
   const mgr=can('prep.generate')||can('prep.assign');
@@ -17202,6 +17527,11 @@ const TOURS={
    {el:()=>tq('.cq-now .rc-chip'), en:'If it has a recipe, Recipe opens it already multiplied for today.', es:'Si tiene receta, Receta la abre ya multiplicada para hoy.'},
    {el:()=>tq('.cq-queue'), en:'The rest of your list waits below, in order.', es:'El resto de tu lista está abajo, en orden.'},
    {el:()=>tq('.cq-now')?null:tq('#app .card'), when:()=>!tq('.cq-now'), en:'Nothing assigned to you yet? It shows up here once the list is built. Ask your lead.', es:'¿No tienes nada todavía? Aparece aquí cuando se arma la lista. Pregúntale a tu encargado.'}];
+  if(TM()) return [
+   {el:()=>tCard('Cover forecast')||tCard('Guests expected')||tCard('Your number'), en:'The guests this list was built for, and which count built it.', es:'Los clientes para los que se armó la lista, y qué conteo la armó.'},
+   {el:()=>tq('.prep-chrome'), en:'How much is done. ⋯ Tools has print, PDF, who’s prepping, split evenly and rebuild.', es:'Cuánto va hecho. ⋯ Herramientas tiene imprimir, PDF, quién prepara, repartir y rehacer.'},
+   {el:()=>tq('.tm-prow'), en:'One line per item: tick it when it’s done, how much to make, and who. Tap the name for the numbers and the recipe.', es:'Una línea por artículo: márcalo al terminar, cuánto hacer y quién. Toca el nombre para ver los números y la receta.'},
+   {el:()=>tq('.prep-bar'), fixed:true, en:'+ Add puts a line on the list. When the day is done, tap ALL PREPPED.', es:'+ Añadir pone una línea. Al terminar el día, toca TODO LISTO.'}];
   return [
    {el:()=>tCard('Cover forecast')||tCard('Guests expected')||tCard('Your number'), en:'The guests this list was built for, and where it came from: which count, who, what time.', es:'Los clientes para los que se hizo la lista, y de dónde salió: qué conteo, quién, a qué hora.'},
    {el:()=>tCard('Who’s prepping')||tCard("Who's prepping"), when:()=>!tq('.prep-chrome'), en:'No list yet? It builds itself when the count is submitted. You can also pick who’s prepping and generate it here.', es:'¿Aún no hay lista? Se arma sola al enviar el conteo. También puedes escoger quién prepara y generarla aquí.'},
@@ -17213,8 +17543,17 @@ const TOURS={
    {el:()=>tq('.prep-bar'), fixed:true, en:'+ Add puts a line on the list. When the day is done, tap ALL PREPPED, check what really got made, then SAVE TO LOG. The par engine learns from it.', es:'+ Añadir agrega una línea. Al terminar el día toca TODO LISTO, revisa lo que de verdad se hizo y GUARDAR. El motor de pares aprende de eso.'},
    {when:()=>can('logs.view'), el:()=>tCard('Prep list log'), en:'Every list ever made, and how much of it got done.', es:'Cada lista que se ha hecho, y cuánto se terminó.'}];
  },
+ lists:()=>[
+  {el:()=>tq('#tm-lists'), en:'Today’s lists, in the order the day happens, from opening to close. Tap a step to open it.', es:'Las listas de hoy, en el orden del día, de la apertura al cierre. Toca un paso para abrirlo.'},
+  {when:()=>!!tq('#tm-cp')&&sec('count'), el:()=>tq('#tm-cp'), en:'Count first. Once the count is in, this same step opens the prep list.', es:'Primero el conteo. Ya enviado, este mismo paso abre la lista de prep.'},
+  {when:()=>!!tq('#tm-cp')&&!sec('count'), el:()=>tq('#tm-cp'), en:'Your prep list shows up here once the count is in. Tap it to start.', es:'Tu lista de prep sale aquí cuando se envía el conteo. Tócala para empezar.'},
+  {when:()=>!!tq('#tabs button[data-v=lists] .tm-badge'), el:()=>tq('#tabs button[data-v=lists]'), fixed:true, en:'The red number is how many of today’s steps are still open.', es:'El número rojo es cuántos pasos de hoy faltan.'}
+ ],
+ more:()=>[
+  {el:()=>tq('#tm-more'), en:'Everything that isn’t every shift: waste, reports, settings and the logs.', es:'Lo que no es de cada turno: merma, reportes, ajustes y los historiales.'}
+ ],
  checklist:()=>[
-  {pre:async()=>{ if(S.ck&&S.ck.page!=='home'){ S.ck.page='home'; await render(); } }, el:()=>tCard('Closing ·')||tCard('Opening ·'), en:'Two lists: Opening and Closing. The one due now has the gold edge. Tap Start.', es:'Dos listas: Apertura y Cierre. La que toca ahora tiene el borde dorado. Toca Empezar.'},
+  {pre:async()=>{ if(S.ck&&S.ck.page!=='home'){ S.ck.page='home'; await render(); } }, el:()=>tCard('Closing ·')||tCard('Opening ·')||tCard('Cierre ·')||tCard('Apertura ·'), en:'Two lists: Opening and Closing. The one due now has the gold edge. Tap Start.', es:'Dos listas: Apertura y Cierre. La que toca ahora tiene el borde dorado. Toca Empezar.'},
   {en:'One item at a time, full screen. YES saves the moment you tap it, with your name.', es:'Un punto a la vez, en pantalla completa. SÍ se guarda en cuanto lo tocas, con tu nombre.'},
   {en:'Can’t do it right now? “Skip for now” — it comes back at the end. “Not possible” asks why.', es:'¿No se puede ahorita? “Después” — regresa al final. “No se pudo” te pregunta por qué.'},
   {en:'Opening checks last night: was it really done? YES or NO. NO asks for a note or a photo.', es:'La apertura revisa lo de anoche: ¿de verdad quedó? SÍ o NO. NO pide una nota o una foto.'},
@@ -17226,7 +17565,7 @@ const TOURS={
   {pre:async()=>{ if(S.fullRecipe){ S.fullRecipe=null; await render(); } }, el:()=>tq('#app .search input'), en:'Search any recipe by name.', es:'Busca cualquier receta por nombre.'},
   {el:()=>tq('.rcp-row'), en:'Tags say if it’s on the count / prep list or reference only. Tap a recipe to open it.', es:'Las etiquetas dicen si está en el conteo / la lista o solo de referencia. Toca una receta para abrirla.'},
   {pre:async()=>{ const r=tq('.rcp-row'); if(r && !S.openRecipe){ r.click(); await tSleep(300); } }, el:()=>tq('.rcp-row'), en:'Yield, shelf life, storage, ingredients and steps. “Full page” makes it big.', es:'Rinde, vida útil, almacenaje, ingredientes y pasos. “Pantalla completa” la hace grande.'},
-  {pre:async()=>{ const b=tBtn('Full page'); if(b && !S.fullRecipe){ b.click(); await tSleep(400); } }, el:()=>tq('.mult'), en:'Batches: 1× to 4×, or more with +. Every ingredient updates.', es:'Lotes: 1× a 4×, o más con +. Todos los ingredientes cambian.'},
+  {pre:async()=>{ const b=tq('.rc-fullbtn')||tBtn('Full page'); if(b && !S.fullRecipe){ b.click(); await tSleep(400); } }, el:()=>tq('.mult'), en:'Batches: 1× to 4×, or more with +. Every ingredient updates.', es:'Lotes: 1× a 4×, o más con +. Todos los ingredientes cambian.'},
   {el:()=>[...document.querySelectorAll('button')].find(b=>b.textContent.includes('Lbs & Quarts'))||null, en:'Units: as written, pounds & quarts, or cups & spoons. Weights never turn into cups.', es:'Medidas: como está, libras y cuartos, o tazas y cucharas. El peso nunca se pasa a tazas.'}
  ],
  waste:()=>[
@@ -17250,8 +17589,9 @@ const TOURS={
   {el:()=>tq('.og-bx.par'), en:'Par wrong? Tap it to change it. That sticks for every future order.', es:'¿El par está mal? Tócalo para cambiarlo. Se queda para todos los pedidos.'},
   {pre:async()=>{ S.og.page='review'; await render(); }, el:()=>tq('.og-sendbox:not(.step2)'), en:'Review order: step 1, Copy as text, then place it the way you always do — vendor site, text or your rep.', es:'Revisar pedido: paso 1, Copiar como texto, y pídelo como siempre — la página, un texto o tu vendedor.'},
   {el:()=>tq('.og-sendbox.step2'), en:'Step 2: I placed this order locks the numbers in the record. The app never sends anything to the vendor.', es:'Paso 2: Ya lo pedí guarda los números para siempre. La app nunca le manda nada al proveedor.'},
-  {pre:async()=>{ S.og.page='pick'; S.og.vendor=null; await render(); }, el:()=>tCard('Upload invoices'), when:()=>can('analytics.money'), en:'Invoices: upload the Sysco, West Coast Prime and Pro Act invoices here.', es:'Facturas: sube aquí las de Sysco, West Coast Prime y Pro Act.'},
-  {pre:async()=>{ if(S.og.page!=='pick'){ S.og.page='pick'; S.og.vendor=null; await render(); } }, el:()=>tCard('Runs out first'), en:'What runs out first and what’s short at the count — from your own counts.', es:'Lo que se acaba primero y lo que está bajo el par — de tus propios conteos.'}
+  {pre:async()=>{ S.og.page='pick'; S.og.vendor=null; await render(); }, el:()=>tq('#inv'), when:()=>TM(), en:'Invoices and how ordering is going are folded down here. Tap one to open it.', es:'Las facturas y cómo van los pedidos están aquí abajo. Toca para abrir.'},
+  {pre:async()=>{ S.og.page='pick'; S.og.vendor=null; await render(); }, el:()=>tCard('Upload invoices'), when:()=>!TM()&&can('analytics.money'), en:'Invoices: upload the Sysco, West Coast Prime and Pro Act invoices here.', es:'Facturas: sube aquí las de Sysco, West Coast Prime y Pro Act.'},
+  {pre:async()=>{ if(S.og.page!=='pick'){ S.og.page='pick'; S.og.vendor=null; await render(); } }, el:()=>tCard('Runs out first'), when:()=>!TM(), en:'What runs out first and what’s short at the count — from your own counts.', es:'Lo que se acaba primero y lo que está bajo el par — de tus propios conteos.'}
  ],
  analytics:()=>[
   {el:()=>tCard('Analytics · Analíticas'), en:()=>can('today.exact')?'Covers today, this week, next week, and where the season is.':'Guests today, this week and next week as likely ranges, and where the season is.', es:()=>can('today.exact')?'Cubiertos hoy, esta semana, la próxima, y cómo va la temporada.':'Clientes hoy, esta semana y la próxima como rangos, y cómo va la temporada.'},
@@ -17275,7 +17615,7 @@ const TOURS={
 };
 const TOUR_TITLE={welcome:['Welcome','Bienvenida'], today:['Today','Hoy'], count:['Count / Lists','Conteo'], prep:['Prep','Prep'],
   checklist:['Checklist','Lista'], recipes:['Recipes','Recetas'], waste:['Waste','Merma'], orders:['Orders','Pedidos'],
-  analytics:['Analytics','Análisis'], admin:['Admin / Settings','Admin / Ajustes']};
+  analytics:['Analytics','Análisis'], admin:['Admin / Settings','Admin / Ajustes'], lists:['Lists','Listas'], more:['More','Más']};
 
 // ---- the engine ----
 function tourStart(name, auto){
@@ -17323,7 +17663,11 @@ function tourPaint(){
         D:['Your prep, the recipes, the opening / closing checklist and the waste log — in your pocket.','Tu prep, las recetas, la lista de apertura / cierre y la merma — en tu bolsillo.'],
         E:['Your prep list one item at a time, the recipes, the checklist and the waste log — in your pocket.','Tu lista de prep un artículo a la vez, las recetas, la lista y la merma — en tu bolsillo.'],
         A:['The kitchen’s paperwork, done faster. This is the tour everyone else sees the first time they sign in.','El papeleo de la cocina, más rápido. Este es el recorrido que ven los demás la primera vez.']}[T];
-      const tabs=PERM_SECTIONS.filter(x=>sec(x[0])).length;
+      if(TM()){ // say only what this person actually has
+        const P=[['count','the count','el conteo'],['prep','the prep list','la lista de prep'],['checklist','the opening / closing checklist','la lista de apertura / cierre'],['orders','vendor orders','los pedidos'],['recipes','the recipes','las recetas'],['waste','the waste log','la merma'],['analytics','the reports','los reportes']].filter(x=>sec(x[0]));
+        const j=(a,y)=>a.length>1?a.slice(0,-1).join(', ')+' '+y+' '+a[a.length-1]:(a[0]||'');
+        if(P.length) txt.splice(0,2,'This app is the kitchen’s paperwork, done faster: '+j(P.map(x=>x[1]),'and')+'.','Esta app es el papeleo de la cocina, más rápido: '+j(P.map(x=>x[2]),'y')+'.'); }
+      const tabs=TM()?TM_TABS.filter(tmTabOn).length:PERM_SECTIONS.filter(x=>sec(x[0])).length;
       body=`<div class="tour-logo">ChefOpsAI</div><h3>${es?`¡Hola, ${esc(u.name)}!`:`Welcome, ${esc(u.name)}`}</h3><p>${esc(es?txt[1]:txt[0])}</p>
         <div class="tour-tiny">${es?`Un recorrido corto · luego cada pestaña (${tabs}) te enseña la primera vez`:`A short tour · then each of your ${tabs} tabs teaches itself the first time`}</div>
         <button class="tour-big" onclick="tourGo(1)">${es?'Enséñame':'Show me · Enséñame'}</button>
@@ -17399,7 +17743,7 @@ window.addEventListener('resize',()=>{ if(TOUR.cur) setTimeout(()=>{ try{ tourPa
 })();
 // Team screen: who has been through the welcome
 async function tourTeamLoad(){
-  try{ const q=await db.from('tb_dev_events').select('who_id,detail').eq('kind','tour').eq('name','welcome').limit(2000);
+  try{ const q=await db.from('tb_dev_events').select('who_id,detail').eq('kind','tour').eq('name',TOUR_GEN+'welcome').limit(2000);
     const m={}; (q.data||[]).forEach(r=>{ const c=m[r.who_id]; if(!c || (TOUR_RANK[r.detail]||0)>(TOUR_RANK[c]||0)) m[r.who_id]=r.detail; });
     S.tourTeam=m; }catch(e){ S.tourTeam=S.tourTeam||{}; }
 }
