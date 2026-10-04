@@ -1506,7 +1506,7 @@ const SB_KEY='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZ
 const TBID='9f8d7c6b-5a49-4e38-b271-06d5f00dbeef'; // Tommy Bahama tenant inside ChefOpsAI
 // Stamped by publish.sh at upload time. It is the only version label there is now —
 // one address, updated in place, so this tells you which build that address is serving.
-const BUILD='Oct 4, 2026 · Count & Prep and Ordering reports + Excel + PDF';
+const BUILD='Oct 4, 2026 · sales-based Top 20 + switch + side-by-side test';
 // ---------- IS THIS PHONE EVEN RUNNING THE LATEST BUILD? ----------
 // Sep 3 2026. Three prep fixes shipped and Dan still saw the old behaviour, because the app
 // installs to the home screen and an installed web app does not go back and re-fetch its own
@@ -7349,7 +7349,7 @@ function bigDayScan(){
     if(!X||!X.v2s) continue;
     const R=dayRange(d), k=X.v2g?R.g/X.v2g:1;                 // k carries Dan's weather dial when it is on
     if(X.v2s*k<BIG_DAY) continue;
-    out.push({d, R, slo:X.band?X.band.lo*k:null, shi:X.band?X.band.hi*k:null, chk:X.chk, typ:typicalGuests(d)});
+    out.push({d, R, s:X.v2s*k, slo:X.band?X.band.lo*k:null, shi:X.band?X.band.hi*k:null, chk:X.chk, typ:typicalGuests(d)});
   }
   const st=[]; out.forEach(o=>{ const L=st[st.length-1]; if(L&&shiftDay(L[L.length-1].d,1)===o.d) L.push(o); else st.push([o]); });
   return st;
@@ -7401,8 +7401,12 @@ function bigDayAlertHtml(){
       <ul>${lis}</ul><span class="muted">${es?'Las listas de prep de esos días ya salen más grandes solas — esto es para que nadie se sorprenda.':'The prep lists for those days build bigger by themselves — this is so nobody is surprised.'}</span></div>`;
   }catch(e){}
   // order up: the busiest plates, anything already low at the last count, and the deadlines
-  const fams=S.families.filter(f=>(f.category==='food'||f.category==='dessert')&&f.active!==false).slice(0,3);
-  const famH=fams.map(f=>`<b>${esc(t2Fam(f,es))}</b> ~${r10p(f.attach_rate*sr.lo)}–${r10p(f.attach_rate*sr.hi)}${typSum?` (normal ~${r10p(f.attach_rate*typSum)})`:''}`).join(' · ');
+  const fams=t20Fams().slice(0,3);
+  // Oct 4 2026: on the sales basis, plates per $1,000 (today's 21-day rates) × the stretch's sales per cover
+  const kS=cur.reduce((a,o)=>a+(o.s||0),0)/(cur.reduce((a,o)=>a+o.R.g,0)||1);
+  const useS=t20Basis()==='sales'&&S.t20Rt&&S.t20Rt.ok&&cur.every(o=>o.s>0);
+  const ar=f=>useS?S.t20Rt.s[f.id]*kS/1000:f.attach_rate;
+  const famH=fams.map(f=>`<b>${esc(t2Fam(f,es))}</b> ~${r10p(ar(f)*sr.lo)}–${r10p(ar(f)*sr.hi)}${typSum?` (normal ~${r10p(ar(f)*typSum)})`:''}`).join(' · ');
   let lowH='';
   if(sec('orders')&&S.og&&S.og.dash&&Array.isArray(S.og.dash.cover)){
     const low=S.og.dash.cover.filter(c=>!c.stale&&c.days!=null&&c.days<=4);
@@ -7562,7 +7566,7 @@ function yearSalesHtml(){
     ${note?`<div class="t2-note">${note}</div>`:''}</div>`;
 }
 function todayRangeHtml(o){
-  const {d, hrs, swing, actualByDate, LA, range, ww, wxf, guests, avgCheck}=o;
+  const {d, hrs, swing, actualByDate, LA, range, ww, wxf, guests, avgCheck, t20}=o;
   const T=todayLA(), es=isES();
   const wk=weekMonSun(d);
   const money=can('analytics.money');
@@ -7619,16 +7623,18 @@ function todayRangeHtml(o){
   `;   // closed below, after the day's guests block (Oct 1 2026, Dan: combine like his)
   // ---- 3 · top 20 sellers, option C: likely plates = share of guests × the day's guest range
   // (a day that is already real uses its real guests and the measured item swing instead)
-  const fams=S.families.filter(f=>(f.category==='food'||f.category==='dessert')&&f.active!==false).slice(0,20);
+  // Oct 4 2026: the per-cover number comes from t20Model — sales (default) or guests, Dan's switch.
+  const M=t20||t20Model([],d), fams=M.fams, rt=f=>M.rate[f.id];
   const gLo=own?guests*(R.lo/(R.g||1)):R.lo, gHi=own?guests*(R.hi/(R.g||1)):R.hi;
   const plates=f=>{ let lo,hi;
-    if(actD!=null){ const est=f.attach_rate*actD, e=swing[f.id]?Math.max(1,swing[f.id].frac*est):est*0.15; lo=est-e; hi=est+e; }
-    else { lo=f.attach_rate*gLo; hi=f.attach_rate*gHi; }
+    if(actD!=null){ const est=rt(f)*actD, e=swing[f.id]?Math.max(1,swing[f.id].frac*est):est*0.15; lo=est-e; hi=est+e; }
+    else { lo=rt(f)*gLo; hi=rt(f)*gHi; }
     return `${Math.max(0,Math.round(lo))}–${Math.round(hi)}`; };
-  const pct=f=>`${(Math.round(f.attach_rate*1000)/10).toFixed(1)}%`;
+  const pct=f=>`${M.basis==='sales'?'≈':''}${(Math.round(rt(f)*1000)/10).toFixed(1)}%`;
   const topCard=fams.length?`<div class="card t2-top">
     <h3 style="margin:0">Top 20 sellers · Lo más vendido</h3>
-    <div class="muted" style="font-size:11.5px">${dayName} · ${actD!=null?(es?'platos (con clientes reales)':'plates (at the real guest count)'):(es?'platos probables':'likely plates')}</div>
+    <div class="muted" style="font-size:11.5px">${dayName} · ${actD!=null?(M.basis==='sales'?(es?'platos (con la venta real)':'plates (at the real sales)'):(es?'platos (con clientes reales)':'plates (at the real guest count)')):(es?'platos probables':'likely plates')} · ${t20BasisTag(M,es)}</div>
+    ${M.why?`<div class="muted" style="font-size:11px;margin-top:2px">${esc(es?M.why.es:M.why.en)}</div>`:''}
     <div class="t2-t5">${fams.slice(0,5).map(f=>`<div class="t2-t5i"><div class="t2-t5n">${esc(t2Fam(f,es))}</div><div class="t2-t5v">${plates(f)}</div><div class="t2-t5p">${pct(f)} ${es?'de clientes':'of guests'}</div></div>`).join('')}</div>
     <div class="t2-r15">${fams.slice(5).map(f=>`<div class="t2-r"><span>${esc(t2Fam(f,es))}</span><b>${plates(f)}</b></div>`).join('')}</div>
   </div>`:'';
@@ -7828,20 +7834,27 @@ async function paintComps(d){
 }
 // ---- top 20, Dan's version: exact plates, typical miss, % of covers, tap for the hourly spread
 function danTopHtml(o){
-  const {d, guests, hrs, swing, realN}=o; const es=isES(), T=todayLA();
-  const fams=S.families.filter(f=>(f.category==='food'||f.category==='dessert')&&f.active!==false).slice(0,20);
+  const {d, guests, hrs, swing, realN, t20}=o; const es=isES(), T=todayLA();
+  // Oct 4 2026: sales (default) or guests — t20Model; the switch sits on this card for Dan.
+  const M=t20||t20Model([],d), fams=M.fams, rt=f=>M.rate[f.id];
   if(!fams.length) return '';
-  const est=f=>Math.round(f.attach_rate*guests);
-  const sw=f=>swing[f.id]?{n:Math.max(1,Math.round(swing[f.id].frac*f.attach_rate*guests)), p:Math.round(swing[f.id].frac*100), days:swing[f.id].n}:null;
-  const spread=(f,fi)=>`<div class="t2-spread" id="ih-${fi}" style="display:none"><b>${esc(t2Fam(f,es))}</b> — ${es?'por hora':'hour by hour'}${itemHoursHtml(f,guests,hrs)}</div>`;
-  const big=fams.slice(0,5).map((f,fi)=>{ const s=sw(f); return `<div class="t2-t5i" style="cursor:pointer" onclick="t2Spread(${fi})"${s?` title="measured over ${s.days} real days"`:''}><div class="t2-t5n">▸ ${esc(t2Fam(f,es))}</div><div class="t2-t5v">${est(f)}${s?` <small>± ${s.n}</small>`:''}</div><div class="t2-t5p">${(f.attach_rate*100).toFixed(1)}% ${es?'de cubiertos':'of covers'}${s?` · ${es?'normalmente ±':'usually within ±'}${s.p}%`:''}</div></div>${spread(f,fi)}`; }).join('');
+  const money=can('analytics.money'), nD=M.nItemDays!=null?M.nItemDays:realN;
+  const est=f=>Math.round(rt(f)*guests);
+  const sw=f=>swing[f.id]?{n:Math.max(1,Math.round(swing[f.id].frac*rt(f)*guests)), p:Math.round(swing[f.id].frac*100), days:swing[f.id].n}:null;
+  const spread=(f,fi)=>`<div class="t2-spread" id="ih-${fi}" style="display:none"><b>${esc(t2Fam(f,es))}</b> — ${es?'por hora':'hour by hour'}${itemHoursHtml(f,guests,hrs,rt(f)*guests)}</div>`;
+  const rateTxt=f=>(M.basis==='sales'&&money)?`${M.per[f.id].toFixed(1)} ${es?'por $1k de venta':'per $1k in sales'}`:`${M.basis==='sales'?'≈':''}${(rt(f)*100).toFixed(1)}% ${es?'de cubiertos':'of covers'}`;
+  const big=fams.slice(0,5).map((f,fi)=>{ const s=sw(f); return `<div class="t2-t5i" style="cursor:pointer" onclick="t2Spread(${fi})"${s?` title="measured over ${s.days} real days"`:''}><div class="t2-t5n">▸ ${esc(t2Fam(f,es))}</div><div class="t2-t5v">${est(f)}${s?` <small>± ${s.n}</small>`:''}</div><div class="t2-t5p">${rateTxt(f)}${s?` · ${es?'normalmente ±':'usually within ±'}${s.p}%`:''}</div></div>${spread(f,fi)}`; }).join('');
   const rest=fams.slice(5).map((f,j)=>{ const fi=j+5, s=sw(f); return `<div class="t2-r" style="cursor:pointer" onclick="t2Spread(${fi})"${s?` title="measured over ${s.days} real days · usually within ±${s.p}%"`:''}><span>▸ ${esc(t2Fam(f,es))}</span><b>${est(f)}${s?` <small>±${s.n}</small>`:''}</b></div>${spread(f,fi)}`; }).join('');
   return `<div class="card t2-top">
     <h3 style="margin:0">Top 20 sellers · Lo más vendido</h3>
-    <div class="muted" style="font-size:11.5px">${fmtDate(d)}${d===T?(es?' · hoy':' · today'):''} · ${es?'platos proyectados · error típico · toca uno para ver sus horas':'projected plates · typical miss · tap one for its hourly spread'}</div>
+    <div class="muted" style="font-size:11.5px">${fmtDate(d)}${d===T?(es?' · hoy':' · today'):''} · ${es?'platos proyectados · error típico · toca uno para ver sus horas':'projected plates · typical miss · tap one for its hourly spread'} · <b>${t20BasisTag(M,es)}</b></div>
+    ${M.why?`<div class="muted" style="font-size:11px;margin-top:2px">${esc(es?M.why.es:M.why.en)}</div>`:''}
+    ${t20SwitchHtml(M)}
     <div class="t2-t5">${big}</div>
     <div class="t2-r15">${rest}</div>
-    <div class="muted" style="font-size:11px;margin-top:6px">Sources: attach rates from the item mix in <b>System Financial 2026</b> (regular + Island Time combined) × today's forecast. <b>± / usually within</b> is measured from your <b>${realN} real Oracle day${realN===1?'':'s'}</b> — each family's actual daily miss against the model at that day's real covers, scaled to today's forecast. A family with fewer than 5 measured days shows no ±.</div>
+    <div class="muted" style="font-size:11px;margin-top:6px">${M.basis==='sales'
+      ?`Sources: each item's <b>plates per $1,000</b> of net sales over <b>${M.R.n} real Oracle days</b> (${fmtDate(M.R.from).replace(/^[A-Za-z]+, /,'')} – ${fmtDate(M.R.to).replace(/^[A-Za-z]+, /,'')})${money?` × this day's sales, <b>$${Math.round(M.C.k*guests).toLocaleString()}</b> (${guests} covers × $${M.C.k.toFixed(2)} ${M.C.real?'real check':'per cover from the forecast engine'})`:` × this day's sales forecast`}. <b>± / usually within</b> is measured from your <b>${nD} real Oracle item day${nD===1?'':'s'}</b> — each family's actual daily miss against plates per $1,000 × that day's real sales, scaled to today. A family with fewer than 5 measured days shows no ±. Prep amounts still run on covers.`
+      :`Sources: attach rates from the item mix in <b>System Financial 2026</b> (regular + Island Time combined) × today's forecast. <b>± / usually within</b> is measured from your <b>${nD} real Oracle item day${nD===1?'':'s'}</b> — each family's actual daily miss against the model at that day's real covers, scaled to today's forecast. A family with fewer than 5 measured days shows no ±.`}</div>
   </div>`;
 }
 async function viewToday(){
@@ -7874,7 +7887,8 @@ async function viewToday(){
   // real item-day on file. Small today (~500 rows) and always true — nothing cached, nothing stale.
   const [LA,swIq,wkFcQ]=await Promise.all([
     lyAligned(d).catch(()=>null),
-    db.from('tb_daily_item_history').select('family_id,units,business_date').eq('synthetic',false),
+    // Oct 4 2026: paged — 1,476 real item rows by Sep 30, and one request stops at 1,000.
+    t20Items().then(data=>({data}),()=>({data:[]})),
     // What the app actually promised on each day of the strip's week. A past day shows the
     // number it was given that morning, not today's recomputation of it.
     db.from('tb_day_forecast').select('business_date,guests_forecast').gte('business_date',wkDays[0]).lte('business_date',wkDays[6])
@@ -7904,19 +7918,11 @@ async function viewToday(){
   // that day's REAL covers with the units Oracle actually counted. Mean absolute miss over
   // mean units = the swing fraction; × today's estimate = "usually within ± N".
   // Under 5 measured days the column shows a dash — a number with less behind it is a guess.
-  const swing={};
-  {
-    const covByD={}; realDays.forEach(r=>{ if(r.business_date) covByD[r.business_date]=Number(r.guests); });
-    const byFam={};
-    (swIq.data||[]).forEach(r=>{ const c=covByD[r.business_date]; if(!c) return;
-      (byFam[r.family_id]=byFam[r.family_id]||[]).push({u:Number(r.units), c}); });
-    for(const f of S.families){
-      const rows=byFam[f.id]||[]; if(rows.length<5) continue;
-      const meanU=rows.reduce((a,x)=>a+x.u,0)/rows.length; if(!meanU) continue;
-      const mae=rows.reduce((a,x)=>a+Math.abs(f.attach_rate*x.c - x.u),0)/rows.length;
-      swing[f.id]={frac:mae/meanU, n:rows.length};
-    }
-  }
+  // Oct 4 2026: the same measurement, in whichever basis the Top 20 is on (t20Swing).
+  const t20=t20Model(swIq.data||[], d, {forecast:can('today.exact')});   // Dan's card multiplies the forecast covers, even on a real day
+  const swing=t20Swing(swIq.data||[], t20);
+  S.t20Rt=t20SalesRates(swIq.data||[], todayLA());     // the $15k alert's plates use today's rates
+  if(d===todayLA()) t20Freeze(d, swIq.data||[]);       // both versions, frozen once, for the test
   const lateClose=['Thursday','Friday','Saturday'].includes(weekdayOf(d));
   const range=lateClose?[11,12,13,14,15,16,17,18,19,20]:[11,12,13,14,15,16,17,18,19];
   const ww=wxHourWeights(d,range);
@@ -7939,7 +7945,7 @@ async function viewToday(){
 
   if(pOr) await pOr;
   if(!can('today.exact')){
-    shell(todayRangeHtml({d, hrs, swing, actualByDate, LA, range, ww, wxf, guests, avgCheck}));
+    shell(todayRangeHtml({d, hrs, swing, actualByDate, LA, range, ww, wxf, guests, avgCheck, t20}));
     if(can('admin.import')){ if(!S.importsLoaded) loadImports().then(()=>paintImports()); paintSynthetic(); }
     return;
   }
@@ -7972,7 +7978,7 @@ async function viewToday(){
   ${todayAlertsHtml(d)}
   ${danWeekHtml({d, wk:wkDays, wkFrozen, actualByDate, salesByDate})}
   ${danBusyHtml({d, hrs, guests, ww, shp, LA, actD:actualByDate[d], lateClose, extra:fcBlock, sales:can('analytics.money')?salesForecast:null})}
-  ${danTopHtml({d, guests, hrs, swing, realN:realDays.length})}
+  ${danTopHtml({d, guests, hrs, swing, realN:realDays.length, t20})}
   ${card86(d)}`;
   inner += eventsCard();
   inner += dataCard(!!(S.settings||{}).bilingual);
@@ -10266,8 +10272,8 @@ window.toggleItemHours=fi=>{ const el=document.getElementById('ih-'+fi); if(el) 
 // Per-item hourly ESTIMATE: (1 - IT share) follows the overall guest curve; the IT share concentrates
 // in the Island Time window. Approximate by design — upgraded to real per-item hours when Day Part /
 // Check Detail exports arrive from Oracle.
-function itemHoursHtml(f,guests,hrs){
-  const units=f.attach_rate*guests;
+function itemHoursHtml(f,guests,hrs,u0){
+  const units=u0!=null?u0:f.attach_rate*guests;
   const itShare=Number(f.it_share)||0;
   const itWin=S.model.it_window||[14,15,16];
   const gTot=hrs.reduce((a,x)=>a+x.sh,0)||1;
@@ -12580,6 +12586,7 @@ async function viewAnalytics(){
   ${rpLauncherHtml()}
   ${reportBuilderCard()}
   ${GRADES()?fcLedgerCardHtml():''}
+  ${GRADES()?'<div id="t20g-card"></div>':''}
   ${avtCardHtml()}
   ${timingCardHtml()}
   <div class="card">
@@ -12785,6 +12792,7 @@ async function viewAnalytics(){
   </div>`);
   renderDayReport(S.anaDay);
   if(AVT_OK()) avtPaint();
+  if(GRADES()) t20GradePaint();
 }
 
 window.logActual=async()=>{
@@ -16712,6 +16720,190 @@ window.tmLayoutSet=async(v)=>{
   S.settings=next; render();
   toast(v==='classic'?'Team is back on the Classic screens':'Team is on the new layout');
 };
+// ===================== Top 20: built from sales or from guests (Oct 4 2026) =====================
+// Dan, Oct 4 2026: "add the sales based top 20. and make a feature for me to change from one to
+// another, i want to use the sales version. but incase i want to change i want it to be easily
+// done." Replay of the morning forecasts, Aug 18 – Sep 30 (44 days, 6 full weeks), items within
+// ±15% for the week: sales 71%, guests 64% at the same 21-day rates, 58% with the saved per-guest
+// rates this card used until today. All-20 weekly miss: sales 6.0%, guests 8.2%.
+//   Sales  = each item's plates per $1,000 of net sales over the 21 days before the day (real
+//            Oracle item days only, 14 needed) × that day's sales forecast. A cover is turned
+//            into dollars with the same engine that made the cover number, so covers × the rate
+//            below = plates per $1,000 × the sales forecast. A real day uses its real sales.
+//   Guests = the saved attach rate × covers, exactly as before.
+// The switch is S.settings.top20_basis ('guests' | 'sales'); unset = sales. Prep amounts and the
+// prep list still run on guests — this changes the Top 20 numbers only.
+// Both versions are frozen the first time each day is opened (tb_forecast_v2.notes, k:'top20')
+// and graded against the Oracle item files on the Analytics screen, for the Oct 5 – Nov 1 test.
+const T20_WIN=21, T20_MIN=14;
+const T20_PLAN=['2026-10-05','2026-10-12','2026-10-19','2026-10-26'], T20_EXTRA=['2026-11-02','2026-11-09'];
+function t20Basis(){ return ((S.settings||{}).top20_basis==='guests')?'guests':'sales'; }
+function t20Fams(){ return (S.families||[]).filter(f=>(f.category==='food'||f.category==='dessert')&&f.active!==false).slice(0,20); }
+function t20RealDays(){ const o={}; (S.dhRows||[]).forEach(r=>{ const g=Number(r.guests), s=Number(r.net_sales); if(g>0&&s>0) o[String(r.business_date)]={g,s}; }); return o; }
+// every real Oracle item-day on file — 1,476 rows on Oct 4, past the 1,000-row page, so paged
+function t20Items(){
+  return dynPaged(()=>db.from('tb_daily_item_history').select('family_id,units,business_date').eq('synthetic',false).order('business_date').order('family_id'));
+}
+// plates per $1,000 for each Top 20 item over the 21 days before the day (before today for a day
+// still ahead). Only days that have both an Oracle item file and real sales count.
+function t20SalesRates(items, d){
+  const T=todayLA(), anc=d<T?d:T, a=shiftDay(anc,-T20_WIN), H=t20RealDays();
+  const fams=t20Fams(), by={}, days=new Set();
+  (items||[]).forEach(r=>{ const x=String(r.business_date); if(x<a||x>=anc||!H[x]) return; days.add(x); by[r.family_id]=(by[r.family_id]||0)+(Number(r.units)||0); });
+  const D=[...days].sort();
+  if(D.length<T20_MIN) return {ok:false, n:D.length};
+  const k=D.reduce((t,x)=>t+H[x].s,0)/1000, s={};
+  fams.forEach(f=>{ s[f.id]=(by[f.id]||0)/k; });
+  return {ok:true, n:D.length, from:D[0], to:D[D.length-1], s};
+}
+// what one cover is worth in sales on day d, from the engine that made the cover number
+// (v2 sales ÷ v2 covers; v1 when the v1 switch is on). A real day uses its real check when the
+// card multiplies by the real covers (the team card); Dan's card always multiplies the forecast.
+function t20Check(d, useReal){
+  const H=t20RealDays(); if(useReal!==false&&H[d]) return {k:H[d].s/H[d].g, real:true};
+  let X=null; try{ X=fcExplain(d); }catch(e){}
+  if(!X) return null;
+  const v1=!FC2.on||!FC2.dates.length||(S.settings&&S.settings.fc_engine==='v1');
+  const s=v1?X.v1s:X.v2s, g=v1?X.v1g:X.v2g;
+  return (s>0&&g>0)?{k:s/g, real:false}:null;
+}
+// the per-cover number the Top 20 multiplies covers by, for day d, in whichever basis is on
+function t20Model(items, d, opt){
+  const want=t20Basis(), fams=t20Fams();
+  const M={want, basis:'guests', fams, rate:{}, per:{}, why:null, R:null, C:null};
+  { const H=t20RealDays(); M.nItemDays=new Set((items||[]).map(r=>String(r.business_date)).filter(x=>H[x])).size; }   // the days the ± is measured on
+  fams.forEach(f=>{ M.rate[f.id]=Number(f.attach_rate)||0; });
+  if(want!=='sales') return M;
+  const R=t20SalesRates(items,d), C=t20Check(d, !(opt&&opt.forecast));
+  if(!R.ok){ M.why={en:`Sales needs ${T20_MIN} days of Oracle item files in the 3 weeks before — there are ${R.n}. Showing guests until then.`, es:`Ventas necesita ${T20_MIN} días de archivos de Oracle en las 3 semanas anteriores — hay ${R.n}. Mientras, se usa clientes.`}; return M; }
+  if(!C){ M.why={en:'No sales forecast for this day — showing guests.', es:'No hay pronóstico de ventas para este día — se usa clientes.'}; return M; }
+  M.basis='sales'; M.R=R; M.C=C;
+  fams.forEach(f=>{ M.per[f.id]=R.s[f.id]; M.rate[f.id]=R.s[f.id]*C.k/1000; });
+  return M;
+}
+// typical miss per family, measured on every real day: guests = the saved rate × real covers
+// (as before); sales = plates per $1,000 × real sales. Under 5 days → no ±.
+function t20Swing(items, M){
+  const H=t20RealDays(), byFam={}, sw={};
+  (items||[]).forEach(r=>{ const h=H[String(r.business_date)]; if(!h) return; (byFam[r.family_id]=byFam[r.family_id]||[]).push({u:Number(r.units)||0, c:h.g, s:h.s}); });
+  for(const f of (S.families||[])){
+    const rows=byFam[f.id]||[]; if(rows.length<5) continue;
+    const meanU=rows.reduce((a,x)=>a+x.u,0)/rows.length; if(!meanU) continue;
+    const est=x=>(M&&M.basis==='sales'&&M.per[f.id]!=null)?M.per[f.id]*x.s/1000:Number(f.attach_rate)*x.c;
+    const mae=rows.reduce((a,x)=>a+Math.abs(est(x)-x.u),0)/rows.length;
+    sw[f.id]={frac:mae/meanU, n:rows.length};
+  }
+  return sw;
+}
+// the one-line "built from" note under the card title, and the admin switch
+function t20BasisTag(M,es){
+  return M.basis==='sales'?(es?'según el pronóstico de ventas':'from the sales forecast'):(es?'según los clientes':'from the guest forecast');
+}
+function t20SwitchHtml(M){
+  if(!(can('admin.perms')&&!S.previewUser)) return '';
+  const b=M?M.want:t20Basis();
+  return `<div class="no-print" style="display:flex;gap:6px;align-items:center;flex-wrap:wrap;margin-top:8px;font-size:12px"><span class="muted">Built from · Según</span>
+    <button class="${b==='sales'?'btn-primary':'btn-ghost'} btn-sm" style="width:auto" onclick="t20BasisSet('sales')">${b==='sales'?'✓ ':''}Sales</button>
+    <button class="${b==='guests'?'btn-primary':'btn-ghost'} btn-sm" style="width:auto" onclick="t20BasisSet('guests')">${b==='guests'?'✓ ':''}Guests</button>
+    <span class="muted" style="font-size:11px">everyone's Top 20 follows this</span></div>`;
+}
+window.t20BasisSet=async(v)=>{
+  if(!guard('admin.perms')) return;
+  const next=Object.assign({},(S.settings||{}),{top20_basis:v==='guests'?'guests':'sales'});
+  const {error}=await db.from('tb_settings').update({value:next}).eq('key','app');
+  if(error){ toast('Did NOT save — '+(error.message||error)); return; }
+  S.settings=next; render();
+  toast(v==='guests'?'Top 20 is built from guests again':'Top 20 is built from sales');
+};
+// Freeze both versions for today, once, the first time the day is opened. Appended to the day's
+// tb_forecast_v2 row (notes is a list; nothing in the app reads it back except the grading card).
+async function t20Freeze(d, items){
+  try{
+    if(d!==todayLA()||S._t20Frz===d) return;
+    const r=(S.fc2rows||[]).find(x=>String(x.business_date)===d); if(!r) return;
+    if(Array.isArray(r.notes)&&r.notes.some(n=>n&&n.k==='top20')) return;
+    S._t20Frz=d;
+    const fresh=await db.from('tb_forecast_v2').select('notes').eq('business_date',d).maybeSingle();
+    if(fresh.error||!fresh.data) return;
+    const notes=Array.isArray(fresh.data.notes)?fresh.data.notes:[];
+    if(notes.some(n=>n&&n.k==='top20')){ r.notes=notes; return; }
+    const cov=guestPlan(d), C=t20Check(d), R=t20SalesRates(items,d), fams=t20Fams(), r1=v=>Math.round(v*10)/10;
+    const g={}, s={}; fams.forEach(f=>{ g[f.id]=r1((Number(f.attach_rate)||0)*cov); if(R.ok&&C) s[f.id]=r1(R.s[f.id]*C.k*cov/1000); });
+    const e={k:'top20', at:new Date().toISOString(), cov, sales:C?Math.round(C.k*cov):null, n:R.n, from:R.from||null, to:R.to||null, shown:t20Basis(), g, s:(R.ok&&C)?s:null};
+    const next=[...notes, e];
+    const q=await db.from('tb_forecast_v2').update({notes:next}).eq('business_date',d);
+    if(!q.error) r.notes=next; else S._t20Frz=null;
+  }catch(e){ S._t20Frz=null; }
+}
+// Grade the frozen days against the Oracle item files, Mon–Sun weeks. An item is "within" when
+// the week's total lands within ±15% of what sold; the all-20 miss is the 20 items added up.
+function t20Grade(items){
+  const act={}; (items||[]).forEach(r=>{ const x=String(r.business_date); (act[x]=act[x]||{})[r.family_id]=(act[x][r.family_id]||0)+(Number(r.units)||0); });
+  const W={};
+  (S.fc2rows||[]).forEach(r=>{ const x=String(r.business_date); const e=Array.isArray(r.notes)?r.notes.find(n=>n&&n.k==='top20'):null;
+    if(!e||!e.g||!e.s||!act[x]) return; const w=weekMonSun(x)[0]; (W[w]=W[w]||[]).push({d:x, e, a:act[x]}); });
+  const r1=v=>Math.abs(Math.round(v*10)/10);
+  return Object.keys(W).sort().map(w=>{ const ds=W[w].sort((p,q)=>p.d<q.d?-1:1);
+    const ids=Object.keys(ds[0].e.g).filter(id=>ds.every(o=>o.e.g[id]!=null&&o.e.s[id]!=null));
+    let Pg=0,Ps=0,A=0,hg=0,hs=0,nf=0; const it=[];
+    ids.forEach(id=>{ let pg=0,ps=0,a=0; ds.forEach(o=>{ pg+=Number(o.e.g[id]); ps+=Number(o.e.s[id]); a+=(o.a[id]||0); }); Pg+=pg; Ps+=ps; A+=a;
+      if(a>0){ nf++; const eg=(pg-a)/a*100, es=(ps-a)/a*100; if(r1(eg)<=15) hg++; if(r1(es)<=15) hs++; it.push({id,pg,ps,a,eg,es}); } });
+    return {w, n:ds.length, days:ds.map(o=>o.d), nf, hg, hs, mg:A?(Pg-A)/A*100:null, ms:A?(Ps-A)/A*100:null, it};
+  });
+}
+// The decision rule Dan was given on Oct 4, applied to the graded weeks (a week counts with 5+ days).
+function t20Verdict(G){
+  const pick=ws=>ws.map(w=>G.find(x=>x.w===w&&x.n>=5&&x.nf>0)||null);
+  const P=pick(T20_PLAN), X=pick(T20_EXTRA), done=P.filter(Boolean);
+  const pct=(L,k)=>{ const n=L.reduce((t,x)=>t+x.nf,0); return n?L.reduce((t,x)=>t+x[k],0)/n*100:null; };
+  const wp=(x,k)=>x[k]/x.nf*100;
+  const out={done:done.length, s:pct(done,'hs'), g:pct(done,'hg')};
+  if(P[0]&&P[1]&&wp(P[0],'hg')>=wp(P[0],'hs')+10&&wp(P[1],'hg')>=wp(P[1],'hs')+10&&done.length<4){
+    out.k='early-guests'; out.en='Guests beat sales by 10+ points in both of the first two weeks — the plan says switch back to guests now.'; return out; }
+  if(done.length<4){ out.k='running'; out.en=`${done.length} of 4 test weeks graded. Check-in Mon Oct 19 · decision Mon Nov 2 (after Sunday Nov 1's Oracle file lands).`; return out; }
+  const lowerS=P.filter(x=>Math.abs(x.ms)<Math.abs(x.mg)).length, lowerG=P.filter(x=>Math.abs(x.mg)<Math.abs(x.ms)).length;
+  if(out.s>=out.g&&lowerS>=3){ out.k='sales'; out.en=`Sales wins: ${Math.round(out.s)}% vs ${Math.round(out.g)}% of items within ±15%, and the smaller all-20 miss in ${lowerS} of 4 weeks. Keep sales.`; return out; }
+  if(out.g>=out.s+5&&lowerG>=3){ out.k='guests'; out.en=`Guests wins: ${Math.round(out.g)}% vs ${Math.round(out.s)}% of items within ±15%, and the smaller all-20 miss in ${lowerG} of 4 weeks. Switch to guests.`; return out; }
+  const all=[...P,...X].filter(Boolean);
+  if(X[0]&&X[1]){ const s6=pct(all,'hs'), g6=pct(all,'hg'); out.k=s6>=g6?'sales':'guests';
+    out.en=`Too close after 4 weeks, so it ran 6. Over 6 weeks: sales ${Math.round(s6)}% vs guests ${Math.round(g6)}% of items within ±15% — ${s6>=g6?'keep sales':'switch to guests'}.`; return out; }
+  out.k='close'; out.en=`Too close after 4 weeks (sales ${Math.round(out.s)}% vs guests ${Math.round(out.g)}%). The plan: keep sales and run 2 more weeks, Nov 2 – Nov 15; the higher 6-week number wins.`; return out;
+}
+// Analytics card (Dan only, like every other grade): the side-by-side test
+async function t20GradePaint(reuse){
+  const el=document.getElementById('t20g-card'); if(!el) return;
+  let items=[]; try{ items=(reuse&&S._t20It)?S._t20It:await t20Items(); S._t20It=items; }catch(e){ el.innerHTML=`<div class="card"><h2>Top 20 · sales vs guests</h2><div class="muted" style="font-size:12px">Could not read the Oracle item files — ${esc(e.message||String(e))}</div></div>`; return; }
+  const el2=document.getElementById('t20g-card'); if(!el2) return;
+  const G=t20Grade(items), V=t20Verdict(G), b=t20Basis();
+  const fam={}; (S.families||[]).forEach(f=>{ fam[f.id]=f; });
+  const frz=(S.fc2rows||[]).filter(r=>Array.isArray(r.notes)&&r.notes.some(n=>n&&n.k==='top20')).length;
+  const sg=v=>v==null?'—':`${v>0?'+':''}${Math.round(v*10)/10}%`;
+  const short=x=>dateObjLA(x).toLocaleDateString('en-US',{month:'short',day:'numeric'});
+  const open=!!(S.anaOpen&&S.anaOpen.t20);
+  const inPlan=w=>T20_PLAN.includes(w)||T20_EXTRA.includes(w);
+  const rows=G.slice().reverse().map(x=>{ const ps=Math.round(x.hs/x.nf*100), pg=Math.round(x.hg/x.nf*100);
+    return `<tr><td><b>${short(x.w)}</b><div class="muted" style="font-size:10.5px">${x.n} day${x.n===1?'':'s'}${x.n<5?' · too few':''}${inPlan(x.w)?'':' · pre-test'}</div></td>
+      <td class="num"><b>${x.hs}/${x.nf}</b> <span class="muted">${ps}%</span><div class="muted" style="font-size:10.5px">all 20 ${sg(x.ms)}</div></td>
+      <td class="num"><b>${x.hg}/${x.nf}</b> <span class="muted">${pg}%</span><div class="muted" style="font-size:10.5px">all 20 ${sg(x.mg)}</div></td></tr>`; }).join('');
+  const last=G[G.length-1];
+  const det=open&&last?`<div class="tbl-wrap" style="margin-top:8px"><div class="muted" style="font-size:11.5px;margin-bottom:4px">Week of ${short(last.w)} · each item, the week added up</div><table>
+      <tr><th>Item</th><th class="num">Sold</th><th class="num">Sales said</th><th class="num">Guests said</th></tr>
+      ${last.it.sort((p,q)=>q.a-p.a).map(i=>{ const f=fam[i.id]; const c=v=>Math.abs(Math.round(v*10)/10)<=15?'var(--palm)':'var(--danger)';
+        return `<tr><td>${esc(f?f.name:i.id)}</td><td class="num">${Math.round(i.a)}</td><td class="num">${Math.round(i.ps)} <span style="color:${c(i.es)};font-size:11px">${sg(i.es)}</span></td><td class="num">${Math.round(i.pg)} <span style="color:${c(i.eg)};font-size:11px">${sg(i.eg)}</span></td></tr>`; }).join('')}
+    </table></div>`:'';
+  el2.innerHTML=`<div class="card">
+    <h2 style="cursor:pointer" onclick="S.anaOpen=S.anaOpen||{};S.anaOpen.t20=!S.anaOpen.t20;t20GradePaint(1)">Top 20 · sales vs guests<span class="h2sub">the 4-week test · ${frz} day${frz===1?'':'s'} frozen · ${open?'tap to close':'tap for the items'}</span></h2>
+    <div style="font-size:12.5px;background:var(--sand);border-radius:8px;padding:8px 10px"><b>Now showing: ${b==='sales'?'Sales':'Guests'}.</b> ${esc(V.en)}</div>
+    ${G.length?`<div class="muted" style="font-size:11px;margin-top:8px">Items within ±15% of what sold that week · all 20 = the 20 items added up</div><div class="tbl-wrap" style="margin-top:4px"><table>
+      <tr><th>Week of</th><th class="num">Sales</th><th class="num">Guests</th></tr>${rows}
+      ${V.done?`<tr><td><b>Test so far</b></td><td class="num"><b>${Math.round(V.s)}%</b></td><td class="num"><b>${Math.round(V.g)}%</b></td></tr>`:''}
+    </table></div>${det}`
+    :`<div class="muted" style="font-size:12px;margin-top:8px">No graded days yet. Each day both versions are frozen the first time someone opens Today, and graded when that day's Oracle item file is uploaded.</div>`}
+    ${t20SwitchHtml(null)}
+    <div class="prov" style="margin-top:8px">Test: Mon Oct 5 – Sun Nov 1 (4 weeks), check-in Mon Oct 19, decision Mon Nov 2. Sales stays if it has at least the same share of items within ±15% <i>and</i> the smaller all-20 miss in 3 of the 4 weeks. Guests takes over if it is 5+ points better with the smaller all-20 miss in 3 of 4 weeks — or 10+ points better in both of the first two weeks. Anything in between: keep sales, run 2 more weeks, the higher 6-week number wins. Replay before launch (Aug 18 – Sep 30, 6 weeks): sales 71%, guests 64% (58% with the saved rates); all-20 weekly miss 6.0% vs 8.2%. Item lists only start Aug 3, so the replay is 6 weeks long.</div>
+  </div>`;
+}
+
 // ===================== Count & Prep and Ordering reports (Oct 4 2026) =====================
 // Dan, Oct 4 2026: "give reports for count/prep with waste and 86 attached to it … run the same
 // for the ordering engine … descriptive but also the option to get an excel sheet". He picked
