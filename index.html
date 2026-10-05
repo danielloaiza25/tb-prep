@@ -1516,7 +1516,7 @@ const SB_KEY='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZ
 const TBID='9f8d7c6b-5a49-4e38-b271-06d5f00dbeef'; // Tommy Bahama tenant inside ChefOpsAI
 // Stamped by publish.sh at upload time. It is the only version label there is now —
 // one address, updated in place, so this tells you which build that address is serving.
-const BUILD='Oct 4, 2026 · Top 20 in two blocks + block tracking';
+const BUILD='Oct 4, 2026 · guest forecast check by season + switch';
 // ---------- IS THIS PHONE EVEN RUNNING THE LATEST BUILD? ----------
 // Sep 3 2026. Three prep fixes shipped and Dan still saw the old behaviour, because the app
 // installs to the home screen and an installed web app does not go back and re-fetch its own
@@ -2200,6 +2200,31 @@ function fcTrend(d,key){
 function fcFallback(d,key){ const v=[]; for(let k=1;k<=6;k++){ const x=shiftDay(d,-7*k); if(fcUsable(x)) v.push(FC2.hist[x][key]/evLift(x).f); } return fcMedian(v); }
 // weekday check average, trailing 8 same weekdays, median — how sales become guests
 function fcCheckAvg(d){ const v=[]; for(let k=1;k<=8;k++){ const x=shiftDay(d,-7*k); const r=FC2.hist[x]; if(r&&!fcClosed(x)&&r.g>0) v.push(r.s/r.g); } return fcMedian(v); }
+// ---- Oct 4 2026: the check that turns forecast SALES into GUESTS ----
+// Dan, Oct 4: "how can we fix the guest part?" … "yes build the fix". fcCheckAvg (same weekday,
+// last 8 weeks) can't see the season turn: the check jumps ~10–12% from August to September
+// (2025 $46.27 → $50.95, 2026 $52.42 → $58.57), so September guests ran +7% high. This one = last
+// year's check on the same weekday within ±2 weeks of the date (median of 5) × how this year's
+// check is running against last year's over the last 28 days that both years have (same dates,
+// 364 apart; 14 pairs needed). Tested on the replayed sales, only data from before each day:
+// Aug 18 – Sep 30 guests lean +6.9% → +0.9%, week miss 7.9% → 4.2%, day miss 17.3% → 15.8%;
+// Jul 20 – Sep 30 +3.3% → +0.1%, 9.0% → 6.8%; the check itself over 2026 (266 days) 7.3% → 6.9%
+// average miss, lean −0.9% → 0.0%. Only the guest conversion uses it — v1's sales side (v1s) keeps
+// fcCheckAvg, so the sales forecast does not move. Missing last year → null → the old check.
+// Switch: S.settings.guest_check ('recent' = the old check); unset = this one.
+function fcCheckSeason(d){
+  const m=FC2.memo||(FC2.memo={}); const key='k'+d; if(m[key]!==undefined) return m[key];
+  const okc=x=>{ const r=FC2.hist[x]; return !!r&&!fcClosed(x)&&r.g>0&&r.s>0; };
+  const ly=shiftDay(d,-364), v=[];
+  for(const j of [-2,-1,0,1,2]){ const x=shiftDay(ly,7*j); if(okc(x)) v.push(FC2.hist[x].s/FC2.hist[x].g); }
+  v.sort((a,b)=>a-b); const a=v.length?(v.length%2?v[v.length>>1]:(v[v.length/2-1]+v[v.length/2])/2):null;
+  const T=todayLA(), anc=d<T?d:T; let s1=0,g1=0,s0=0,g0=0,n=0;
+  for(let i=1;i<=28;i++){ const x=shiftDay(anc,-i), y=shiftDay(x,-364); if(!okc(x)||!okc(y)) continue;
+    s1+=FC2.hist[x].s; g1+=FC2.hist[x].g; s0+=FC2.hist[y].s; g0+=FC2.hist[y].g; n++; }
+  const out=(a&&n>=14&&g1>0&&g0>0&&s0>0)?a*(s1/g1)/(s0/g0):null;
+  m[key]=out; return out;
+}
+function fcGuestCheckHow(){ return ((S.settings||{}).guest_check==='recent')?'recent':'season'; }
 // ---- v2.1 self-correction (Sep 23 2026) ----
 // What the finished blend got wrong on the last 28 real, non-holiday days, recomputed the way
 // it would have been that morning (every input looks backward only). Decay 0.7, shrink +8,
@@ -2274,9 +2299,12 @@ function fcExplain(d){
   const P=fcParts(d); const resid=P.raw?fcResid(d):1;
   const WX=P.raw?fcWx(d):{f:1,parts:[]};
   const v2s=P.raw?P.raw*resid*WX.f:null;
-  const v2g=(v2s&&P.chk)?Math.max(1,Math.round(v2s/P.chk)):P.v1g;
+  // Oct 4 2026: guests = sales ÷ the check by season (fcCheckSeason); 'recent' on the switch = the old one
+  const chkR=P.chk, chkS=fcCheckSeason(d), gHow=(fcGuestCheckHow()==='season'&&chkS)?'season':'recent', gchk=gHow==='season'?chkS:chkR;
+  const v2g=(v2s&&gchk)?Math.max(1,Math.round(v2s/gchk)):P.v1g;
+  const v2gR=(v2s&&chkR)?Math.max(1,Math.round(v2s/chkR)):P.v1g, v2gS=(v2s&&chkS)?Math.max(1,Math.round(v2s/chkS)):null;
   const band=v2s?fcBand(d,v2s):null;
-  return {d, hol:P.hol?P.hol.name:null, ev:P.ev, v1g:P.v1g, v1s:P.v1s?Math.round(P.v1s):null, chk:P.chk, ly:P.ly?{s:Math.round(P.ly.v),date:P.ly.date,how:P.ly.how}:null, lyBase:P.lyBase?Math.round(P.lyBase):null, trend:Math.round(P.trend*1000)/1000, resid:Math.round(resid*1000)/1000, wx:Math.round(WX.f*1000)/1000, wxParts:WX.parts, wxT:WX.t, lySide:P.lySide?Math.round(P.lySide):null, v2s:v2s?Math.round(v2s):null, v2g, mode:P.mode, src:P.src, band, engine:'v2.2'};
+  return {d, hol:P.hol?P.hol.name:null, ev:P.ev, v1g:P.v1g, v1s:P.v1s?Math.round(P.v1s):null, chk:gchk, chkR, chkS, gHow, v2gR, v2gS, ly:P.ly?{s:Math.round(P.ly.v),date:P.ly.date,how:P.ly.how}:null, lyBase:P.lyBase?Math.round(P.lyBase):null, trend:Math.round(P.trend*1000)/1000, resid:Math.round(resid*1000)/1000, wx:Math.round(WX.f*1000)/1000, wxParts:WX.parts, wxT:WX.t, lySide:P.lySide?Math.round(P.lySide):null, v2s:v2s?Math.round(v2s):null, v2g, mode:P.mode, src:P.src, band, engine:'v2.2'};
 }
 // ---- the watchdog: three morning rules, shown as a confidence note, never an alarm ----
 function fcWatch(d,X){
@@ -2305,7 +2333,8 @@ async function fcLogShown(d){
     if((S.fc2rows||[]).some(r=>String(r.business_date)===d)) return;
     const X=fcExplain(d); const notes=fcWatch(d,X);
     const row={business_date:d, v1_g:X.v1g, v2_g:X.v2g, v1_s:X.v1s, v2_s:X.v2s, ly_s:X.ly?X.ly.s:null, ly_date:X.ly?X.ly.date:null, ly_how:X.ly?X.ly.how:X.src,
-      trend:X.trend, ev:X.ev, resid:X.resid, holiday:X.hol, engine:'v2.2 '+X.mode, notes:[...notes.map(n=>({k:n.k,en:n.en})), ...(X.band?[{k:'band',lo:X.band.lo,hi:X.band.hi}]:[])]};
+      trend:X.trend, ev:X.ev, resid:X.resid, holiday:X.hol, engine:'v2.2 '+X.mode, notes:[...notes.map(n=>({k:n.k,en:n.en})), ...(X.band?[{k:'band',lo:X.band.lo,hi:X.band.hi}]:[]),
+      {k:'gchk', how:X.gHow, r:{chk:X.chkR?Math.round(X.chkR*100)/100:null, g:X.v2gR}, s:X.chkS?{chk:Math.round(X.chkS*100)/100, g:X.v2gS}:null}]};
     const q=await db.from('tb_forecast_v2').upsert(row,{onConflict:'business_date',ignoreDuplicates:true}).select('*');
     if(!q.error&&q.data&&q.data.length){ S.fc2rows=[q.data[0],...(S.fc2rows||[])]; }
     else if(!q.error){ S.fc2rows=[row,...(S.fc2rows||[])]; }
@@ -7472,7 +7501,7 @@ function todayAlertsHtml(d){
 function yearBarsHtml(avgCheck){
   const T=todayLA(), es=isES(), Y=Number(T.slice(0,4)), cm=Number(T.slice(5,7));
   const mk=(y,m)=>`${y}-${String(m).padStart(2,'0')}`;
-  const key=T+'|'+FC2.dates.length+'|'+((S.settings||{}).fc_engine||'')+'|'+(S.wx&&S.wx.loaded?1:0);
+  const key=T+'|'+FC2.dates.length+'|'+((S.settings||{}).fc_engine||'')+((S.settings||{}).guest_check||'')+'|'+(S.wx&&S.wx.loaded?1:0);
   let D=(S._t2yr&&S._t2yr.key===key)?S._t2yr.D:null;
   if(!D){
     const b={}; FC2.dates.forEach(d=>{ if(d>=T||fcClosed(d)) return; const k=d.slice(0,7); (b[k]=b[k]||{s:0,n:0}); b[k].s+=FC2.hist[d].g; b[k].n++; });
@@ -7529,7 +7558,7 @@ function t2Wx(x){
 function yearSalesHtml(){
   const T=todayLA(), es=isES(), Y=Number(T.slice(0,4)), cm=Number(T.slice(5,7));
   const mk=(y,m)=>`${y}-${String(m).padStart(2,'0')}`;
-  const key='$|'+T+'|'+FC2.dates.length+'|'+((S.settings||{}).fc_engine||'')+'|'+(S.wx&&S.wx.loaded?1:0);
+  const key='$|'+T+'|'+FC2.dates.length+'|'+((S.settings||{}).fc_engine||'')+((S.settings||{}).guest_check||'')+'|'+(S.wx&&S.wx.loaded?1:0);
   let D=(S._t2ys&&S._t2ys.key===key)?S._t2ys.D:null;
   if(!D){
     const b={}; FC2.dates.forEach(x=>{ if(x>=T||fcClosed(x)) return; const k=x.slice(0,7); (b[k]=b[k]||{s:0,n:0}); b[k].s+=FC2.hist[x].s; b[k].n++; });
@@ -12053,6 +12082,38 @@ window.openWeekReport=(weekEnd)=>{
 window.closeWeekReport=()=>{ S.weekReport={open:false, weekEnd:null, F:null, isCurrent:false}; render(); };
 
 
+// ---------- Oct 4 2026: guests from sales, the two checks side by side ----------
+function fcGchkStats(){
+  const rows=(S.fc2rows||[]).filter(r=>Number(r.actual_g)>0&&Array.isArray(r.notes)&&r.notes.some(n=>n&&n.k==='gchk'));
+  const one=k=>{ const e=[], W={};
+    rows.forEach(r=>{ const n=r.notes.find(x=>x&&x.k==='gchk'), g=n&&n[k]&&Number(n[k].g); if(!(g>0)) return; const a=Number(r.actual_g);
+      e.push((g-a)/a*100); const w=weekMonSun(String(r.business_date))[0], o=(W[w]=W[w]||{f:0,a:0,n:0}); o.f+=g; o.a+=a; o.n++; });
+    if(!e.length) return null; const we=Object.values(W).filter(o=>o.n>=5).map(o=>Math.abs(o.f-o.a)/o.a*100), r1=v=>Math.round(v*10)/10;
+    return {n:e.length, miss:r1(e.reduce((t,x)=>t+Math.abs(x),0)/e.length), lean:r1(e.reduce((t,x)=>t+x,0)/e.length), w15:Math.round(100*e.filter(x=>Math.abs(x)<=15).length/e.length), wk:we.length?r1(we.reduce((t,x)=>t+x,0)/we.length):null, wn:we.length}; };
+  return {n:rows.length, s:one('s'), r:one('r')};
+}
+function gchkCardHtml(){
+  const G=fcGchkStats(), how=fcGuestCheckHow(), f=(o,k)=>o&&o[k]!=null?`${k==='lean'&&o[k]>0?'+':''}${o[k]}%`:'—';
+  const sw=(can('admin.perms')&&!S.previewUser)?`<div class="no-print" style="display:flex;gap:6px;align-items:center;flex-wrap:wrap;margin-top:8px;font-size:12px"><span class="muted">Guests use</span>
+    <button class="${how==='season'?'btn-primary':'btn-ghost'} btn-sm" style="width:auto" onclick="gchkSet('season')">${how==='season'?'✓ ':''}Check by season</button>
+    <button class="${how==='recent'?'btn-primary':'btn-ghost'} btn-sm" style="width:auto" onclick="gchkSet('recent')">${how==='recent'?'✓ ':''}Last 8 weeks</button></div>`:'';
+  return `<h3 style="margin:14px 0 4px">Guests from sales · which check</h3>
+    ${G.n?`<div class="tbl-wrap"><table><tr><th></th><th class="num">avg miss</th><th class="num">within ±15%</th><th class="num">lean</th><th class="num">week miss</th></tr>
+      <tr><td>${how==='season'?'<b>By season (new)</b>':'By season (new)'}</td><td class="num">${f(G.s,'miss')}</td><td class="num">${f(G.s,'w15')}</td><td class="num">${f(G.s,'lean')}</td><td class="num">${f(G.s,'wk')}</td></tr>
+      <tr><td>${how==='recent'?'<b>Last 8 weeks (old)</b>':'Last 8 weeks (old)'}</td><td class="num">${f(G.r,'miss')}</td><td class="num">${f(G.r,'w15')}</td><td class="num">${f(G.r,'lean')}</td><td class="num">${f(G.r,'wk')}</td></tr>
+    </table></div><div class="muted" style="font-size:11px;margin-top:2px">${G.n} graded day${G.n===1?'':'s'}${G.s&&G.s.wn?` · ${G.s.wn} full week${G.s.wn===1?'':'s'}`:''}.</div>`
+    :`<div class="muted" style="font-size:12px">Both guest numbers are saved with each morning's forecast from Oct 4 on, and graded when the day's Oracle file lands.</div>`}
+    ${sw}
+    <div class="prov" style="margin-top:6px">Guests = forecast sales ÷ an average check. The old check (same weekday, last 8 weeks) can't see the season turn — the check jumps 10–12% from August to September — so September guests ran +7% high. The new one is last year's check for that weekday and time of year × how this year's check is running against last year's. Replay (only data from before each day): Aug 18 – Sep 30 lean +6.9% → +0.9%, week miss 7.9% → 4.2%, day miss 17.3% → 15.8%; Jul 20 – Sep 30 lean +3.3% → +0.1%, week miss 9.0% → 6.8%. The sales forecast is not touched.</div>`;
+}
+window.gchkSet=async(v)=>{
+  if(!guard('admin.perms')) return;
+  const next=Object.assign({},(S.settings||{}),{guest_check:v==='recent'?'recent':'season'});
+  const {error}=await db.from('tb_settings').update({value:next}).eq('key','app');
+  if(error){ toast('Did NOT save — '+(error.message||error)); return; }
+  S.settings=next; S._fcSpan=null; render();
+  toast(v==='recent'?'Guests use the last-8-weeks check again':'Guests use the check by season');
+};
 // ---------- v1 vs v2 live ledger + timing card (Analytics) ----------
 function fcLedgerCardHtml(){
   const L=fcLedgerStats(28); const money=can('analytics.money');
@@ -12073,6 +12134,7 @@ function fcLedgerCardHtml(){
     </table></div>`:''}
     <div class="prov" style="margin-top:8px">Both engines are frozen the morning each day is first opened and graded when its Oracle file lands. The app plans on v2; v1 keeps running for the comparison. Replay before launch (363 days): v1 18.0% → v2 15.3% average miss on sales. v2.1 (Sep 23): holiday double-count fixed, trend reacts faster, self-correction on its own misses, likely range shown — 2026 replay 16.2% → 15.0%, holidays 25% → 17%, days within 20%: 69% → 75%.</div>`
     :`<div class="muted" style="font-size:12px">No graded days yet. The first row lands the morning after the next Oracle upload.</div>`}
+    ${gchkCardHtml()}
   </div>`;
 }
 const TIMING_DAYS=14;
