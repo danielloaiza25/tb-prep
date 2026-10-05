@@ -1401,6 +1401,23 @@
   .t20-bt td{padding:5px 3px;border-bottom:1px solid var(--sand-dark,#e7dac4);vertical-align:top}
   .t20-bt .n{text-align:right;white-space:nowrap;font-variant-numeric:tabular-nums}
   .t20-bs{display:block;font-size:10.5px;color:var(--muted);font-weight:400}
+  .t20-tabs{display:grid;grid-template-columns:1fr 1fr;gap:6px;margin:10px 0 8px}
+  .t20-tab{display:flex;flex-direction:column;align-items:flex-start;justify-content:center;gap:1px;border:1.5px solid var(--line);border-radius:12px;padding:7px 10px;background:#fff;text-align:left;min-height:0;width:auto;box-shadow:none;cursor:pointer;color:var(--muted)}
+  .t20-tab b{display:block;font-size:13px}.t20-tab small{font-size:11px;font-weight:600}
+  .t20-tab.slow.on{background:var(--lagoon,#12666d);border-color:var(--lagoon,#12666d);color:#fff}.t20-tab.busy.on{background:#d9734e;border-color:#d9734e;color:#fff}
+  .t20-tk{border-radius:14px;overflow:hidden;margin-bottom:8px}.t20-tk.slow{border:1px solid #bcdcdf}.t20-tk.busy{border:1px solid #f0c7b3}
+  .t20-tkh{display:flex;align-items:center;justify-content:space-between;color:#fff;padding:10px 14px}.t20-tk.slow .t20-tkh{background:var(--lagoon,#12666d)}.t20-tk.busy .t20-tkh{background:#d9734e}
+  .t20-tkh small{display:block;font-size:10px;font-weight:800;letter-spacing:.9px;opacity:.9}.t20-tkh b{display:block;font-size:21px;line-height:1.15}.t20-tkh i{display:block;font-style:normal;font-size:12px;opacity:.9}.t20-tkh .ar{font-size:22px;opacity:.85}
+  .t20-tkb{display:grid;grid-template-columns:repeat(4,1fr)}.t20-tk.slow .t20-tkb{background:#e3f0f1}.t20-tk.busy .t20-tkb{background:#fbe9e0}
+  .t20-tkb span{text-align:center;font-size:11.5px;color:var(--muted);padding:6px 2px;border-right:1px dashed rgba(0,0,0,.14)}.t20-tkb span:last-child{border-right:0}
+  .t20-tkb b{display:block;color:var(--ocean,#0b4a4f);font-size:12px}.t20-tkb span.in b{color:var(--palm)}
+  .t20-tiles{display:grid;gap:6px;margin-bottom:6px}.t20-tiles div{background:var(--sand);border-radius:12px;padding:7px 10px}.t20-tiles b{display:block;font-size:18px;color:var(--ocean,#0b4a4f);white-space:nowrap}.t20-tiles small{font-size:11px;color:var(--muted)}
+  .t20-br{border-bottom:1px solid var(--sand-dark,#e7dac4);padding:8px 0}
+  .t20-brt{display:flex;justify-content:space-between;align-items:baseline;gap:8px}.t20-brt span{font-weight:700;font-size:14px}.t20-brt b{font-size:21px;color:var(--ocean,#0b4a4f);font-variant-numeric:tabular-nums;white-space:nowrap}
+  .t20-brs{display:flex;gap:10px;flex-wrap:wrap;font-size:11.5px;color:var(--muted)}.t20-brs i{font-style:normal}
+  .t20-hs{display:flex;gap:3px;margin-top:6px}.t20-hc{flex:1;min-width:0;border-radius:7px;text-align:center;padding:3px 1px}
+  .t20-hc small{display:block;font-size:9.5px;opacity:.85;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.t20-hc b{font-size:12.5px;font-variant-numeric:tabular-nums;white-space:nowrap}
+  .t20-hc.rg b{font-size:10px;letter-spacing:-.3px}.t20-hc.off{opacity:.8}.t20-hc.in{box-shadow:inset 0 0 0 1.5px var(--palm)}.t20-hsep{width:3px;background:#1f2e2c;opacity:.45;border-radius:2px;margin:0 2px;flex:none}
   /* ---- team layout (Oct 3 2026): Today · Lists · Orders · Recipes · More for everyone but admin ---- */
   .tm-quick{display:grid;grid-template-columns:repeat(auto-fit,minmax(90px,1fr));gap:8px;margin:0 0 12px}
   .tm-quick button{background:var(--white);border:1px solid var(--line);border-radius:14px;padding:10px 4px;font-weight:800;font-size:13px;color:var(--ocean-dark);display:flex;flex-direction:column;align-items:center;gap:3px;cursor:pointer}
@@ -1516,7 +1533,7 @@ const SB_KEY='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZ
 const TBID='9f8d7c6b-5a49-4e38-b271-06d5f00dbeef'; // Tommy Bahama tenant inside ChefOpsAI
 // Stamped by publish.sh at upload time. It is the only version label there is now —
 // one address, updated in place, so this tells you which build that address is serving.
-const BUILD='Oct 4, 2026 · guest forecast check by season + switch';
+const BUILD='Oct 4, 2026 · Blocks view redesign + guest check by season';
 // ---------- IS THIS PHONE EVEN RUNNING THE LATEST BUILD? ----------
 // Sep 3 2026. Three prep fixes shipped and Dan still saw the old behaviour, because the app
 // installs to the home screen and an installed web app does not go back and re-fetch its own
@@ -7964,6 +7981,7 @@ async function viewToday(){
   const swing=t20Swing(swIq.data||[], t20);
   S.t20Rt=t20SalesRates(swIq.data||[], todayLA());     // the $15k alert's plates use today's rates
   S._t20Items=swIq.data||[];
+  if(S.t20View==null){ try{ S.t20View=localStorage.getItem('tb_t20_view')==='blk'?'blk':'day'; }catch(e){ S.t20View='day'; } }
   if(S.t20View==='blk') await t20SunLoad().catch(()=>null);   // Sunday's 4pm cut, for the Blocks view
   if(d===todayLA()) t20Freeze(d, swIq.data||[]);       // both versions, frozen once, for the test (+ the block on Thu / Sun)
   const lateClose=['Thursday','Friday','Saturday'].includes(weekdayOf(d));
@@ -16981,40 +16999,103 @@ function t20SunAvg(fid){ const Z=S._t20Sun; if(!Z) return 0.5; const v=Z.share[f
 function t20SunAct(fid,d){ const Z=S._t20Sun; if(Z&&Z.day[d]){ const x=Z.day[d][fid]; return {v:(x&&x[1]>0)?x[0]/x[1]:t20SunAvg(fid), est:false}; } return {v:t20SunAvg(fid), est:true}; }
 // one block, per Top 20 item, in the basis asked for
 function t20Block(items, B, basis){
-  const P=t20BlockParts(B.half,B.start), H=t20RealDays(), fams=t20Fams(), ds=new Set(P.map(p=>p.d)), act={};
+  const P=t20BlockParts(B.half,B.start), H=t20RealDays(), fams=t20Fams(), ds=new Set(P.map(p=>p.d)), act={}, Z=S._t20Sun;
   (items||[]).forEach(r=>{ const x=String(r.business_date); if(!ds.has(x)) return; (act[x]=act[x]||{})[r.family_id]=(act[x][r.family_id]||0)+(Number(r.units)||0); });
-  const X={B, basis, sold:{}, fc:{}, pt:{}, lo:{}, hi:{}, kf:0, real:0, estSun:false, why:null};
+  const X={B, basis, sold:{}, fc:{}, pt:{}, lo:{}, hi:{}, kf:0, real:0, estSun:false, why:null, days:[], cov:0, covF:0, sales:0, salesF:0};
   fams.forEach(f=>{ X.sold[f.id]=0; X.fc[f.id]=0; });
+  const allPm=(Z&&Z.n)?Z.all:0.5;      // covers and sales have no hourly split of their own: Sunday's sales share after 4pm
   P.forEach(p=>{
-    if(act[p.d]&&H[p.d]){ X.real++;
-      fams.forEach(f=>{ let u=act[p.d][f.id]||0; if(p.p!=='all'){ const s=t20SunAct(f.id,p.d); if(s.est) X.estSun=true; u*=p.p==='post'?s.v:(1-s.v); } X.sold[f.id]+=u; });
-      return; }
+    const part=p.p==='all'?1:(p.p==='post'?allPm:1-allPm), D={d:p.d, p:p.p, real:false, u:{}, lo:{}, hi:{}};
+    if(act[p.d]&&H[p.d]){ X.real++; D.real=true;
+      fams.forEach(f=>{ let u=act[p.d][f.id]||0; if(p.p!=='all'){ const s=t20SunAct(f.id,p.d); if(s.est) X.estSun=true; u*=p.p==='post'?s.v:(1-s.v); } X.sold[f.id]+=u; D.u[f.id]=u; D.lo[f.id]=u; D.hi[f.id]=u; });
+      X.cov+=H[p.d].g*part; X.sales+=H[p.d].s*part; X.days.push(D); return; }
     const M=t20Model(items,p.d,{forecast:true, basis}); if(M.why&&!X.why) X.why=M.why;
     const cov=guestPlan(p.d); X.kf+=p.p==='all'?1:0.5;
-    fams.forEach(f=>{ let u=(M.rate[f.id]||0)*cov; if(p.p!=='all'){ const s=t20SunAvg(f.id); u*=p.p==='post'?s:(1-s); } X.fc[f.id]+=u; });
+    let R1=null, Xe=null; try{ R1=dayRange(p.d); }catch(e){} try{ Xe=fcExplain(p.d); }catch(e){}
+    const kl=(R1&&R1.g)?R1.lo/R1.g:1, kh=(R1&&R1.g)?R1.hi/R1.g:1;
+    X.covF+=cov*part; if(Xe&&Xe.v2s&&Xe.v2g) X.salesF+=Xe.v2s*(cov/Xe.v2g)*part;
+    fams.forEach(f=>{ let u=(M.rate[f.id]||0)*cov; if(p.p!=='all'){ const s=t20SunAvg(f.id); u*=p.p==='post'?s:(1-s); } X.fc[f.id]+=u; D.u[f.id]=u; D.lo[f.id]=u*kl; D.hi[f.id]=u*kh; });
+    X.days.push(D);
   });
   const sp=X.kf?fcSpan(Math.max(1,Math.round(X.kf))):{lo:1,hi:1};
   fams.forEach(f=>{ const s=X.sold[f.id], c=X.fc[f.id]; X.pt[f.id]=s+c; X.lo[f.id]=s+c*sp.lo; X.hi[f.id]=s+c*sp.hi; });
+  X.covPt=X.cov+X.covF; X.covLo=X.cov+X.covF*sp.lo; X.covHi=X.cov+X.covF*sp.hi; X.salesPt=X.sales+X.salesF;
   return X;
 }
+// Each item's average miss on each side of the week over the last completed weeks (up to 8): the
+// forecast re-run for each of those days (it only looks at data from before the day), the same way
+// the block is built, against the Oracle item files. Same method as the Oct 4 replay. Cached.
+function t20BlockMiss(items, basis){
+  const T=todayLA(), key=basis+'|'+(items||[]).length+'|'+T; S._t20Miss=S._t20Miss||{}; if(S._t20Miss[key]) return S._t20Miss[key];
+  const H=t20RealDays(), fams=t20Fams(), act={};
+  (items||[]).forEach(r=>{ const x=String(r.business_date); (act[x]=act[x]||{})[r.family_id]=(act[x][r.family_id]||0)+(Number(r.units)||0); });
+  const acc={busy:{}, slow:{}}; let n=0, from=null, to=null;
+  let thu=dynAdd(T,-7); while(dynWd(thu)!==4) thu=dynAdd(thu,-1);
+  for(let k=0;k<12&&n<8;k++){
+    const st=dynAdd(thu,-7*k), all=[0,1,2,3,4,5,6].map(i=>dynAdd(st,i));
+    if(!all.every(x=>act[x]&&H[x])) continue;
+    const F={busy:{},slow:{}}, A={busy:{},slow:{}}; let ok=true;
+    for(const half of ['busy','slow']){
+      for(const p of t20BlockParts(half, half==='busy'?st:dynAdd(st,3))){
+        const M=t20Model(items,p.d,{forecast:true, basis}); if(basis==='sales'&&M.basis!=='sales'){ ok=false; break; }
+        const cov=guestPlan(p.d);
+        fams.forEach(f=>{ let u=(M.rate[f.id]||0)*cov, a=act[p.d][f.id]||0;
+          if(p.p!=='all'){ const s=t20SunAvg(f.id), sa=t20SunAct(f.id,p.d).v; u*=p.p==='post'?s:(1-s); a*=p.p==='post'?sa:(1-sa); }
+          F[half][f.id]=(F[half][f.id]||0)+u; A[half][f.id]=(A[half][f.id]||0)+a; });
+      }
+      if(!ok) break;
+    }
+    if(!ok) continue;
+    n++; from=st; if(!to) to=dynAdd(st,6);
+    ['busy','slow'].forEach(h=>fams.forEach(f=>{ const o=(acc[h][f.id]=acc[h][f.id]||{e:0,a:0}); o.e+=Math.abs(F[h][f.id]-A[h][f.id]); o.a+=A[h][f.id]; }));
+  }
+  const out={busy:{}, slow:{}, n, from, to};
+  ['busy','slow'].forEach(h=>Object.keys(acc[h]).forEach(id=>{ const o=acc[h][id]; if(o.a>0) out[h][id]=o.e/o.a*100; }));
+  S._t20Miss[key]=out; return out;
+}
 function t20SegHtml(es){ const v=S.t20View==='blk'?'blk':'day';
-  return `<div class="t20-seg no-print"><button class="${v==='day'?'on':''}" onclick="S.t20View='day';render()">${es?'Día':'Day'}</button><button class="${v==='blk'?'on':''}" onclick="S.t20View='blk';render()">${es?'Bloques':'Blocks'}</button></div>`; }
-// the Top 20 card's Blocks view: the block under way and the next one
+  const go=x=>`S.t20View='${x}';try{localStorage.setItem('tb_t20_view','${x}')}catch(e){};render()`;
+  return `<div class="t20-seg no-print"><button class="${v==='day'?'on':''}" onclick="${go('day')}">${es?'Día':'Day'}</button><button class="${v==='blk'?'on':''}" onclick="${go('blk')}">${es?'Bloques':'Blocks'}</button></div>`; }
+// The Top 20 card's Blocks view (Dan, Oct 4: "i want it to look like these 2 added together" —
+// mockup C2's STARTS / ENDS ticket + C+D's day strip). Tabs: the block under way and the next one.
+// Each item: the block's plates, its likely range, its measured miss on that side of the week, and
+// a strip of the days — the picked block lit, a divider, the other block faded.
 function t20BlocksHtml(items, d, es, exact){
   const fams=t20Fams(); if(!fams.length) return '';
-  const BB=t20BlocksFor(d).map(B=>t20Block(items,B,t20Basis()));
-  const r=v=>Math.max(0,Math.round(v));
-  const cell=(X,f)=>{
-    const main=(exact||!X.kf)?`${r(X.pt[f.id])}`:`${r(X.lo[f.id])}–${r(X.hi[f.id])}`;
-    const sub=X.real&&X.kf?`${es?'vendidos':'sold'} ${r(X.sold[f.id])} + ~${r(X.fc[f.id])}`:(!X.kf?(es?'real':'all sold'):(exact?`${r(X.lo[f.id])}–${r(X.hi[f.id])}`:''));
-    return `<td class="n"><b>${main}</b>${sub?`<span class="t20-bs">${sub}</span>`:''}</td>`; };
-  const Z=S._t20Sun, est=BB.some(X=>X.estSun);
-  return `<table class="t20-bt"><colgroup><col style="width:42%"><col style="width:29%"><col style="width:29%"></colgroup><tr><th></th>${BB.map(X=>`<th class="n">${t20BlockHead(X.B,es)}</th>`).join('')}</tr>
-    ${fams.map(f=>`<tr><td>${esc(t2Fam(f,es))}</td>${BB.map(X=>cell(X,f)).join('')}</tr>`).join('')}</table>
-    ${BB.some(X=>X.why)?`<div class="muted" style="font-size:11px;margin-top:4px">${esc(es?BB.find(X=>X.why).why.es:BB.find(X=>X.why).why.en)}</div>`:''}
-    <div class="muted" style="font-size:11px;margin-top:6px">${es
-      ?`Un bloque es la suma de sus días: <b>fuerte</b> = jueves → domingo 4pm, <b>flojo</b> = domingo 4pm → miércoles. Los días que ya subieron de Oracle cuentan como vendidos; el resto es el pronóstico. El domingo se corta a las 4pm con el patrón de domingo de cada platillo${Z&&Z.n?` (${Z.n} domingos del archivo por hora de Oracle)`:' (sin archivo por hora: 50/50)'}. En 6 semanas un bloque falló 15% en promedio; un día solo, 27%.`
-      :`A block is its days added up: <b>busy</b> = Thursday → Sunday 4pm, <b>slow</b> = Sunday 4pm → Wednesday. Days already uploaded from Oracle count as sold; the rest is the forecast. Sunday is cut at 4pm by each item's own Sunday pattern${Z&&Z.n?` (${Z.n} Sundays of Oracle's hourly item file)`:' (no hourly file yet: 50/50)'}. Over 6 weeks a block missed by 15% on average; a single day, 27%.`}${est?(es?' El corte del domingo pasado es estimado — no hay archivo por hora de ese domingo.':' Last Sunday’s cut is estimated — there is no hourly file for that Sunday.'):''}</div>`;
+  const basis=t20Basis(), BB=t20BlocksFor(d).map(B=>t20Block(items,B,basis)), sel=S.t20Blk===1?1:0, X=BB[sel], T=todayLA(), money=can('analytics.money');   // forecast sales: same gate as the sales forecast on Today
+  let MS={busy:{},slow:{},n:0}; try{ MS=t20BlockMiss(items,basis); }catch(e){}
+  const r=v=>Math.max(0,Math.round(v)), md=x=>dateObjLA(x).toLocaleDateString(es?'es-US':'en-US',{month:'short',day:'numeric'});
+  const wd=x=>dateObjLA(x).toLocaleDateString(es?'es-US':'en-US',{weekday:'short'}).replace('.','');
+  const nm=h=>h==='busy'?(es?'Fuerte':'Busy'):(es?'Flojo':'Slow');
+  const span=h=>h==='busy'?(es?'jue → dom 4pm':'Thu → Sun 4pm'):(es?'dom 4pm → mié':'Sun 4pm → Wed');
+  const tabs=`<div class="t20-tabs no-print">${BB.map((Y,i)=>`<button class="t20-tab ${Y.B.half}${i===sel?' on':''}" onclick="S.t20Blk=${i};render()"><b>${i===0?(d===T?(es?'Ahora':'Now'):(es?'Este':'This')):(es?'Siguiente':'Next')} · ${nm(Y.B.half)}</b><small>${span(Y.B.half)}</small></button>`).join('')}</div>`;
+  const P=t20BlockParts(X.B.half,X.B.start), busy=X.B.half==='busy';
+  const st=busy?(es?'Jue apertura':'Thu open'):(es?'Dom 4 pm':'Sun 4 pm'), en=busy?(es?'Dom 4 pm':'Sun 4 pm'):(es?'Mié cierre':'Wed close');
+  const part=D=>D.p==='all'?(es?'todo el día':'all day'):(D.p==='post'?(es?'4pm–cierre':'4pm–close'):(es?'apertura–4pm':'open–4pm'));
+  const ticket=`<div class="t20-tk ${X.B.half}"><div class="t20-tkh"><div><small>${es?'EMPIEZA':'STARTS'}</small><b>${st}</b><i>${md(P[0].d)}</i></div><div class="ar">→</div><div><small>${es?'TERMINA':'ENDS'}</small><b>${en}</b><i>${md(P[3].d)}</i></div></div>
+    <div class="t20-tkb">${X.days.map(D=>`<span class="${D.real?'in':''}">${wd(D.d)}<b>${D.real?'✓ '+(es?'subido':'uploaded'):part(D)}</b></span>`).join('')}</div></div>`;
+  const tl=[`<div><b>${exact?r(X.covPt):`${r(X.covLo)}–${r(X.covHi)}`}</b><small>${es?'cubiertos':'covers'}</small></div>`];
+  if(money&&X.salesPt>0) tl.push(`<div><b>$${(X.salesPt/1000).toFixed(1)}k</b><small>${es?'ventas':'sales'}</small></div>`);
+  tl.push(`<div><b>${X.real} ${es?'de':'of'} 4</b><small>${es?'días subidos':'days uploaded'}</small></div>`);
+  const tiles=`<div class="t20-tiles" style="grid-template-columns:repeat(${tl.length},1fr)">${tl.join('')}</div>`;
+  let vmax=0; BB.forEach(Y=>Y.days.forEach(D=>fams.forEach(f=>{ vmax=Math.max(vmax,D.u[f.id]||0); }))); vmax=vmax||1;
+  const lab=D=>wd(D.d)+(D.p==='post'?' 4+':(D.p==='pre'?'<4':''));
+  const cell=(Y,D,f,lit)=>{ const v=D.u[f.id]||0, a=Math.min(1,v/vmax), c=Y.B.half==='busy'?'217,115,78':'18,102,109';
+    const bg=`rgba(${c},${lit?(0.18+a*0.72).toFixed(2):(0.08+a*0.26).toFixed(2)})`, dark=lit&&a>0.45;
+    const val=(exact||D.real)?`${r(v)}`:`${r(D.lo[f.id])}–${r(D.hi[f.id])}`;
+    return `<div class="t20-hc${lit?'':' off'}${D.real?' in':''}${(exact||D.real)?'':' rg'}" style="background:${bg};color:${dark?'#fff':'#1f2e2c'}"><small>${lab(D)}</small><b>${val}</b></div>`; };
+  const rows=fams.map(f=>{ const m=MS[X.B.half]&&MS[X.B.half][f.id];
+    const sub=[]; if(exact&&X.kf) sub.push(`${es?'probable':'likely'} ${r(X.lo[f.id])}–${r(X.hi[f.id])}`);
+    if(X.real&&X.kf) sub.push(`${es?'vendidos':'sold'} ${r(X.sold[f.id])} + ~${r(X.fc[f.id])}`);
+    if(m!=null) sub.push(es?`falla ±${r(m)}% en promedio`:`misses ±${r(m)}% on average`);
+    return `<div class="t20-br"><div class="t20-brt"><span>${esc(t2Fam(f,es))}</span><b>${(exact||!X.kf)?r(X.pt[f.id]):`${r(X.lo[f.id])}–${r(X.hi[f.id])}`}</b></div>
+      ${sub.length?`<div class="t20-brs">${sub.map(x=>`<i>${x}</i>`).join('')}</div>`:''}
+      <div class="t20-hs">${BB.map((Y,i)=>Y.days.map(D=>cell(Y,D,f,i===sel)).join('')).join('<div class="t20-hsep"></div>')}</div></div>`; }).join('');
+  const Z=S._t20Sun, est=BB.some(Y=>Y.estSun), why=BB.find(Y=>Y.why);
+  return `${tabs}${ticket}${tiles}${why?`<div class="muted" style="font-size:11px;margin:2px 0 4px">${esc(es?why.why.es:why.why.en)}</div>`:''}${rows}
+    <div class="muted" style="font-size:11px;margin-top:8px">${es
+      ?`Un bloque es la suma de sus días: <b>fuerte</b> = jueves apertura → domingo 4pm, <b>flojo</b> = domingo 4pm → miércoles cierre. Los días con ✓ ya subieron de Oracle y cuentan como vendidos; el resto es el pronóstico. En cada platillo: el bloque elegido en color, la raya, y el otro bloque claro — más oscuro = más platos. El domingo se corta a las 4pm con el patrón de domingo de cada platillo${Z&&Z.n?` (${Z.n} domingos del archivo por hora de Oracle)`:' (sin archivo por hora: 50/50)'}.${MS.n?` "Falla ±" = lo que ese platillo falló en promedio de ese lado de la semana en las últimas ${MS.n} semanas (el pronóstico recalculado para esos días, contra Oracle).`:''}`
+      :`A block is its days added up: <b>busy</b> = Thursday open → Sunday 4pm, <b>slow</b> = Sunday 4pm → Wednesday close. Days with a ✓ are uploaded from Oracle and count as sold; the rest is the forecast. On each item: the block you picked in color, the divider, the other block faded — darker = more plates. Sunday is cut at 4pm by each item's own Sunday pattern${Z&&Z.n?` (${Z.n} Sundays of Oracle's hourly item file)`:' (no hourly file yet: 50/50)'}.${MS.n?` "Misses ±" = how far that item has been off on that side of the week, on average, over the last ${MS.n} weeks (the forecast re-run for those days, against Oracle).`:''}`}${est?(es?' El corte del domingo pasado es estimado — no hay archivo por hora de ese domingo.':' Last Sunday’s cut is estimated — there is no hourly file for that Sunday.'):''}</div>`;
 }
 // Grade every frozen block whose days all have an Oracle item file, beside the same days graded
 // one at a time from the daily freeze.
