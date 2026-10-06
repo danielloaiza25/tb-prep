@@ -1533,7 +1533,7 @@ const SB_KEY='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZ
 const TBID='9f8d7c6b-5a49-4e38-b271-06d5f00dbeef'; // Tommy Bahama tenant inside ChefOpsAI
 // Stamped by publish.sh at upload time. It is the only version label there is now —
 // one address, updated in place, so this tells you which build that address is serving.
-const BUILD='Oct 4, 2026 · Blocks view redesign + guest check by season';
+const BUILD='Oct 5, 2026 · Top 20 rates weigh recent days + report fix';
 // ---------- IS THIS PHONE EVEN RUNNING THE LATEST BUILD? ----------
 // Sep 3 2026. Three prep fixes shipped and Dan still saw the old behaviour, because the app
 // installs to the home screen and an installed web app does not go back and re-fetch its own
@@ -7911,7 +7911,7 @@ function danTopHtml(o){
     ${S.t20View==='blk'?t20BlocksHtml(S._t20Items||[], d, es, true):`<div class="t2-t5">${big}</div>
     <div class="t2-r15">${rest}</div>`}
     <div class="muted" style="font-size:11px;margin-top:6px">${M.basis==='sales'
-      ?`Sources: each item's <b>plates per $1,000</b> of net sales over <b>${M.R.n} real Oracle days</b> (${fmtDate(M.R.from).replace(/^[A-Za-z]+, /,'')} – ${fmtDate(M.R.to).replace(/^[A-Za-z]+, /,'')})${money?` × this day's sales, <b>$${Math.round(M.C.k*guests).toLocaleString()}</b> (${guests} covers × $${M.C.k.toFixed(2)} ${M.C.real?'real check':'per cover from the forecast engine'})`:` × this day's sales forecast`}. <b>± / usually within</b> is measured from your <b>${nD} real Oracle item day${nD===1?'':'s'}</b> — each family's actual daily miss against plates per $1,000 × that day's real sales, scaled to today. A family with fewer than 5 measured days shows no ±. Prep amounts still run on covers.`
+      ?`Sources: each item's <b>plates per $1,000</b> of net sales over <b>${M.R.n} real Oracle days</b>, recent days counting more (${fmtDate(M.R.from).replace(/^[A-Za-z]+, /,'')} – ${fmtDate(M.R.to).replace(/^[A-Za-z]+, /,'')})${money?` × this day's sales, <b>$${Math.round(M.C.k*guests).toLocaleString()}</b> (${guests} covers × $${M.C.k.toFixed(2)} ${M.C.real?'real check':'per cover from the forecast engine'})`:` × this day's sales forecast`}. <b>± / usually within</b> is measured from your <b>${nD} real Oracle item day${nD===1?'':'s'}</b> — each family's actual daily miss against plates per $1,000 × that day's real sales, scaled to today. A family with fewer than 5 measured days shows no ±. Prep amounts still run on covers.`
       :`Sources: attach rates from the item mix in <b>System Financial 2026</b> (regular + Island Time combined) × today's forecast. <b>± / usually within</b> is measured from your <b>${nD} real Oracle item day${nD===1?'':'s'}</b> — each family's actual daily miss against the model at that day's real covers, scaled to today's forecast. A family with fewer than 5 measured days shows no ±.`}</div>
   </div>`;
 }
@@ -12561,7 +12561,9 @@ async function viewAnalytics(){
   const since=new Date(dateObjLA(d)); since.setDate(since.getDate()-45);
   const sinceStr=since.toISOString().slice(0,10);
   const [ihq, plq, fcq, wsq, dhq, asq] = await Promise.all([
-    db.from('tb_daily_item_history').select('business_date,family_id,units').eq('synthetic',false),
+    // Oct 5 2026: paged. The item file passed 1,000 rows (1,581 on Oct 5) and one request stops at
+    // 1,000 — the weekly report saw 3 of the 6 item days in the week ending Oct 5.
+    t20Items().then(data=>({data}),e=>({data:[],error:e})),
     db.from('prep_lists').select('id,date,notes').eq('restaurant_id',TBID).gte('date',sinceStr).order('date',{ascending:false}),
     db.from('tb_day_forecast').select('*').order('business_date',{ascending:false}).limit(60),
     db.from('waste_records').select('*').eq('restaurant_id',TBID).gte('date',sinceStr).order('date',{ascending:false}),
@@ -16829,7 +16831,13 @@ window.tmLayoutSet=async(v)=>{
 // prep list still run on guests — this changes the Top 20 numbers only.
 // Both versions are frozen the first time each day is opened (tb_forecast_v2.notes, k:'top20')
 // and graded against the Oracle item files on the Analytics screen, for the Oct 5 – Nov 1 test.
-const T20_WIN=21, T20_MIN=14;
+// Oct 5 2026 — recent days count more: each day in the last 28 weighs half as much for every 10 days
+// back (half-life 10 days). Dan asked to fix Guac & Salsa: its lean came from one weekend (Aug 14–16,
+// 49 sold against ~6 a day) that held its flat 21-day rate up for three weeks. Replay Aug 17 – Oct 4
+// (7 weeks × 20 items, only data from before each day): item-weeks within ±15% 95 → 99 of 140,
+// average weekly miss 13.5% → 12.6%, at the real sales 101 → 108. Half-lives of 7 / 10 / 14 days
+// all beat the flat 21 days (100 / 99 / 97); 10 is the middle one, not the best one.
+const T20_WIN=28, T20_MIN=14, T20_HL=10;
 const T20_PLAN=['2026-10-05','2026-10-12','2026-10-19','2026-10-26'], T20_EXTRA=['2026-11-02','2026-11-09'];
 function t20Basis(){ return ((S.settings||{}).top20_basis==='guests')?'guests':'sales'; }
 function t20Fams(){ return (S.families||[]).filter(f=>(f.category==='food'||f.category==='dessert')&&f.active!==false).slice(0,20); }
@@ -16838,15 +16846,15 @@ function t20RealDays(){ const o={}; (S.dhRows||[]).forEach(r=>{ const g=Number(r
 function t20Items(){
   return dynPaged(()=>db.from('tb_daily_item_history').select('family_id,units,business_date').eq('synthetic',false).order('business_date').order('family_id'));
 }
-// plates per $1,000 for each Top 20 item over the 21 days before the day (before today for a day
+// plates per $1,000 for each Top 20 item over the 28 days before the day, recent days weighted more (before today for a day
 // still ahead). Only days that have both an Oracle item file and real sales count.
 function t20SalesRates(items, d){
   const T=todayLA(), anc=d<T?d:T, a=shiftDay(anc,-T20_WIN), H=t20RealDays();
-  const fams=t20Fams(), by={}, days=new Set();
-  (items||[]).forEach(r=>{ const x=String(r.business_date); if(x<a||x>=anc||!H[x]) return; days.add(x); by[r.family_id]=(by[r.family_id]||0)+(Number(r.units)||0); });
+  const fams=t20Fams(), by={}, days=new Set(), A=Date.parse(anc+'T12:00:00Z'), w=x=>Math.pow(0.5,(A-Date.parse(x+'T12:00:00Z'))/864e5/T20_HL);
+  (items||[]).forEach(r=>{ const x=String(r.business_date); if(x<a||x>=anc||!H[x]) return; days.add(x); by[r.family_id]=(by[r.family_id]||0)+(Number(r.units)||0)*w(x); });
   const D=[...days].sort();
   if(D.length<T20_MIN) return {ok:false, n:D.length};
-  const k=D.reduce((t,x)=>t+H[x].s,0)/1000, s={};
+  const k=D.reduce((t,x)=>t+H[x].s*w(x),0)/1000, s={};
   fams.forEach(f=>{ s[f.id]=(by[f.id]||0)/k; });
   return {ok:true, n:D.length, from:D[0], to:D[D.length-1], s};
 }
