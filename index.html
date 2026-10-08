@@ -1533,7 +1533,7 @@ const SB_KEY='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZ
 const TBID='9f8d7c6b-5a49-4e38-b271-06d5f00dbeef'; // Tommy Bahama tenant inside ChefOpsAI
 // Stamped by publish.sh at upload time. It is the only version label there is now —
 // one address, updated in place, so this tells you which build that address is serving.
-const BUILD='Oct 8, 2026 · checklists by level + protein count in the app';
+const BUILD='Oct 8, 2026 · daily uploads update the forecast + weekly report';
 // ---------- IS THIS PHONE EVEN RUNNING THE LATEST BUILD? ----------
 // Sep 3 2026. Three prep fixes shipped and Dan still saw the old behaviour, because the app
 // installs to the home screen and an installed web app does not go back and re-fetch its own
@@ -2345,23 +2345,64 @@ function guestForecast(dstr){
 }
 // Freeze what was shown, once per date, so the ledger grades the morning number and not a
 // recomputation. Called from the Today screen.
-async function fcLogShown(d){
+// Oct 8 2026 (Dan): only TODAY is frozen. Opening a date ahead used to lock that date's number
+// days or months early (7 of the first 25 graded days, and 34 dates out into 2027). A row that was
+// locked before its own day is replaced the first time the day itself is opened; the early number
+// is kept in its notes (k:'early'). Every row now also records the last day of data it was built
+// on (hist_thru), so days built with yesterday's numbers in can be compared with days built
+// without them. opt.after = the grading path, for a day nobody opened that morning (labeled).
+function fcLAday(iso){ try{ return new Intl.DateTimeFormat('en-CA',{timeZone:'America/Los_Angeles',year:'numeric',month:'2-digit',day:'2-digit'}).format(new Date(iso)); }catch(e){ return null; } }
+function fcHistThru(){ return FC2.dates.length?FC2.dates[FC2.dates.length-1]:null; }
+async function fcLogShown(d, opt){
   try{
-    if((S.fc2rows||[]).some(r=>String(r.business_date)===d)) return;
+    const after=!!(opt&&opt.after);
+    if(!after && d!==todayLA()) return;
+    const ex=(S.fc2rows||[]).find(r=>String(r.business_date)===d);
+    const early=!after && !!ex && !!ex.shown_at && fcLAday(ex.shown_at)<d;
+    if(ex && !early) return;
     const X=fcExplain(d); const notes=fcWatch(d,X);
     const row={business_date:d, v1_g:X.v1g, v2_g:X.v2g, v1_s:X.v1s, v2_s:X.v2s, ly_s:X.ly?X.ly.s:null, ly_date:X.ly?X.ly.date:null, ly_how:X.ly?X.ly.how:X.src,
-      trend:X.trend, ev:X.ev, resid:X.resid, holiday:X.hol, engine:'v2.2 '+X.mode, notes:[...notes.map(n=>({k:n.k,en:n.en})), ...(X.band?[{k:'band',lo:X.band.lo,hi:X.band.hi}]:[]),
-      {k:'gchk', how:X.gHow, r:{chk:X.chkR?Math.round(X.chkR*100)/100:null, g:X.v2gR}, s:X.chkS?{chk:Math.round(X.chkS*100)/100, g:X.v2gS}:null}]};
+      trend:X.trend, ev:X.ev, resid:X.resid, holiday:X.hol, engine:'v2.2 '+X.mode, hist_thru:fcHistThru(), notes:[...notes.map(n=>({k:n.k,en:n.en})), ...(X.band?[{k:'band',lo:X.band.lo,hi:X.band.hi}]:[]),
+      {k:'gchk', how:X.gHow, r:{chk:X.chkR?Math.round(X.chkR*100)/100:null, g:X.v2gR}, s:X.chkS?{chk:Math.round(X.chkS*100)/100, g:X.v2gS}:null},
+      ...(after?[{k:'after', en:'built when the day was graded — nobody opened it that morning'}]:[])]};
+    if(early){
+      const upd=Object.assign({}, row, {shown_at:new Date().toISOString(), notes:[...row.notes, {k:'early', shown_at:ex.shown_at, v2_s:ex.v2_s, v2_g:ex.v2_g, v1_s:ex.v1_s, v1_g:ex.v1_g}]});
+      delete upd.business_date;
+      const qe=await db.from('tb_forecast_v2').update(upd).eq('business_date',d).select('*');
+      if(!qe.error&&qe.data&&qe.data.length) Object.assign(ex,qe.data[0]);
+      return;
+    }
     const q=await db.from('tb_forecast_v2').upsert(row,{onConflict:'business_date',ignoreDuplicates:true}).select('*');
     if(!q.error&&q.data&&q.data.length){ S.fc2rows=[q.data[0],...(S.fc2rows||[])]; }
     else if(!q.error){ S.fc2rows=[row,...(S.fc2rows||[])]; }
   }catch(e){}
 }
+// Oct 8 2026 (Dan): after a Daily Operations upload the app reloads its history right away, so
+// the forecast for today and the coming days uses the new numbers on this phone too (it used to
+// wait for the next reload or the next morning), and the weekly report rebuilds. The next 7 days'
+// forecast is logged just before and just after the upload (tb_forecast_rev), so the weekly
+// report can show whether each upload moved the forecast closer to what really happened.
+async function fcAfterDailyUpload(bdates){
+  const T=todayLA(), span=[]; for(let i=0;i<7;i++) span.push(shiftDay(T,i));
+  const thruB=fcHistThru(), before={};
+  span.forEach(x=>{ try{ const X=fcExplain(x); if(X&&X.v2s) before[x]={s:Math.round(X.v2s), g:X.v2g}; }catch(e){} });
+  try{ await loadAll(); }catch(e){}
+  S._anaHist=null; S._fcSpan=null;
+  if(S.weekReport&&S.weekReport.open){ S.pendingWeekOpen=S.weekReport.weekEnd; S.weekReport={open:false, weekEnd:null, F:null, isCurrent:false}; }
+  const thruA=fcHistThru(), now=new Date().toISOString(), u=pu()||{}, last=(bdates||[]).slice().sort().slice(-1)[0]||null;
+  const rows=[];
+  span.forEach(x=>{ let X=null; try{ X=fcExplain(x); }catch(e){} if(!X||!X.v2s) return; const b=before[x]||{}; const sv=Math.round(X.v2s);
+    if(b.s===sv && b.g===X.v2g && thruA===thruB) return;      // nothing moved, nothing to log
+    rows.push({business_date:x, made_at:now, trigger:'upload', upload_for:last, hist_thru_before:thruB, hist_thru:thruA,
+      v2_s_before:b.s!=null?b.s:null, v2_g_before:b.g!=null?b.g:null, v2_s:sv, v2_g:X.v2g, made_by:u.name||null, build:BUILD}); });
+  if(rows.length && !S.previewUser){ try{ await db.from('tb_forecast_rev').insert(rows); }catch(e){} }
+  return rows.length;
+}
 // Grade both engines the moment a day's Oracle file lands. Called from applyDailyOperations.
 async function fcScoreDay(d, guests, sales){
   try{
     let r=(S.fc2rows||[]).find(x=>String(x.business_date)===d);
-    if(!r){ await fcLogShown(d); r=(S.fc2rows||[]).find(x=>String(x.business_date)===d); }
+    if(!r){ await fcLogShown(d,{after:true}); r=(S.fc2rows||[]).find(x=>String(x.business_date)===d); }
     if(!r) return;
     const e=(f,a)=> (f!=null&&a>0)?Math.round((Number(f)-a)/a*1000)/10:null;
     const upd={actual_g:guests, actual_s:sales, err_v1_g:e(r.v1_g,guests), err_v2_g:e(r.v2_g,guests), err_v1_s:e(r.v1_s,sales), err_v2_s:e(r.v2_s,sales), scored_at:new Date().toISOString()};
@@ -8941,10 +8982,10 @@ async function uploadFiles(list){
         oracleMsg=oracleReceiptMsg(oracleInfo);
         if(oracleInfo && !oracleInfo.error){
           const loadedSomething=oracleInfo.type==='daily_operations' && oracleInfo.historyMsg;
-          const upd=await db.from('data_imports').update({
+          const upd=await db.from('data_imports').update(Object.assign({
             status: loadedSomething?'loaded':'reviewed',
             review_note: oracleMsg, reviewed_at:new Date().toISOString()
-          }).eq('id', ins.data.id).select().single();
+          }, (oracleInfo.type==='daily_operations'&&oracleInfo.businessDate)?{covers:String(oracleInfo.businessDate)}:{})).eq('id', ins.data.id).select().single();
           if(!upd.error && upd.data){
             const idx=S.imports.findIndex(r=>r.id===ins.data.id);
             if(idx>=0) S.imports[idx]=upd.data;
@@ -8964,6 +9005,9 @@ async function uploadFiles(list){
     }
   }
   const n=document.getElementById('up-note'); if(n) n.value='';
+  // Oct 8 2026: a Daily Operations day landed — reload so the forecast and the weekly report use it now
+  const dailyDays=results.filter(r=>r&&r.ok&&r.oracleInfo&&r.oracleInfo.type==='daily_operations'&&r.oracleInfo.historyMsg).map(r=>String(r.oracleInfo.businessDate));
+  if(dailyDays.length){ try{ await fcAfterDailyUpload(dailyDays); }catch(e){} }
   paintUploads(); paintImports();
   // Dan, Sep 3 2026: "i already uploaded it but it didnt give me any report." Each file got
   // its own line, but eight lines is not a report — it does not tell you what the BATCH did.
@@ -11876,7 +11920,10 @@ function fvaCompute(hist, fcRows, itemRows, families, scores, weekEnd){
     days.push({d:ds, wd:weekdayOf(ds).slice(0,3), a, f, st, sales:salesOf[ds]!=null?salesOf[ds]:null, plan:planOf[ds]||null});
   }
   const scored=days.filter(x=>x.a!=null&&x.a>0);
-  if(scored.length<4) return null;
+  // Oct 8 2026 (Dan): a week asked for by name (the Weekly Reports list) shows from its first
+  // uploaded day and fills in as days arrive. The unnamed call (the model's last full week, which
+  // also feeds the weekly attach-rate ledger) keeps its 4-day minimum.
+  if(scored.length<(weekEnd?1:4)) return null;
   const tf=scored.reduce((s,x)=>s+x.f,0), ta=scored.reduce((s,x)=>s+x.a,0);
   const totalSales=scored.reduce((s,x)=>s+(x.sales||0),0);
   const mape=scored.reduce((s,x)=>s+Math.abs(x.f-x.a)/x.a,0)/scored.length*100;
@@ -12162,11 +12209,69 @@ function fvaCardHtml(F, suggs, isCurrent){
       </table></div>
       <div class="muted" style="font-size:11px;margin-top:4px">Rate = units per cover. Drift compares what really sold per cover against the model's attach rate — it strips the cover-forecast error out, so it judges the item model on its own. If a family's Miss above is big but its Drift here is small, the recipe rate was right and the crowd guess was wrong. Bar families excluded (kitchen-only rule).</div>`:''}
     `}
+    ${fvaUploadHtml(F)}
     ${isCurrent?fvaCorrHtml():''}
     ${isCurrent?fvaSuggHtml(suggs):''}
     ${isCurrent?'':'<div class="muted" style="font-size:11px;margin:4px 0 10px">Corrections &amp; item suggestions are shown only on the current week, since those reflect today\'s model, not this one.</div>'}
     ${anaSrc('tb_daily_history + tb_daily_item_history (your Oracle uploads) vs tb_day_forecast + the live model. <b>Measured vs model — no estimates presented as actuals.</b>')}
   </div>`;
+}
+// ---- Oct 8 2026 (Dan): did the daily uploads help the forecast? Inside every weekly report. ----
+// Morning forecast = the tb_forecast_v2 row frozen on the day itself (sales, the v2 engine).
+// "Yesterday's numbers in" = that row was built with data through the day before (hist_thru).
+// Uploads = tb_forecast_rev: each coming day's forecast just before and just after a Daily
+// Operations upload made on or before that day. All measured; a day with no record says so.
+function fvaUploadHtml(F){
+  if(!F||!F.days) return '';
+  const es=isES(), money=can('analytics.money');
+  const fc=S.fc2rows||[], revs=(S._anaHist&&S._anaHist.revs)||[];
+  const byD={}; fc.forEach(r=>{ byD[String(r.business_date)]=r; });
+  const ape=(f,a)=>(f!=null&&isFinite(f)&&a>0)?Math.abs(f-a)/a*100:null;
+  const avg=a=>{ const v=a.filter(x=>x!=null&&isFinite(x)); return v.length?v.reduce((x,y)=>x+y,0)/v.length:null; };
+  const p1=v=>v==null?'—':(Math.round(v*10)/10)+'%';
+  const usd=v=>v==null?'—':'$'+Math.round(v).toLocaleString();
+  const info=(d, salesFallback)=>{
+    const r=byD[d];
+    const morningOk=!!(r&&r.shown_at&&fcLAday(r.shown_at)===d&&!(Array.isArray(r.notes)&&r.notes.some(n=>n&&n.k==='after')));
+    const lag=(morningOk&&r.hist_thru)?Math.round((dateObjLA(d)-dateObjLA(String(r.hist_thru)))/86400000):null;
+    const act=(r&&r.actual_s!=null)?Number(r.actual_s):(salesFallback!=null?Number(salesFallback):null);
+    const rv=revs.filter(v=>String(v.business_date)===d && fcLAday(v.made_at)<=d);
+    const bef=(rv.length&&rv[0].v2_s_before!=null)?Number(rv[0].v2_s_before):null;
+    const aft=rv.length?Number(rv[rv.length-1].v2_s):null;
+    return {d, morning:morningOk?Number(r.v2_s):null, lag, act:(act>0?act:null), bef, aft, nrev:rv.length};
+  };
+  const h3=`<h3 style="font-size:13.5px;color:var(--teal-dark);margin:16px 0 4px">${es?'Subidas diarias · ¿ayudaron al pronóstico?':'Daily uploads · did they help the forecast?'}</h3>`;
+  const rows=F.days.map(x=>Object.assign({wd:x.wd}, info(x.d, x.sales)));
+  const tracked=rows.filter(r=>r.lag!=null);
+  if(!tracked.length && !rows.some(r=>r.nrev))
+    return h3+`<div class="muted" style="font-size:12px">${es?'Sin registro para esta semana. Desde el 8 de oct. 2026 cada pronóstico de la mañana guarda con qué días de datos se hizo, y cada subida de Daily Operations guarda el pronóstico antes y después.':'No record for this week. From Oct 8, 2026 every morning forecast records which days of data it was built on, and every Daily Operations upload logs the forecast before and after it — this section fills in from there.'}</div>`;
+  const fresh=tracked.filter(r=>r.lag===1), stale=tracked.filter(r=>r.lag>1);
+  const gF=fresh.filter(r=>ape(r.morning,r.act)!=null), gS=stale.filter(r=>ape(r.morning,r.act)!=null);
+  const moved=rows.filter(r=>r.bef!=null&&r.aft!=null&&r.act&&r.bef!==r.aft);
+  const closer=moved.filter(r=>Math.abs(r.aft-r.act)<Math.abs(r.bef-r.act)).length;
+  const dataCell=r=>r.lag==null?'<span class="muted">—</span>':(r.lag===1?`<b style="color:var(--palm)">✓</b>`:`<span style="color:var(--coral)">${r.lag-1} ${es?'falta'+(r.lag-1>1?'n':''):'missing'}</span>`);
+  const table=`<div class="tbl-wrap"><table>
+    <tr><th>${es?'Día':'Day'}</th><th>${es?'Ayer ya subido':'Yesterday in'}</th>${money?`<th class="num">${es?'Mañana':'Morning'}</th><th class="num">${es?'Tras subir':'After uploads'}</th><th class="num">${es?'Real':'Actual'}</th>`:''}<th class="num">${es?'Error mañana':'Miss · morning'}</th><th class="num">${es?'Error tras subir':'Miss · after'}</th></tr>
+    ${rows.map(r=>`<tr><td>${esc(r.wd)}</td><td>${dataCell(r)}</td>${money?`<td class="num">${usd(r.morning)}</td><td class="num">${r.nrev?usd(r.aft):'<span class="muted">—</span>'}</td><td class="num">${usd(r.act)}</td>`:''}
+      <td class="num">${p1(ape(r.morning,r.act))}</td><td class="num">${r.nrev?p1(ape(r.aft,r.act)):'<span class="muted">—</span>'}</td></tr>`).join('')}
+  </table></div>`;
+  const lines=[];
+  lines.push(`${es?'Los números de ayer estaban subidos en la mañana':'Yesterday\'s numbers were in by the morning'} <b>${fresh.length} ${es?'de':'of'} ${tracked.length}</b> ${es?'días registrados':'tracked days'}.`);
+  if(gF.length||gS.length) lines.push(`${es?'Con los de ayer subidos, el pronóstico falló':'With yesterday in, the morning forecast missed by'} <b>${p1(avg(gF.map(r=>ape(r.morning,r.act))))}</b> ${es?'en promedio':'on average'} (${gF.length} ${es?'días':'days'}); ${es?'sin ellos':'without them'}, <b>${p1(avg(gS.map(r=>ape(r.morning,r.act))))}</b> (${gS.length}).`);
+  if(moved.length) lines.push(`${es?'Las subidas cambiaron el pronóstico de':'Uploads changed the forecast for'} <b>${moved.length}</b> ${es?'días ya cerrados: más cerca en':'finished days: closer on'} <b>${closer}</b>; ${es?'error promedio':'average miss'} ${p1(avg(moved.map(r=>ape(r.bef,r.act))))} → <b>${p1(avg(moved.map(r=>ape(r.aft,r.act))))}</b>.`);
+  // every tracked week so far, newest first, so a week with daily uploads sits next to one without
+  const all={}, ups={};
+  fc.forEach(r=>{ const d=String(r.business_date); const i=info(d,null); if(i.lag==null||!i.act||i.morning==null) return; (all[cWeekStart(d)]=all[cWeekStart(d)]||[]).push(i); });
+  revs.forEach(v=>{ if(v.made_at) (ups[cWeekStart(fcLAday(v.made_at))]=ups[cWeekStart(fcLAday(v.made_at))]||new Set()).add(v.made_at); });
+  const wks=Object.keys(all).sort().reverse().slice(0,10);
+  const allF=[].concat(...wks.map(w=>all[w].filter(i=>i.lag===1))), allS=[].concat(...wks.map(w=>all[w].filter(i=>i.lag>1)));
+  const wkTable=wks.length?`<div class="muted" style="font-size:11.5px;margin:10px 0 3px"><b>${es?'Todas las semanas registradas':'Every tracked week'}</b></div><div class="tbl-wrap"><table>
+    <tr><th>${es?'Semana':'Week'}</th><th class="num">${es?'Días con ayer subido':'Days with yesterday in'}</th><th class="num">${es?'Subidas':'Uploads'}</th><th class="num">${es?'Error diario prom.':'Avg daily miss'}</th></tr>
+    ${wks.map(w=>`<tr${w===F.start?' style="font-weight:700"':''}><td>${fmtDate(w)}</td><td class="num">${all[w].filter(i=>i.lag===1).length} / ${all[w].length}</td><td class="num">${ups[w]?ups[w].size:0}</td><td class="num">${p1(avg(all[w].map(i=>ape(i.morning,i.act))))}</td></tr>`).join('')}
+  </table></div>
+  <div class="muted" style="font-size:11.5px;margin-top:4px">${es?'Todas juntas':'All tracked weeks'}: ${es?'con ayer subido':'with yesterday in'} <b>${p1(avg(allF.map(i=>ape(i.morning,i.act))))}</b> (${allF.length} ${es?'días':'days'}) · ${es?'sin':'without'} <b>${p1(avg(allS.map(i=>ape(i.morning,i.act))))}</b> (${allS.length}).</div>`:'';
+  return h3+`<div style="font-size:12.5px;line-height:1.5">${lines.join('<br>')}</div>${table}${wkTable}
+    <div class="muted" style="font-size:11px;margin-top:6px">${es?'Ventas, motor v2. Pocos días todavía: un día raro mueve estos promedios; se leen mejor según se juntan semanas. Mañana = el número congelado ese mismo día. Tras subir = el último pronóstico después de una subida de Daily Operations hecha ese día o antes.':'Sales, the v2 engine. Few days so far — one odd day moves these averages; they read better as weeks build up. Morning = the number frozen that same day. After uploads = the last forecast after a Daily Operations upload made on or before that day.'}</div>`;
 }
 // The Weekly Reports archive list (mockup Option B, approved Aug 17 2026) — every
 // complete Tue–Mon week found in the last 90 days of tb_daily_history, newest first.
@@ -12679,7 +12784,7 @@ async function viewAnalytics(){
   // ---- async pulls
   const since=new Date(dateObjLA(d)); since.setDate(since.getDate()-45);
   const sinceStr=since.toISOString().slice(0,10);
-  const [ihq, plq, fcq, wsq, dhq, asq] = await Promise.all([
+  const [ihq, plq, fcq, wsq, dhq, asq, rvq] = await Promise.all([
     // Oct 5 2026: paged. The item file passed 1,000 rows (1,581 on Oct 5) and one request stops at
     // 1,000 — the weekly report saw 3 of the 6 item days in the week ending Oct 5.
     t20Items().then(data=>({data}),e=>({data:[],error:e})),
@@ -12687,7 +12792,9 @@ async function viewAnalytics(){
     db.from('tb_day_forecast').select('*').order('business_date',{ascending:false}).limit(60),
     db.from('waste_records').select('*').eq('restaurant_id',TBID).gte('date',sinceStr).order('date',{ascending:false}),
     db.from('tb_daily_history').select('business_date,guests,net_sales').eq('synthetic',false).order('business_date',{ascending:false}).limit(90).then(dhFixQ),
-    db.from('tb_attach_scores').select('*').order('week_end',{ascending:false}).limit(240)
+    db.from('tb_attach_scores').select('*').order('week_end',{ascending:false}).limit(240),
+    // Oct 8 2026: before / after each Daily Operations upload, for the weekly report
+    db.from('tb_forecast_rev').select('*').gte('business_date',shiftDay(d,-100)).order('made_at',{ascending:true}).limit(3000)
   ]);
   const fva=fvaCompute(dhq.data||[], fcq.data||[], ihq.data||[], S.families, S.scores);
   // Record this week's attach rates into the weekly ledger (idempotent upsert) so the
@@ -12704,7 +12811,7 @@ async function viewAnalytics(){
   // Cache this load's history rows + suggestions so openWeekReport() can build any other
   // week's detail instantly (no second round trip), and so re-opening the current week's
   // detail after this load can still show its live correction/suggestion sections.
-  S._anaHist={dh:dhq.data||[], fc:fcq.data||[], ih:ihq.data||[], currentEnd:fva?fva.end:null, fvaSuggs};
+  S._anaHist={dh:dhq.data||[], fc:fcq.data||[], ih:ihq.data||[], currentEnd:fva?fva.end:null, fvaSuggs, revs:(rvq&&rvq.data)||[]};
   // Weekly Reports archive list — every Tue–Mon week bucket found in the 90 days just
   // fetched (cWeeks already implements this exact bucketing for the Count log). The
   // current week reuses the already-computed fva instead of scoring it twice.
@@ -13327,7 +13434,7 @@ window.toggleStaff=async(id,v)=>{ if(!guard('admin.staff')) return;
 // keeps its own daily backups; this one is yours, on your laptop, whenever you want it.
 const BACKUP_TABLES=['employees','inventory','recipes','prep_lists','prep_list_items','inventory_counts','inventory_count_items',
  'waste_records','tb_86','tb_fresh_cuts','tb_model','tb_settings','tb_families','tb_daily_history','tb_daily_item_history',
- 'tb_day_forecast','tb_forecast_scores','tb_forecast_v2','tb_vendor_orders','tb_vendor_order_lines','tb_order_guide_items',
+ 'tb_day_forecast','tb_forecast_scores','tb_forecast_v2','tb_forecast_rev','tb_vendor_orders','tb_vendor_order_lines','tb_order_guide_items',
  'tb_order_guide_rooms','tb_order_guide_categories','tb_vendor_rules','tb_vendor_prices','tb_supplier_orders','tb_supplier_lines',
  'tb_sku_map','tb_par_engine','tb_par_engine_runs','tb_par_signals','tb_order_signals','tb_protein_count','tb_attach_scores',
  'tb_check_items','tb_check_runs','tb_check_log','tb_check_edits','tb_valley_events','tb_weather_daily','data_imports',
