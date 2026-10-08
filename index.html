@@ -1533,7 +1533,7 @@ const SB_KEY='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZ
 const TBID='9f8d7c6b-5a49-4e38-b271-06d5f00dbeef'; // Tommy Bahama tenant inside ChefOpsAI
 // Stamped by publish.sh at upload time. It is the only version label there is now —
 // one address, updated in place, so this tells you which build that address is serving.
-const BUILD='Oct 5, 2026 · Top 20 rates weigh recent days + report fix';
+const BUILD='Oct 8, 2026 · checklists by level + protein count in the app';
 // ---------- IS THIS PHONE EVEN RUNNING THE LATEST BUILD? ----------
 // Sep 3 2026. Three prep fixes shipped and Dan still saw the old behaviour, because the app
 // installs to the home screen and an installed web app does not go back and re-fetch its own
@@ -3962,7 +3962,7 @@ window.bumpCount=(pid,delta)=>{ if(!guard('count.start')) return;
 // Repaint just the rail after a save, so the ring and the n/total move without re-rendering
 // the whole screen and throwing away the keyboard mid-count.
 function refreshStationRail(){
-  const secs=countSections(S.preps.filter(p=>p.station!=='bar'));
+  const secs=countSections(countKitchen());
   document.querySelectorAll('.st-rail .st-btn').forEach((btn,i)=>{
     const s=secs[i]; if(!s) return;
     const n=s.items.filter(p=>S.split[p.id]||S.cantCount[p.id]).length;
@@ -4373,7 +4373,7 @@ function cqMatches(q){
   const needle=String(q||'').trim().toLowerCase();
   if(!needle) return [];
   const out=[];
-  countSections(S.preps.filter(p=>p.station!=='bar')).forEach(s=>s.items.forEach(p=>{
+  countSections(countKitchen()).forEach(s=>s.items.forEach(p=>{
     const en=String(p.name_en||'').toLowerCase(), es=String(p.name_es||'').toLowerCase(),
           sn=String(p.sheet_name||'').toLowerCase();
     if(en.includes(needle)||es.includes(needle)||sn.includes(needle)) out.push({p, s});
@@ -6970,6 +6970,17 @@ function orWeekHtml(){
 // come back at the end. Nothing forces the ten minutes: two answers at 9:00 and six at 9:45
 // are eight rows with eight times. Who did it comes from the login, never from typing.
 // Nothing here is assigned by us — every item's "assign to" is the Chef's to set.
+//
+// Oct 8 2026 (Dan) — LEVELS. There used to be ONE opening and ONE closing list for the whole
+// kitchen, and whoever started it got the managers' list (Ben ran it Oct 1 and Oct 6). Now every
+// item and every run belongs to a level — Management, Lead cooks, Cooks — and Dan puts each
+// person on one level (tb_model 'checklists'.levels, editable in Edit the list). The Lists tab and
+// this screen show a person only their own level's two lists; someone on no level sees none.
+// Due by (Dan): opening 2:00 PM — the 6th-hour mark — closing 11:00 PM. A list finished after
+// that is still open to finish and is stamped late. Izzi ('checklists'.alert_to) gets an alert
+// card on Today for every level: "done" as soon as a list closes (early or not), and "not done"
+// once its due time has passed. In-app only for now (Dan: no phone buzz yet).
+// Photo option (Dan): items with photo_opt take an optional photo on YES and on NO / not possible.
 const CK_AREAS=['Walk-in','Line','Prep','Back','Front','Office','Dish','Bar'];
 const CK_TYPES=[
   ['yes','Tap YES','Marcar SÍ'],
@@ -6978,43 +6989,68 @@ const CK_TYPES=[
   ['choice','Pick one of a few answers','Elegir una respuesta'],
   ['verify','Opener checks a closing item — was it left right?','El que abre revisa un punto del cierre — ¿quedó bien?']];
 const CK_REASONS=[['time','Ran out of time','No hubo tiempo'],['supplies','No supplies / broken','Sin material / descompuesto'],['station','Not my station','No es mi estación'],['other','Other','Otro']];
-function ckState(){ if(!S.ck) S.ck={page:'home', shift:null, items:[], runs:{}, logs:{}, loadedFor:null, idx:0, order:[], edit:null, res:null}; return S.ck; }
+const CK_LEVELS=[['management','Management','Gerencia'],['lead','Lead cooks','Cocineros líderes'],['cook','Cooks','Cocineros']];
+const CK_DUE_DEFAULT={opening:'14:00', closing:'23:00'};
+function ckState(){ if(!S.ck) S.ck={page:'home', shift:null, items:[], runs:{}, logs:{}, loadedFor:null, idx:0, order:[], edit:null, res:null, cfg:null, editLevel:'management'}; return S.ck; }
+function ckCfg(){ return ckState().cfg||{}; }
+function ckLevelOf(id){ const L=ckCfg().levels||{}; return (id&&L[id])||null; }
+function ckLevel(){ const u=pu(); return u?ckLevelOf(u.id):null; }
+function ckLevelLabel(l){ const x=CK_LEVELS.find(y=>y[0]===l); return x?(isES()?x[2]:x[1]):(isES()?'sin nivel':'no level'); }
+function ckLv(x){ return (x&&x.level)||'management'; }   // rows from before levels were the managers' list
+function ckDueMin(shift){ const s=String((ckCfg().due||{})[shift]||CK_DUE_DEFAULT[shift]||'23:59'); const p=s.split(':').map(Number); return (p[0]||0)*60+(p[1]||0); }
+function ckDueLabel(shift){ const t=ckDueMin(shift), h=Math.floor(t/60), m=t%60; return `${((h+11)%12)+1}:${String(m).padStart(2,'0')} ${h>=12?'PM':'AM'}`; }
+// a timestamp as its Palm Springs date and minute of the day
+function ckLA(iso){ const p={}; try{ new Intl.DateTimeFormat('en-CA',{timeZone:'America/Los_Angeles',year:'numeric',month:'2-digit',day:'2-digit',hour:'2-digit',minute:'2-digit',hourCycle:'h23'}).formatToParts(new Date(iso)).forEach(x=>{ p[x.type]=x.value; }); }catch(e){}
+  return {d:`${p.year}-${p.month}-${p.day}`, min:(Number(p.hour)%24)*60+Number(p.minute)}; }
+// late = finished after the due time of its own day (or on a later day)
+function ckIsLate(onDate, shift, iso){ const t=ckLA(iso||new Date().toISOString()); if(t.d!==onDate) return t.d>onDate; return t.min>ckDueMin(shift); }
+// this day's list is past its due time right now
+function ckPastDue(d, shift){ const T=todayLA(); if(d<T) return true; if(d>T) return false; return orNowMin()>ckDueMin(shift); }
+function ckRunLate(run){ if(!run) return false; if(run.late!=null) return !!run.late; return run.closed_at?ckIsLate(run.on_date,run.shift,run.closed_at):false; }
 function ckShiftFor(){ // which list the phone offers first: closing after 3 PM, opening before
   return orNowMin()>=15*60?'closing':'opening'; }
-function ckItems(shift){ return ckState().items.filter(i=>i.active && i.shift===shift).sort((a,b)=>a.ord-b.ord); }
+function ckItems(shift, level){ const lv=level===undefined?ckLevel():level; return ckState().items.filter(i=>i.active && i.shift===shift && ckLv(i)===lv).sort((a,b)=>a.ord-b.ord); }
 function ckLabel(i){ return (isES()&&i.text_es)?i.text_es:i.text_en; }
 function ckDetail(i){ return (isES()&&i.detail_es)?i.detail_es:(i.detail_en||''); }
 function ckStaffLabel(id){ const s=S.staff.find(x=>x.id===id); return s?`${s.name}${s.title?` <span class="muted" style="font-size:10.5px">${esc(s.title)}</span>`:''}`:''; }
 async function ckLoad(d, force){
   const C=ckState(); d=d||todayLA();
   if(!force && C.loadedFor===d && Date.now()-(C.loadedAt||0)<30000) return;
-  const [it,ru]=await Promise.all([
+  const [it,ru,cf]=await Promise.all([
     db.from('tb_check_items').select('*').order('shift').order('ord'),
-    db.from('tb_check_runs').select('*').in('on_date',[d,shiftDay(d,-1)])
+    db.from('tb_check_runs').select('*').in('on_date',[d,shiftDay(d,-1)]),
+    db.from('tb_model').select('value').eq('key','checklists').maybeSingle()
   ]);
   C.items=it.data||[]; C.runs={}; C.logs={};
-  (ru.data||[]).forEach(r=>{ C.runs[r.on_date+'|'+r.shift]=r; });
+  if(cf&&cf.data&&cf.data.value) C.cfg=cf.data.value; else if(!C.cfg) C.cfg={};
+  (ru.data||[]).forEach(r=>{ C.runs[r.on_date+'|'+r.shift+'|'+ckLv(r)]=r; });
   const ids=Object.values(C.runs).map(r=>r.id);
   if(ids.length){ const lg=await db.from('tb_check_log').select('*').in('run_id',ids); (lg.data||[]).forEach(l=>{ (C.logs[l.run_id]=C.logs[l.run_id]||{})[l.item_id]=l; }); }
   C.loadedFor=d; C.loadedAt=Date.now();
 }
-function ckRun(d,shift){ return ckState().runs[d+'|'+shift]||null; }
+function ckRun(d,shift,level){ const lv=level===undefined?ckLevel():level; return ckState().runs[d+'|'+shift+'|'+lv]||null; }
 function ckLogOf(run){ return run?(ckState().logs[run.id]||{}):{}; }
 async function ckOpenRun(d,shift){
-  let r=ckRun(d,shift); if(r) return r;
-  const u=pu(); const row={on_date:d, shift, opened_by:u.name, opened_by_id:u.id, build:BUILD};
-  const q=await db.from('tb_check_runs').upsert(row,{onConflict:'restaurant_id,on_date,shift',ignoreDuplicates:true}).select('*').maybeSingle();
+  const lv=ckLevel(); if(!lv){ toast(isES()?'No estás en ninguna lista':'You are not on a checklist level'); return null; }
+  let r=ckRun(d,shift,lv); if(r) return r;
+  const u=pu(); const row={on_date:d, shift, level:lv, opened_by:u.name, opened_by_id:u.id, build:BUILD};
+  const q=await db.from('tb_check_runs').upsert(row,{onConflict:'restaurant_id,on_date,shift,level',ignoreDuplicates:true}).select('*').maybeSingle();
   if(q.error){ toast(q.error.message||'Could not start the list'); return null; }
-  if(!q.data){ const g=await db.from('tb_check_runs').select('*').eq('on_date',d).eq('shift',shift).maybeSingle(); r=g.data; } else r=q.data;
-  if(r){ ckState().runs[d+'|'+shift]=r; ckState().logs[r.id]=ckState().logs[r.id]||{}; }
+  if(!q.data){ const g=await db.from('tb_check_runs').select('*').eq('on_date',d).eq('shift',shift).eq('level',lv).maybeSingle(); r=g.data; } else r=q.data;
+  if(r){ ckState().runs[d+'|'+shift+'|'+lv]=r; ckState().logs[r.id]=ckState().logs[r.id]||{}; }
   return r;
 }
 // auto items: the app already knows whether these happened — no tap, and it cannot be faked
 async function ckAutoCheck(d, items){
   const out={};
   for(const i of items){
-    if(i.auto_key==='prep_list'){ try{ const q=await db.from('prep_lists').select('id').eq('restaurant_id',TBID).eq('date',d).limit(1); out[i.id]=!!(q.data&&q.data.length); }catch(e){} }
-    if(i.auto_key==='orders_placed'){ try{ const q=await db.from('tb_vendor_orders').select('id').eq('order_date',d).eq('status','sent').limit(1); out[i.id]=!!(q.data&&q.data.length); }catch(e){} }
+    try{
+      if(i.auto_key==='prep_list'){ const q=await db.from('prep_lists').select('id').eq('restaurant_id',TBID).eq('date',d).limit(1); out[i.id]=!!(q.data&&q.data.length); }
+      if(i.auto_key==='orders_placed'){ const q=await db.from('tb_vendor_orders').select('id').eq('order_date',d).eq('status','sent').limit(1); out[i.id]=!!(q.data&&q.data.length); }
+      // Oct 8 2026: the morning (opening) count submitted in the app, and every protein counted in it
+      if(i.auto_key==='morning_count'){ const q=await db.from('inventory_counts').select('id').eq('restaurant_id',TBID).eq('notes',cNotes(d,'open')).eq('status','completed').limit(1); out[i.id]=!!(q.data&&q.data.length); }
+      if(i.auto_key==='protein_count'){ await loadProteins(d); const s=await protStatus(d); out[i.id]=!!(s.tot&&s.n>=s.tot); }
+    }catch(e){}
   }
   return out;
 }
@@ -7026,51 +7062,69 @@ async function ckSave(run, item, result, extra){
   (ckState().logs[run.id]=ckState().logs[run.id]||{})[item.id]=q.data||row;
   return true;
 }
+// the optional photo for the item on screen, uploaded only when one was actually taken
+async function ckUpPhoto(){
+  const C=ckState(); const f=C.pending&&C.pending.photo; if(!f) return null;
+  try{ const path=`${TBID}/checks/${todayLA()}/${Date.now()}-${safeName(f.name)}`; const up=await db.storage.from('imports').upload(path,f,{contentType:f.type||'image/jpeg'}); return up.error?null:path; }catch(e){ return null; }
+}
 // ---- the run: one item at a time ----
 async function ckStart(shift){
   const C=ckState(); const d=todayLA();
   await ckLoad(d,true);
+  const items=ckItems(shift); if(!items.length){ C.page='home'; render(); return; }
   const run=await ckOpenRun(d,shift); if(!run) return;
-  const items=ckItems(shift); const log=ckLogOf(run);
+  const log=ckLogOf(run);
   const auto=await ckAutoCheck(d, items.filter(i=>i.auto_key));
   for(const i of items){ if(i.auto_key && auto[i.id] && !log[i.id]) await ckSave(run,i,'auto',{note:'checked by the app'}); }
   C.shift=shift; C.page='run'; C.pass=1;
   C.order=items.filter(i=>!ckLogOf(run)[i.id] || ckLogOf(run)[i.id].result==='skipped').map(i=>i.id);
-  C.idx=0; C.pending=null; tbMark('check.start', shift);
+  C.idx=0; C.pending=null; tbMark('check.start', shift+' · '+ckLevel());
+  if(!C.order.length) C.page='end';
   render();
 }
 function ckCurrent(){ const C=ckState(); const id=C.order[C.idx]; return C.items.find(i=>i.id===id)||null; }
-function ckAdvance(){ const C=ckState(); C.idx++; if(C.idx>=C.order.length){ C.page='end'; } render(); }
+function ckAdvance(){ const C=ckState(); C.pending=null; C.idx++; if(C.idx>=C.order.length){ C.page='end'; } render(); }
 window.ckYes=async()=>{ const C=ckState(); const it=ckCurrent(); const run=ckRun(todayLA(),C.shift); if(!it||!run) return;
   if(it.type==='number'){ const v=Number((document.getElementById('ck-num')||{}).value); if(!isFinite(v)||(document.getElementById('ck-num')||{}).value===''){ toast(isES()?'Escribe el número':'Type the number'); return; }
     const out=(it.range_lo!=null&&v<Number(it.range_lo))||(it.range_hi!=null&&v>Number(it.range_hi));
     if(await ckSave(run,it,'yes',{value:v, note:out?'out of range':null})) ckAdvance(); return; }
-  if(it.type==='choice'){ const c=C.pending&&C.pending.choice; if(!c){ toast(isES()?'Elige una':'Pick one'); return; } if(await ckSave(run,it,'yes',{choice:c})){ C.pending=null; ckAdvance(); } return; }
-  if(it.type==='photo'){ const f=C.pending&&C.pending.photo; let path=null; if(f){ try{ path=`${TBID}/checks/${todayLA()}/${Date.now()}-${safeName(f.name)}`; const up=await db.storage.from('imports').upload(path,f,{contentType:f.type||'image/jpeg'}); if(up.error) path=null; }catch(e){ path=null; } }
-    if(await ckSave(run,it,'yes',{photo_path:path})){ C.pending=null; ckAdvance(); } return; }
+  if(it.type==='choice'){ const c=C.pending&&C.pending.choice; if(!c){ toast(isES()?'Elige una':'Pick one'); return; } if(await ckSave(run,it,'yes',{choice:c})) ckAdvance(); return; }
+  if(it.type==='photo'||it.photo_opt){ const path=await ckUpPhoto(); if(await ckSave(run,it,'yes',{photo_path:path})) ckAdvance(); return; }
   if(await ckSave(run,it,'yes')) ckAdvance(); };
 window.ckNo=async()=>{ const C=ckState(); const it=ckCurrent(); const run=ckRun(todayLA(),C.shift); if(!it||!run) return;
-  const f=C.pending&&C.pending.photo; let path=null; if(f){ try{ path=`${TBID}/checks/${todayLA()}/${Date.now()}-${safeName(f.name)}`; const up=await db.storage.from('imports').upload(path,f,{contentType:f.type||'image/jpeg'}); if(up.error) path=null; }catch(e){} }
+  const path=await ckUpPhoto();
   const note=(document.getElementById('ck-note')||{}).value||null;
-  if(await ckSave(run,it,'no',{photo_path:path, note})){ C.pending=null; ckAdvance(); } };
+  if(await ckSave(run,it,'no',{photo_path:path, note})) ckAdvance(); };
 window.ckSkip=async()=>{ const C=ckState(); const it=ckCurrent(); const run=ckRun(todayLA(),C.shift); if(!it||!run) return;
-  if(await ckSave(run,it,'skipped')){ C.pending=null; ckAdvance(); } };
-window.ckNotPossible=(on)=>{ const C=ckState(); C.pending=Object.assign({},C.pending||{},{np:!!on}); render(); };
+  if(await ckSave(run,it,'skipped')) ckAdvance(); };
+window.ckNotPossible=(on)=>{ const C=ckState(); C.pending=Object.assign({},C.pending||{},{np:on||false}); render(); };
 window.ckReason=async(code)=>{ const C=ckState(); const it=ckCurrent(); const run=ckRun(todayLA(),C.shift); if(!it||!run) return;
-  if(await ckSave(run,it,'not_possible',{reason:code})){ C.pending=null; ckAdvance(); } };
+  const path=await ckUpPhoto();
+  if(await ckSave(run,it,'not_possible',{reason:code, photo_path:path})) ckAdvance(); };
 window.ckPick=(c)=>{ const C=ckState(); C.pending=Object.assign({},C.pending||{},{choice:c}); render(); };
-window.ckPhoto=(input)=>{ const C=ckState(); const f=input.files&&input.files[0]; C.pending=Object.assign({},C.pending||{},{photo:f||null}); const l=document.getElementById('ck-photo-lab'); if(l) l.textContent=f?(isES()?'foto lista ✓':'photo ready ✓'):''; };
+window.ckPhoto=(input)=>{ const C=ckState(); const f=input.files&&input.files[0]; C.pending=Object.assign({},C.pending||{},{photo:f||null}); document.querySelectorAll('.ck-photo-lab').forEach(l=>{ l.textContent=f?(isES()?'foto lista ✓':'photo ready ✓'):''; }); };
 window.ckAnswerSkipped=()=>{ const C=ckState(); const run=ckRun(todayLA(),C.shift); const log=ckLogOf(run);
-  C.order=ckItems(C.shift).filter(i=>log[i.id]&&log[i.id].result==='skipped').map(i=>i.id); C.idx=0; C.pass=2; C.page=C.order.length?'run':'end'; render(); };
+  C.order=ckItems(C.shift).filter(i=>!log[i.id]||log[i.id].result==='skipped').map(i=>i.id); C.idx=0; C.pass=2; C.pending=null; C.page=C.order.length?'run':'end'; render(); };
 window.ckFinish=async()=>{ const C=ckState(); const run=ckRun(todayLA(),C.shift); if(!run) return; const u=pu();
+  if(S.previewUser){ toast('Preview only · Solo vista'); return; }
   const ini=(u.name||'').split(/\s+/).map(w=>w[0]||'').join('').toUpperCase().slice(0,3);
+  const nowIso=new Date().toISOString();
   const secs=Math.max(0,Math.round((Date.now()-new Date(run.opened_at).getTime())/1000));
-  const q=await db.from('tb_check_runs').update({status:'closed', closed_by:u.name, closed_by_id:u.id, closed_at:new Date().toISOString(), initials:ini, seconds:secs}).eq('id',run.id).select('*').maybeSingle();
+  const late=ckIsLate(run.on_date, run.shift, nowIso);
+  const q=await db.from('tb_check_runs').update({status:'closed', closed_by:u.name, closed_by_id:u.id, closed_at:nowIso, initials:ini, seconds:secs, late}).eq('id',run.id).select('*').maybeSingle();
   if(q.error){ toast(q.error.message||'Could not close'); return; }
-  C.runs[run.on_date+'|'+run.shift]=q.data||Object.assign(run,{status:'closed'}); tbMark('check.finish', C.shift+' · '+secs+'s');
+  C.runs[run.on_date+'|'+run.shift+'|'+ckLv(run)]=q.data||Object.assign(run,{status:'closed', closed_by:u.name, closed_at:nowIso, late}); tbMark('check.finish', C.shift+' · '+ckLv(run)+' · '+secs+'s'+(late?' · late':''));
   C.page='home'; render(); };
 window.ckHome=()=>{ ckState().page='home'; render(); };
 window.ckGo=(p)=>{ ckState().page=p; render(); };
+// the due line under a list: "due 2:00 PM", "late · due 2:00 PM", "closed late"
+function ckDueHtml(d, shift, run){
+  const es=isES();
+  if(run&&run.status==='closed') return ckRunLate(run)?` · <b style="color:var(--coral)">${es?'terminada tarde':'finished late'}</b>`:'';
+  if(ckPastDue(d,shift)) return ` · <b style="color:var(--coral)">${es?'tarde · era para las':'late · was due'} ${ckDueLabel(shift)}</b>`;
+  return ` · ${es?'para las':'due'} ${ckDueLabel(shift)}`;
+}
+function ckPhotoLab(txt){ return `<label class="btn-ghost ck-btn" style="display:block;margin-top:10px;text-align:center">📷 ${txt} <span class="ck-photo-lab">${(ckState().pending||{}).photo?(isES()?'foto lista ✓':'photo ready ✓'):''}</span><input type="file" accept="image/*" capture="environment" style="display:none" onchange="ckPhoto(this)"></label>`; }
 // ---- HTML: the run screen ----
 function ckRunHtml(){
   const C=ckState(); const it=ckCurrent(); const es=isES(); const run=ckRun(todayLA(),C.shift); if(!it||!run) return ckEndHtml();
@@ -7078,10 +7132,11 @@ function ckRunHtml(){
   const bars=items.map(i=>{ const l=log[i.id]; const k=l?(l.result==='skipped'?'s':(l.result==='no'||l.result==='not_possible'?'n':'d')):(i.id===it.id?'cur':''); return `<i class="${k}"></i>`; }).join('');
   const P=C.pending||{};
   const who=it.assign_id?`<span class="tag">${es?'para':'for'} ${esc(it.assign_name||'')}</span>`:'';
+  const optPhoto=it.photo_opt?ckPhotoLab(es?'Agregar foto (opcional)':'Add a photo (optional)'):'';
   let body='';
-  if(it.type==='verify'){ /* handled below */ }
   if(P.np && it.type!=='verify'){
     body=`<div class="sub" style="margin-top:14px"><b>${es?'¿Por qué no se pudo?':'Why not possible?'}</b></div>
+      ${it.photo_opt?ckPhotoLab(es?'Foto de por qué (opcional)':'Photo of why (optional)'):''}
       <div style="display:flex;flex-direction:column;gap:7px;margin-top:8px">${CK_REASONS.map(r=>`<button class="btn-ghost ck-btn" onclick="ckReason('${r[0]}')">${es?r[2]:r[1]}</button>`).join('')}</div>
       <button class="btn-ghost ck-btn" style="margin-top:10px" onclick="ckNotPossible(false)">‹ ${es?'Regresar':'Back'}</button>`;
   } else if(it.type==='number'){
@@ -7097,20 +7152,22 @@ function ckRunHtml(){
   } else if(it.type==='verify'){
     const src=C.items.find(x=>x.id===it.verify_item); const yrun=ckRun(shiftDay(todayLA(),-1),'closing'); const yl=src&&yrun?ckLogOf(yrun)[src.id]:null;
     body=`<div class="muted" style="font-size:12px;margin-top:8px">${es?'Anoche':'Last night'}: ${yrun?`${esc(yrun.closed_by||yrun.opened_by||'')} · ${yrun.status==='open'?(es?'lista sin cerrar':'list left open'):(es?'cerró':'closed')+' '+new Date(yrun.closed_at||yrun.opened_at).toLocaleTimeString('en-US',{timeZone:'America/Los_Angeles',hour:'numeric',minute:'2-digit'})}${yl?` · ${esc(src.code||'')} ${yl.result==='yes'||yl.result==='auto'?'✓':yl.result} ${new Date(yl.at).toLocaleTimeString('en-US',{timeZone:'America/Los_Angeles',hour:'numeric',minute:'2-digit'})}`:(src?` · ${esc(src.code||'')} ${es?'sin marcar':'not marked'}`:'')}`:(es?'sin lista de cierre':'no closing list')}</div>
+      ${optPhoto}
       <div class="ck-row" style="margin-top:18px"><button class="btn-primary ck-btn" style="padding:22px 0;font-size:22px" onclick="ckYes()">${es?'SÍ':'YES'}</button><button class="btn-ghost ck-btn ck-warn" style="padding:22px 0;font-size:22px" onclick="ckNotPossible('no')">NO</button></div>`;
     if(P.np==='no'||P.np===true){ body=`<div class="sub" style="margin-top:12px"><b>${es?'¿Qué encontraste?':'What did you find?'}</b> <span class="muted">(${es?'opcional':'optional'})</span></div>
       <input id="ck-note" style="width:100%;margin-top:6px;padding:10px;border:1.5px solid var(--line);border-radius:10px;font-size:14px" placeholder="${es?'una línea':'one line'}">
-      <label class="btn-ghost ck-btn" style="display:block;margin-top:8px;text-align:center">📷 ${es?'Foto':'Photo'} <span id="ck-photo-lab"></span><input type="file" accept="image/*" capture="environment" style="display:none" onchange="ckPhoto(this)"></label>
+      ${ckPhotoLab(es?'Foto':'Photo')}
       <button class="ck-yes" style="background:var(--coral)" onclick="ckNo()">${es?'GUARDAR "NO"':'SAVE "NO"'}</button>
       <button class="btn-ghost ck-btn" style="margin-top:8px" onclick="ckNotPossible(false)">‹ ${es?'Regresar':'Back'}</button>`; }
   } else { // yes / photo
-    body=`${it.type==='photo'?`<label class="btn-ghost ck-btn" style="display:block;margin-top:14px;text-align:center">📷 ${es?'Tomar foto':'Take the photo'} <span id="ck-photo-lab"></span><input type="file" accept="image/*" capture="environment" style="display:none" onchange="ckPhoto(this)"></label>`:''}
+    body=`${it.type==='photo'?ckPhotoLab(es?'Tomar foto':'Take the photo'):optPhoto}
       <button class="ck-yes" onclick="ckYes()">${es?'SÍ':'YES'}</button>
       <div class="ck-row"><button class="btn-ghost ck-btn" onclick="ckSkip()">${es?'Después':'Skip for now'}</button><button class="btn-ghost ck-btn ck-warn" onclick="ckNotPossible(true)">${es?'No se pudo':'Not possible'}</button></div>`;
   }
   const done=items.filter(i=>log[i.id]&&log[i.id].result!=='skipped').length;
   return `<div class="card" style="padding:12px 14px">
-    <div style="display:flex;justify-content:space-between;align-items:center"><b style="color:var(--ocean-dark)">${C.shift==='closing'?(es?'Cierre':'Closing'):(es?'Apertura':'Opening')}</b><span class="muted" style="font-size:12px">${done}/${items.length} · ${C.idx+1} ${es?'de':'of'} ${C.order.length}${C.pass===2?(es?' · repaso':' · second pass'):''}</span></div>
+    <div style="display:flex;justify-content:space-between;align-items:center;gap:8px"><b style="color:var(--ocean-dark)">${C.shift==='closing'?(es?'Cierre':'Closing'):(es?'Apertura':'Opening')} · ${ckLevelLabel(ckLv(run))}</b><span class="muted" style="font-size:12px;text-align:right">${done}/${items.length} · ${C.idx+1} ${es?'de':'of'} ${C.order.length}${C.pass===2?(es?' · repaso':' · second pass'):''}</span></div>
+    <div class="muted" style="font-size:11.5px">${ckDueHtml(run.on_date,C.shift,run).replace(/^ · /,'')}</div>
     <div class="ck-prog">${bars}</div></div>
   <div class="card" style="min-height:300px">
     <div><span class="tag">${esc(it.area||'')}</span>${who}${it.code?`<span class="muted" style="font-size:10.5px">${esc(it.code)}</span>`:''}</div>
@@ -7127,38 +7184,42 @@ function ckEndHtml(){
   const done=items.length-sk.length-un.length;
   const mins=Math.max(1,Math.round((Date.now()-new Date(run.opened_at).getTime())/60000));
   const u=pu(); const ini=(u.name||'').split(/\s+/).map(w=>w[0]||'').join('').toUpperCase().slice(0,3);
+  const late=ckPastDue(run.on_date,C.shift);
   return `<div class="card"><div class="ck-big" style="font-size:20px">${done} ${es?'de':'of'} ${items.length} ${es?'contestados':'answered'} · ${mins} min</div>
     ${sk.length||un.length?`<div class="sub">${sk.length+un.length} ${es?'sin contestar — contéstalos ahora o quedan como "después" esta noche.':'skipped — answer them now, or they stay marked "skipped" tonight.'}</div>
       ${[...sk,...un].map(i=>`<div class="ck-li"><span class="ck-ck s">·</span>${esc(ckLabel(i))}</div>`).join('')}
       <div class="ck-row"><button class="btn-primary ck-btn" onclick="ckAnswerSkipped()">${es?'Contestar':'Answer them'} (${sk.length+un.length})</button></div>`:`<div class="sub" style="color:var(--palm);font-weight:700">${es?'Todo contestado.':'Everything answered.'}</div>`}
   </div>
   <div class="card"><div class="sub"><b>${es?'Terminar:':'Finish:'}</b> ${es?'toca tus iniciales para cerrar la lista.':'tap your initials to close the list.'}</div>
+    ${late?`<div class="sub" style="color:var(--coral);font-weight:700;margin-top:4px">${es?'Ya pasó la hora (':'Past its due time ('}${ckDueLabel(C.shift)}${es?') — se guarda como tarde.':') — it is saved as late.'}</div>`:''}
     <button class="btn-primary ck-btn" style="font-size:24px;padding:16px 0;margin-top:8px" onclick="ckFinish()">${esc(ini||'OK')}</button>
     <div class="muted" style="font-size:11px;margin-top:6px">${es?'Quién eres viene de tu inicio de sesión, no de lo que escribes.':'Who you are comes from your login, not from what you type.'}</div></div>`;
 }
-// ---- home: today's two lists ----
+// ---- home: today's two lists, for the person's own level ----
 function ckHomeHtml(){
-  const es=isES(); const d=todayLA(); const C=ckState();
-  const card=(shift)=>{ const items=ckItems(shift); const run=ckRun(d,shift); const log=ckLogOf(run);
+  const es=isES(); const d=todayLA(); const C=ckState(); const lv=ckLevel();
+  const tools=can('checklist.edit')||can('checklist.results')?`<div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:6px">${can('checklist.results')?`<button class="btn-ghost ck-btn" style="width:auto" onclick="ckGo('results')">${es?'Resultados':'Results'}</button>`:''}${can('checklist.edit')?`<button class="btn-ghost ck-btn" style="width:auto" onclick="ckGo('edit')">${es?'Editar la lista':'Edit the list'}</button>`:''}</div>`:'';
+  const head=`<div class="card"><h2>${es?'Lista de apertura / cierre':'Opening / Closing checklist'}${lv?` · ${ckLevelLabel(lv)}`:''}<span class="h2sub">${es?'un punto a la vez · cada SÍ se guarda al momento':'one item at a time · every YES saves the moment you tap it'}</span></h2>${tools}</div>`;
+  if(!lv) return head+`<div class="card"><div class="sub">${es?'No estás en ninguna lista de apertura / cierre.':'You are not on an opening / closing list.'}</div><div class="muted" style="font-size:12px;margin-top:4px">${es?'El Chef pone a cada persona en un nivel: Gerencia, Cocineros líderes o Cocineros.':'The Chef puts each person on a level: Management, Lead cooks or Cooks.'}</div></div>`;
+  if(!ckItems('opening').length && !ckItems('closing').length) return head+`<div class="card"><div class="sub">${es?'Todavía no hay lista para':'No list yet for'} ${ckLevelLabel(lv)}.</div></div>`;
+  const card=(shift)=>{ const items=ckItems(shift); if(!items.length) return ''; const run=ckRun(d,shift); const log=ckLogOf(run);
     const done=items.filter(i=>log[i.id]&&log[i.id].result!=='skipped').length;
     const lab=shift==='closing'?(es?'Cierre':'Closing'):(es?'Apertura':'Opening');
     const first=ckShiftFor()===shift;
     let st='';
-    if(run&&run.status!=='open') st=`<div class="muted" style="font-size:12px">${es?'cerrada por':'closed by'} ${esc(run.closed_by||'')} · ${done}/${items.length} · ${run.seconds!=null?Math.round(run.seconds/60)+' min':''}</div>`;
-    else if(run) st=`<div class="muted" style="font-size:12px">${es?'en curso':'in progress'} · ${done}/${items.length} · ${es?'empezó':'started by'} ${esc(run.opened_by||'')}</div>`;
-    else st=`<div class="muted" style="font-size:12px">${items.length} ${es?'puntos · unos':'items · about'} ${Math.max(2,Math.round(items.length*0.8))} min</div>`;
-    const btn=!items.length?'':(run&&run.status!=='open')?'':`<button class="btn-primary ck-btn" style="margin-top:8px" onclick="ckStart('${shift}')">${run?(es?'Continuar':'Continue'):(es?'Empezar':'Start')} ›</button>`;
+    if(run&&run.status!=='open') st=`<div class="muted" style="font-size:12px">${es?'cerrada por':'closed by'} ${esc(run.closed_by||'')} · ${done}/${items.length} · ${run.seconds!=null?Math.round(run.seconds/60)+' min':''}${ckDueHtml(d,shift,run)}</div>`;
+    else if(run) st=`<div class="muted" style="font-size:12px">${es?'en curso':'in progress'} · ${done}/${items.length} · ${es?'empezó':'started by'} ${esc(run.opened_by||'')}${ckDueHtml(d,shift,run)}</div>`;
+    else st=`<div class="muted" style="font-size:12px">${items.length} ${es?'puntos · unos':'items · about'} ${Math.max(2,Math.round(items.length*0.8))} min${ckDueHtml(d,shift,null)}</div>`;
+    const btn=(run&&run.status!=='open')?'':`<button class="btn-primary ck-btn" style="margin-top:8px" onclick="ckStart('${shift}')">${run?(es?'Continuar':'Continue'):(es?'Empezar':'Start')} ›</button>`;
     return `<div class="card" style="${first?'border-left:4px solid var(--gold)':''}"><b style="font-size:15px;color:var(--ocean-dark)">${lab} · ${fmtDate(d)}</b>${st}${btn}</div>`; };
   const first=ckShiftFor(), second=first==='closing'?'opening':'closing';
   const y=ckRun(shiftDay(d,-1),'closing'); const ylog=ckLogOf(y); const yi=ckItems('closing');
-  const yline=y?`<div class="card"><div class="sub"><b>${es?'Anoche':'Last night'}</b> · ${esc(y.closed_by||y.opened_by||'')} · ${yi.filter(i=>ylog[i.id]&&['yes','auto'].includes(ylog[i.id].result)).length}/${yi.length} ✓${y.status==='open'?` · <span style="color:var(--coral)">${es?'lista sin cerrar':'list left open'}</span>`:''}</div></div>`:'';
-  return `<div class="card"><h2>${es?'Lista de apertura / cierre':'Opening / Closing checklist'}<span class="h2sub">${es?'un punto a la vez · cada SÍ se guarda al momento':'one item at a time · every YES saves the moment you tap it'}</span></h2>
-    ${can('checklist.edit')||can('checklist.results')?`<div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:6px">${can('checklist.results')?`<button class="btn-ghost ck-btn" style="width:auto" onclick="ckGo('results')">${es?'Resultados':'Results'}</button>`:''}${can('checklist.edit')?`<button class="btn-ghost ck-btn" style="width:auto" onclick="ckGo('edit')">${es?'Editar la lista':'Edit the list'}</button>`:''}</div>`:''}</div>
-    ${card(first)}${card(second)}${yline}`;
+  const yline=y?`<div class="card"><div class="sub"><b>${es?'Anoche':'Last night'}</b> · ${esc(y.closed_by||y.opened_by||'')} · ${yi.filter(i=>ylog[i.id]&&['yes','auto'].includes(ylog[i.id].result)).length}/${yi.length} ✓${y.status==='open'?` · <span style="color:var(--coral)">${es?'lista sin cerrar':'list left open'}</span>`:''}${ckRunLate(y)?` · <span style="color:var(--coral)">${es?'tarde':'late'}</span>`:''}</div></div>`:'';
+  return head+card(first)+card(second)+yline;
 }
 // ---- Chef's editor ----
 function ckEditHtml(){
-  const es=isES(); const C=ckState(); const sh=C.editShift||'closing'; const items=ckItems(sh);
+  const es=isES(); const C=ckState(); const sh=C.editShift||'closing'; const lv=C.editLevel||'management'; const items=ckItems(sh,lv);
   const E=C.edit; // item being edited (object) or null
   const staff=S.staff.filter(s=>s.active&&s.login);
   const form=(it)=>`<div class="card" style="border-left:4px solid var(--gold)">
@@ -7166,43 +7227,55 @@ function ckEditHtml(){
     <label class="ck-lab">${es?'Texto (EN)':'Text (EN)'}<input id="ed-en" value="${esc(it.text_en||'')}"></label>
     <label class="ck-lab">Texto (ES)<input id="ed-es" value="${esc(it.text_es||'')}"></label>
     <label class="ck-lab">${es?'Detalle / instrucción (opcional)':'Detail / instruction (optional)'}<input id="ed-det" value="${esc(it.detail_en||'')}"></label>
+    <label class="ck-lab">${es?'Nivel':'Level'}<select id="ed-level">${CK_LEVELS.map(l=>`<option value="${l[0]}" ${ckLv(it)===l[0]?'selected':''}>${es?l[2]:l[1]}</option>`).join('')}</select></label>
     <label class="ck-lab">${es?'Turno':'Shift'}<select id="ed-shift"><option value="closing" ${it.shift==='closing'?'selected':''}>${es?'Cierre':'Closing'}</option><option value="opening" ${it.shift==='opening'?'selected':''}>${es?'Apertura':'Opening'}</option></select></label>
     <label class="ck-lab">${es?'Área':'Area'}<select id="ed-area">${CK_AREAS.map(a=>`<option ${it.area===a?'selected':''}>${a}</option>`).join('')}</select></label>
     <label class="ck-lab">${es?'Tipo de respuesta':'Answer type'}<select id="ed-type" onchange="ckEdType(this.value)">${CK_TYPES.map(t=>`<option value="${t[0]}" ${it.type===t[0]?'selected':''}>${es?t[2]:t[1]}</option>`).join('')}</select></label>
     <div id="ed-type-extra">${ckEdTypeExtra(it)}</div>
+    <label class="ck-lab" style="flex-direction:row;align-items:center;gap:8px"><input type="checkbox" id="ed-photo" ${it.photo_opt?'checked':''} style="width:auto">${es?'Opción de foto (foto opcional en SÍ o en NO)':'Photo option (an optional photo on YES or NO)'}</label>
     <label class="ck-lab">${es?'Asignar a':'Assign to'}<select id="ed-assign"><option value="">${es?'— nadie (quien esté en turno)':'— open (whoever is on shift)'}</option>${staff.map(s=>`<option value="${s.id}" ${it.assign_id===s.id?'selected':''}>${esc(s.name)}${s.title?' · '+esc(s.title):''}</option>`).join('')}</select></label>
     <label class="ck-lab">${es?'Cuándo':'When'}<select id="ed-timing"><option value="any" ${it.timing==='any'?'selected':''}>${es?'en cualquier momento del turno':'any time in the shift'}</option><option value="first" ${it.timing==='first'?'selected':''}>${es?'al empezar':'first thing'}</option><option value="last" ${it.timing==='last'?'selected':''}>${es?'antes de irse':'before leaving'}</option></select></label>
     <label class="ck-lab" style="flex-direction:row;align-items:center;gap:8px"><input type="checkbox" id="ed-req" ${it.required!==false?'checked':''} style="width:auto">${es?'Obligatorio (cuenta en el porcentaje)':'Required (counts toward the completion %)'}</label>
     <label class="ck-lab">${es?'Nota del Chef (se muestra debajo del punto)':'Chef\'s note (shown under the item)'}<input id="ed-note" value="${esc(it.note||'')}"></label>
     <div class="ck-row"><button class="btn-primary ck-btn" onclick="ckEdSave()">${es?'Guardar':'Save'}</button><button class="btn-ghost ck-btn" onclick="ckEdCancel()">${es?'Cancelar':'Cancel'}</button>${it.id?`<button class="btn-ghost ck-btn ck-warn" onclick="ckEdRetire('${it.id}')">${it.active?(es?'Quitar de la lista':'Remove from list'):(es?'Volver a poner':'Put back')}</button>`:''}</div></div>`;
-  return `<div class="card"><h2>${es?'Editar la lista':'Edit the list'}<span class="h2sub">${es?'tuya: orden, texto, a quién, tipo de respuesta':'yours: order, wording, who, answer type'}</span>
+  const alertNames=(Array.isArray(ckCfg().alert_to)?ckCfg().alert_to:[]).map(id=>(S.staff.find(s=>s.id===id)||{}).name).filter(Boolean).join(', ')||'—';
+  const people=`<div class="card"><b>${es?'Quién hace cada lista':'Who does which list'}</b>
+    <div class="muted" style="font-size:11.5px;margin:2px 0 4px">${es?'Cada persona ve solo las listas de su nivel. Sin nivel = no ve ninguna.':'Each person sees only their level\'s lists. No level = no list.'}</div>
+    ${staff.map(s=>`<div class="ck-li"><span style="flex:1">${esc(s.name)}${s.title?` <span class="muted" style="font-size:10.5px">${esc(s.title)}</span>`:''}</span><select style="width:auto;max-width:150px" onchange="ckSetLevel('${s.id}',this.value)"><option value="">${es?'— ninguno':'— none'}</option>${CK_LEVELS.map(l=>`<option value="${l[0]}" ${ckLevelOf(s.id)===l[0]?'selected':''}>${es?l[2]:l[1]}</option>`).join('')}</select></div>`).join('')}
+    <div class="muted" style="font-size:11px;margin-top:8px">${es?'Hora límite':'Due by'}: ${es?'apertura':'opening'} ${ckDueLabel('opening')} · ${es?'cierre':'closing'} ${ckDueLabel('closing')} · ${es?'avisos para':'alerts go to'} ${esc(alertNames)}</div></div>`;
+  return `<div class="card"><h2>${es?'Editar la lista':'Edit the list'}<span class="h2sub">${es?'tuya: orden, texto, a quién, tipo de respuesta':'yours: order, wording, who, answer type'}</span></h2>
+      <div style="display:flex;gap:6px;flex-wrap:wrap;margin-top:6px">${CK_LEVELS.map(l=>`<button class="${lv===l[0]?'btn-primary':'btn-ghost'} ck-btn" style="width:auto" onclick="ckEdLevel('${l[0]}')">${es?l[2]:l[1]} <span style="opacity:.75">${ckItems('opening',l[0]).length+ckItems('closing',l[0]).length}</span></button>`).join('')}</div>
       <div style="display:flex;gap:8px;margin-top:6px"><button class="${sh==='closing'?'btn-primary':'btn-ghost'} ck-btn" style="width:auto" onclick="ckEdShift('closing')">${es?'Cierre':'Closing'}</button><button class="${sh==='opening'?'btn-primary':'btn-ghost'} ck-btn" style="width:auto" onclick="ckEdShift('opening')">${es?'Apertura':'Opening'}</button><button class="btn-ghost ck-btn" style="width:auto;margin-left:auto" onclick="ckHome()">‹ ${es?'Lista':'Checklist'}</button></div></div>
     ${E&&!E.id?form(E):''}
+    ${items.length?'':`<div class="card"><div class="muted">${es?'Esta lista está vacía.':'This list is empty.'}</div></div>`}
     ${items.map((it,k)=>E&&E.id===it.id?form(E):`<div class="card" style="padding:10px 12px;${it.active?'':'opacity:.5'}">
       <div style="display:flex;align-items:flex-start;gap:8px"><b style="color:var(--muted);min-width:22px">${k+1}</b>
-        <div style="flex:1;min-width:0"><div style="font-size:13.5px"><b>${esc(it.text_en)}</b></div><div class="muted" style="font-size:11.5px">${esc(it.area||'')} · ${(CK_TYPES.find(t=>t[0]===it.type)||[])[1]||it.type}${it.auto_key?' · auto':''}${it.assign_id?` · <b>${ckStaffLabel(it.assign_id)}</b>`:` · ${es?'sin asignar':'unassigned'}`}</div></div>
+        <div style="flex:1;min-width:0"><div style="font-size:13.5px"><b>${esc(it.text_en)}</b></div><div class="muted" style="font-size:11.5px">${esc(it.area||'')} · ${(CK_TYPES.find(t=>t[0]===it.type)||[])[1]||it.type}${it.auto_key?' · auto':''}${it.photo_opt?' · 📷':''}${it.assign_id?` · <b>${ckStaffLabel(it.assign_id)}</b>`:` · ${es?'sin asignar':'unassigned'}`}</div></div>
         <div style="display:flex;flex-direction:column;gap:3px"><button class="btn-ghost" style="padding:3px 8px;font-size:12px" onclick="ckEdMove('${it.id}',-1)">▲</button><button class="btn-ghost" style="padding:3px 8px;font-size:12px" onclick="ckEdMove('${it.id}',1)">▼</button></div>
         <button class="btn-ghost" style="padding:6px 9px;font-size:12px" onclick="ckEdOpen('${it.id}')">${es?'editar':'edit'}</button></div></div>`).join('')}
     ${E?'':`<button class="btn-ghost ck-btn" style="width:100%;border-style:dashed" onclick="ckEdNew()">+ ${es?'Agregar un punto':'Add an item'}</button>`}
-    <div class="muted" style="font-size:11px;margin-top:8px">${es?'Cada cambio queda registrado con tu nombre y fecha. Los cambios aplican la próxima vez que alguien abra la lista.':'Every change is logged with your name and date. Changes apply the next time someone opens the list.'}</div>`;
+    <div class="muted" style="font-size:11px;margin-top:8px">${es?'Cada cambio queda registrado con tu nombre y fecha. Los cambios aplican la próxima vez que alguien abra la lista.':'Every change is logged with your name and date. Changes apply the next time someone opens the list.'}</div>
+    ${people}`;
 }
 function ckEdTypeExtra(it){
   const es=isES(); const t=(document.getElementById('ed-type')||{}).value||it.type;
   if(t==='number') return `<div class="ck-row"><label class="ck-lab">${es?'Mín':'Min'}<input id="ed-lo" type="number" step="any" value="${it.range_lo!=null?it.range_lo:''}"></label><label class="ck-lab">${es?'Máx':'Max'}<input id="ed-hi" type="number" step="any" value="${it.range_hi!=null?it.range_hi:''}"></label><label class="ck-lab">${es?'Unidad':'Unit'}<input id="ed-unit" value="${esc(it.unit||'')}" placeholder="°F"></label></div>`;
   if(t==='choice') return `<label class="ck-lab">${es?'Opciones (separadas por coma)':'Answers (comma separated)'}<input id="ed-choices" value="${esc((it.choices||[]).join(', '))}" placeholder="Sauté, Grill, Fry, Pantry"></label>`;
-  if(t==='verify'){ const cl=ckState().items.filter(i=>i.shift==='closing'&&i.active&&i.type!=='verify'); return `<label class="ck-lab">${es?'Revisa este punto del cierre':'Checks this closing item'}<select id="ed-verify">${cl.map(c=>`<option value="${c.id}" ${it.verify_item===c.id?'selected':''}>${esc(c.code||'')} ${esc(c.text_en)}</option>`).join('')}</select></label>`; }
+  if(t==='verify'){ const lv=ckLv(it); const cl=ckState().items.filter(i=>i.shift==='closing'&&i.active&&i.type!=='verify'&&ckLv(i)===lv); return `<label class="ck-lab">${es?'Revisa este punto del cierre':'Checks this closing item'}<select id="ed-verify">${cl.map(c=>`<option value="${c.id}" ${it.verify_item===c.id?'selected':''}>${esc(c.code||'')} ${esc(c.text_en)}</option>`).join('')}</select></label>`; }
   return '';
 }
 window.ckEdType=(v)=>{ const C=ckState(); if(C.edit){ C.edit.type=v; const x=document.getElementById('ed-type-extra'); if(x) x.innerHTML=ckEdTypeExtra(C.edit); } };
 window.ckEdShift=(s)=>{ ckState().editShift=s; ckState().edit=null; render(); };
+window.ckEdLevel=(l)=>{ ckState().editLevel=l; ckState().edit=null; render(); };
 window.ckEdOpen=(id)=>{ const it=ckState().items.find(i=>i.id===id); if(it) ckState().edit=Object.assign({},it); render(); };
-window.ckEdNew=()=>{ const C=ckState(); const sh=C.editShift||'closing'; const mx=Math.max(0,...ckItems(sh).map(i=>i.ord)); C.edit={shift:sh, ord:mx+10, area:'Line', type:'yes', timing:'any', required:true, active:true}; render(); };
+window.ckEdNew=()=>{ const C=ckState(); const sh=C.editShift||'closing'; const lv=C.editLevel||'management'; const mx=Math.max(0,...ckItems(sh,lv).map(i=>i.ord)); C.edit={shift:sh, level:lv, ord:mx+10, area:'Line', type:'yes', timing:'any', required:true, active:true, photo_opt:false}; render(); };
 window.ckEdCancel=()=>{ ckState().edit=null; render(); };
 function ckEdRead(){
   const g=id=>(document.getElementById(id)||{}).value; const E=ckState().edit||{};
   const type=g('ed-type')||E.type||'yes';
-  const out={shift:g('ed-shift')||E.shift, area:g('ed-area')||null, text_en:(g('ed-en')||'').trim(), text_es:(g('ed-es')||'').trim()||null, detail_en:(g('ed-det')||'').trim()||null,
+  const out={shift:g('ed-shift')||E.shift, level:g('ed-level')||ckLv(E), area:g('ed-area')||null, text_en:(g('ed-en')||'').trim(), text_es:(g('ed-es')||'').trim()||null, detail_en:(g('ed-det')||'').trim()||null,
     type, assign_id:g('ed-assign')||null, timing:g('ed-timing')||'any', required:!!(document.getElementById('ed-req')||{}).checked, note:(g('ed-note')||'').trim()||null,
+    photo_opt:!!(document.getElementById('ed-photo')||{}).checked,
     range_lo:null, range_hi:null, unit:null, choices:null, verify_item:null};
   if(type==='number'){ out.range_lo=g('ed-lo')!==''&&g('ed-lo')!=null?Number(g('ed-lo')):null; out.range_hi=g('ed-hi')!==''&&g('ed-hi')!=null?Number(g('ed-hi')):null; out.unit=(g('ed-unit')||'').trim()||null; }
   if(type==='choice'){ out.choices=(g('ed-choices')||'').split(',').map(s=>s.trim()).filter(Boolean); }
@@ -7223,7 +7296,7 @@ window.ckEdSave=async()=>{
     if(q.error){ toast(q.error.message||'Could not save'); return; }
     await db.from('tb_check_edits').insert({item_id:q.data&&q.data.id, who:u.name, who_id:u.id, action:'add', after:q.data});
   }
-  C.edit=null; await ckLoad(todayLA(),true); toast(isES()?'Guardado':'Saved'); render();
+  C.edit=null; C.editLevel=vals.level; C.editShift=vals.shift; await ckLoad(todayLA(),true); toast(isES()?'Guardado':'Saved'); render();
 };
 window.ckEdRetire=async(id)=>{
   if(!guard('checklist.edit')) return; const C=ckState(); const it=C.items.find(i=>i.id===id); if(!it) return; const u=pu();
@@ -7234,12 +7307,25 @@ window.ckEdRetire=async(id)=>{
 };
 window.ckEdMove=async(id,dir)=>{
   if(!guard('checklist.edit')) return; const C=ckState(); const it=C.items.find(i=>i.id===id); if(!it) return;
-  const list=ckItems(it.shift); const k=list.findIndex(i=>i.id===id); const j=k+dir; if(j<0||j>=list.length) return;
+  const list=ckItems(it.shift, ckLv(it)); const k=list.findIndex(i=>i.id===id); const j=k+dir; if(j<0||j>=list.length) return;
   const a=list[k], b=list[j]; const u=pu();
   await db.from('tb_check_items').update({ord:b.ord, updated_by:u.name}).eq('id',a.id);
   await db.from('tb_check_items').update({ord:a.ord, updated_by:u.name}).eq('id',b.id);
   await db.from('tb_check_edits').insert({item_id:a.id, who:u.name, who_id:u.id, action:'move', before:{ord:a.ord}, after:{ord:b.ord}});
   await ckLoad(todayLA(),true); render();
+};
+// Dan puts a person on a level (or none). One config row, read fresh first so two phones do not overwrite each other.
+window.ckSetLevel=async(empId, lv)=>{
+  if(!guard('checklist.edit')) return; const C=ckState(); const u=pu();
+  const cur=await db.from('tb_model').select('value').eq('key','checklists').maybeSingle();
+  const cfg=Object.assign({version:1}, (cur.data&&cur.data.value)||C.cfg||{});
+  const levels=Object.assign({}, cfg.levels||{}); const before=levels[empId]||null;
+  if(lv) levels[empId]=lv; else delete levels[empId];
+  cfg.levels=levels; cfg.updated_by=u.name; cfg.updated_at=new Date().toISOString();
+  const q=cur.data?await db.from('tb_model').update({value:cfg}).eq('key','checklists'):await db.from('tb_model').insert({key:'checklists', value:cfg});
+  if(q.error){ toast(q.error.message||'Could not save'); render(); return; }
+  try{ await db.from('tb_check_edits').insert({item_id:null, who:u.name, who_id:u.id, action:'level', before:{employee:empId, level:before}, after:{employee:empId, level:lv||null}}); }catch(e){}
+  C.cfg=cfg; toast(isES()?'Guardado':'Saved'); render();
 };
 // ---- results ----
 async function ckLoadResults(days){
@@ -7254,23 +7340,52 @@ async function ckLoadResults(days){
 function ckResultsHtml(){
   const es=isES(); const C=ckState(); const R=C.res; if(!R) return `<div class="card"><div class="muted">${es?'Cargando…':'Loading…'}</div></div>`;
   const items=C.items; const byId={}; items.forEach(i=>byId[i.id]=i);
-  const req=(shift)=>items.filter(i=>i.active&&i.shift===shift&&i.required!==false&&i.type!=='verify');
+  const req=(shift,lv)=>items.filter(i=>i.active&&i.shift===shift&&ckLv(i)===lv&&i.required!==false&&i.type!=='verify');
   const runs=R.runs; const closing=runs.filter(r=>r.shift==='closing'), opening=runs.filter(r=>r.shift==='opening');
-  const pct=(r)=>{ const it=req(r.shift); if(!it.length) return null; const L=R.logs[r.id]||{}; return Math.round(100*it.filter(i=>L[i.id]&&['yes','auto'].includes(L[i.id].result)).length/it.length); };
+  const pct=(r)=>{ const it=req(r.shift,ckLv(r)); if(!it.length) return null; const L=R.logs[r.id]||{}; return Math.round(100*it.filter(i=>L[i.id]&&['yes','auto'].includes(L[i.id].result)).length/it.length); };
   const cp=closing.map(pct).filter(x=>x!=null); const avg=cp.length?Math.round(cp.reduce((a,b)=>a+b,0)/cp.length):null;
   const found=opening.reduce((a,r)=>a+Object.values(R.logs[r.id]||{}).filter(l=>byId[l.item_id]&&byId[l.item_id].type==='verify'&&l.result==='no').length,0);
   const secs=closing.filter(r=>r.seconds!=null).map(r=>r.seconds).sort((a,b)=>a-b); const med=secs.length?Math.round(secs[Math.floor(secs.length/2)]/60):null;
-  const money=false;
-  const runHtml=(r)=>{ const L=R.logs[r.id]||{}; const its=items.filter(i=>i.shift===r.shift&&(i.active||L[i.id])).sort((a,b)=>a.ord-b.ord);
-    return `<div class="card"><div class="sub"><b>${r.shift==='closing'?(es?'Cierre':'Closing'):(es?'Apertura':'Opening')} · ${fmtDate(r.on_date)}</b> · ${esc(r.closed_by||r.opened_by||'')}${r.status==='open'?` · <span style="color:var(--coral)">${es?'sin cerrar':'left open'}</span>`:(r.seconds!=null?` · ${Math.round(r.seconds/60)} min`:'')}</div>
+  const lateN=runs.filter(r=>r.status==='closed'&&ckRunLate(r)).length;
+  const runHtml=(r)=>{ const L=R.logs[r.id]||{}; const its=items.filter(i=>i.shift===r.shift&&ckLv(i)===ckLv(r)&&(i.active||L[i.id])).sort((a,b)=>a.ord-b.ord);
+    return `<div class="card"><div class="sub"><b>${r.shift==='closing'?(es?'Cierre':'Closing'):(es?'Apertura':'Opening')} · ${ckLevelLabel(ckLv(r))} · ${fmtDate(r.on_date)}</b> · ${esc(r.closed_by||r.opened_by||'')}${r.status==='open'?` · <span style="color:var(--coral)">${es?'sin cerrar':'left open'}</span>`:(r.seconds!=null?` · ${Math.round(r.seconds/60)} min`:'')}${r.status==='closed'&&ckRunLate(r)?` · <span style="color:var(--coral)">${es?'tarde':'late'}</span>`:''}</div>
       ${its.map(i=>{ const l=L[i.id]; const k=!l?'':(['yes','auto'].includes(l.result)?'d':(l.result==='skipped'?'s':'n')); const t=l?new Date(l.at).toLocaleTimeString('en-US',{timeZone:'America/Los_Angeles',hour:'numeric',minute:'2-digit'}):'';
         const extra=l?(l.result==='auto'?' · app':(l.value!=null?` · ${l.value}${i.unit?' '+esc(i.unit):''}${l.note==='out of range'?' ⚠':''}`:'')+(l.choice?` · ${esc(l.choice)}`:'')+(l.reason?` · ${esc((CK_REASONS.find(x=>x[0]===l.reason)||[])[1]||l.reason)}`:'')+(l.result==='no'&&l.note?` · "${esc(l.note)}"`:'')+(l.photo_path?' · 📷':'')):'';
         return `<div class="ck-li"><span class="ck-ck ${k}">${k==='d'?'✓':(k==='n'?'✕':'·')}</span><span style="flex:1">${esc(ckLabel(i))}${i.assign_name?` <span class="muted" style="font-size:10.5px">${esc(i.assign_name)}</span>`:''}</span><span class="muted" style="font-size:11px;white-space:nowrap">${l?(l.result==='skipped'?(es?'después':'skipped'):(l.result==='not_possible'?(es?'no se pudo':'not possible'):(l.result==='no'?'NO':t))):(es?'sin marcar':'not marked')}${extra}${l&&l.who&&l.who!==(r.closed_by||r.opened_by)?` · ${esc(l.who)}`:''}</span></div>`; }).join('')}</div>`; };
-  return `<div class="card"><h2>${es?'Resultados':'Results'}<span class="h2sub">${es?'últimos 14 días':'last 14 days'}</span>
+  return `<div class="card"><h2>${es?'Resultados':'Results'}<span class="h2sub">${es?'últimos 14 días · todos los niveles':'last 14 days · every level'}</span></h2>
       <button class="btn-ghost ck-btn" style="width:auto;margin-top:6px" onclick="ckHome()">‹ ${es?'Lista':'Checklist'}</button></div>
-    <div class="card"><div class="ck-kpi"><div><b>${avg!=null?avg+'%':'—'}</b><i>${es?'cierre hecho':'closing done'} · ${cp.length} ${es?'noches':'nights'}</i></div><div><b>${found}</b><i>${es?'encontrado mal por el que abre':'found not right by openers'}</i></div><div><b>${med!=null?med+' min':'—'}</b><i>${es?'cierre, mediana':'median closing time'}</i></div></div>
-      <div class="muted" style="font-size:11px;margin-top:6px">${es?'Hecho = puntos obligatorios marcados SÍ (o por la app). Los "no se pudo" y los "después" no cuentan como hechos.':'Done = required items answered YES (or by the app). "Not possible" and "skipped" do not count as done.'}</div></div>
+    <div class="card"><div class="ck-kpi"><div><b>${avg!=null?avg+'%':'—'}</b><i>${es?'cierre hecho':'closing done'} · ${cp.length} ${es?'noches':'nights'}</i></div><div><b>${found}</b><i>${es?'encontrado mal por el que abre':'found not right by openers'}</i></div><div><b>${med!=null?med+' min':'—'}</b><i>${es?'cierre, mediana':'median closing time'}</i></div><div><b>${lateN}</b><i>${es?'terminadas tarde':'finished late'}</i></div></div>
+      <div class="muted" style="font-size:11px;margin-top:6px">${es?'Hecho = puntos obligatorios marcados SÍ (o por la app). Los "no se pudo" y los "después" no cuentan como hechos. Tarde = terminada después de las':'Done = required items answered YES (or by the app). "Not possible" and "skipped" do not count as done. Late = finished after'} ${ckDueLabel('opening')} (${es?'apertura':'opening'}) / ${ckDueLabel('closing')} (${es?'cierre':'closing'}).</div></div>
     ${runs.length?runs.map(runHtml).join(''):`<div class="card"><div class="muted">${es?'Todavía no hay listas.':'No lists yet.'}</div></div>`}`;
+}
+// ---- alerts on Today (Oct 8 2026): one card per level and list, for whoever is in alert_to ----
+// Done shows as soon as the list closes, early or not. Not done shows once its due time has
+// passed. Last night's closing shows the next day too, so a morning look covers it. "Got it"
+// hides that one card on this phone only.
+function ckIsAlertee(){ const u=pu(); const a=ckCfg().alert_to; return !!(u&&Array.isArray(a)&&a.includes(u.id)); }
+function ckSeenKey(d,shift,lv,state){ return 'tb_ck_seen_'+d+'|'+shift+'|'+lv+'|'+state; }
+function ckSeen(k){ try{ return localStorage.getItem(k)==='1'; }catch(e){ return false; } }
+window.ckAlertSeen=(k)=>{ try{ localStorage.setItem(k,'1'); }catch(e){} render(); };
+function ckAlertsHtml(d){
+  if(d!==todayLA() || !sec('checklist') || !ckIsAlertee()) return '';
+  const es=isES(), C=ckState(); if(C.loadedFor!==d) return '';
+  const y=shiftDay(d,-1); const out=[];
+  const tm=iso=>{ try{ return new Date(iso).toLocaleTimeString('en-US',{timeZone:'America/Los_Angeles',hour:'numeric',minute:'2-digit'}); }catch(e){ return ''; } };
+  const one=(day, shift, lv)=>{
+    const items=ckItems(shift, lv); if(!items.length) return;
+    const run=ckRun(day, shift, lv); const log=ckLogOf(run);
+    const yes=items.filter(i=>log[i.id]&&['yes','auto'].includes(log[i.id].result)).length;
+    const lab=`${shift==='closing'?(day===y?(es?'Cierre de anoche':'Last night\'s closing'):(es?'Lista de cierre':'Closing list')):(es?'Lista de apertura':'Opening list')} · ${ckLevelLabel(lv)}`;
+    let state=null, html='';
+    if(run&&run.status==='closed'){ state='done';
+      html=`<div class="or-card or-done"><b>✓ ${lab}</b> — ${es?'terminada por':'done by'} ${esc(run.closed_by||'')} ${es?'a las':'at'} ${tm(run.closed_at)}${ckRunLate(run)?` · <b style="color:var(--coral)">${es?'tarde':'late'}</b>`:''} · ${yes}/${items.length} ${es?'en SÍ':'YES'}`; }
+    else if(ckPastDue(day, shift)){ state='notdone';
+      html=`<div class="or-card or-late"><b>${lab} — ${es?'no se terminó':'not done'}</b> · ${es?'era para las':'due'} ${ckDueLabel(shift)}${run?` · ${es?'empezada por':'started by'} ${esc(run.opened_by||'')} · ${yes}/${items.length}${run.status==='auto_closed'?(es?' · se quedó abierta':' · left open'):''}`:` · ${es?'nadie la empezó':'nobody started it'}`}`; }
+    if(!state) return; const k=ckSeenKey(day,shift,lv,state); if(ckSeen(k)) return;
+    out.push(html+`<div class="t2-abtn"><button class="btn-ghost or-btn" onclick="ckAlertSeen('${k}')">Got it · Entendido</button></div></div>`);
+  };
+  CK_LEVELS.forEach(([lv])=>{ one(y,'closing',lv); one(d,'opening',lv); one(d,'closing',lv); });
+  return out.join('');
 }
 async function viewChecklist(){
   const C=ckState(); if(can('checklist.results') && !C.swept){ C.swept=true; await ckSweep(); }
@@ -7508,7 +7623,7 @@ function bigDayRealHtml(){
     return `${t2Day(x,es)} ${es?'hizo':'did'} <b>${kTxt(R.s[x])}</b> (${R.g[x]} ${es?'clientes':'guests'}${h?' · '+esc(h.name):''})`; }).join(' · ')}</div>`;
 }
 // The alerts section. Another module's notice is one more function here, returning '' when quiet.
-const TODAY_ALERTS=[ d=>gsCardHtml(), d=>bigDayAlertHtml(), d=>bigDayRealHtml(), d=>orCardHtml(d) ];
+const TODAY_ALERTS=[ d=>gsCardHtml(), d=>bigDayAlertHtml(), d=>bigDayRealHtml(), d=>orCardHtml(d), d=>ckAlertsHtml(d) ];
 function todayAlertsHtml(d){
   const parts=TODAY_ALERTS.map(f=>{ try{ return f(d)||''; }catch(e){ return ''; } }).filter(x=>x.trim());
   if(!parts.some(x=>x.replace('<div id="gs-card"></div>','').trim())) return parts.join('');   // nothing to show (keeps the gs placeholder)
@@ -7925,12 +8040,15 @@ async function viewToday(){
   // the weather, instead of each waiting its turn — same data, fewer trips before Today shows.
   const pOr=(d===todayLA() && sec('orders')) ? orLoadToday(d).catch(()=>null) : null;
   const p86=load86(d);
+  // Oct 8 2026: the checklist alerts (Izzi) read the same lists the Checklist screen does
+  const pCk=(d===todayLA() && sec('checklist')) ? ckLoad(d).catch(()=>null) : null;
   if(!S._dyn) dynLoad().catch(()=>{});   // the dynamic par, warmed in the background (Sep 30)
   if(!S.wx.loaded) await loadWeather();
   await wxEnsureHours(d);
   await loadEvents();
   if(!S.evMonth) S.evMonth=d.slice(0,7);
   await p86;
+  if(pCk) await pCk;
   const wxf=wxGuestFactor(d);
   const baseGuests=guestForecast(d);
   if(d>=todayLA()) await fcLogShown(d);   // freeze the morning number so the ledger grades what was shown
@@ -10355,6 +10473,39 @@ function itemHoursHtml(f,guests,hrs,u0){
   </div>`;
 }
 
+// One count row. The station walk and the protein drawer (Oct 8 2026) draw the same row, so a
+// protein typed in its drawer saves exactly like any other count line. lite = no drag grip, no move / trash.
+function cntRowHtml(p,o){ o=o||{}; const bil=S.settings&&S.settings.bilingual;
+      const slot=slotOf(p), has=!!S.split[p.id];
+      return `<div class="task-line count-row${has?' done':''}" id="crow-${p.id}" data-pid="${p.id}">
+        ${can('admin.items')&&!o.lite?`<button class="grip no-print" aria-label="Drag to reorder · Arrastra para ordenar" title="Hold and slide to move this item up or down"><svg class="ico ico-sm" aria-hidden="true"><use href="#i-grip"/></svg></button>`:''}
+        <div class="nm"><b>${esc(isES()&&p.name_es?p.name_es:p.name_en)}</b>${noteFlag(p)}
+          <div class="yield" style="justify-content:flex-start;margin-top:4px">
+            ${p.raw?`<span class="y-cont" title="${esc(isES()?'Se cuenta en '+rawUnitLabel(p,'base')+' o en '+rawUnitLabel(p,'alt'):'Count in '+rawUnitLabel(p,'base')+' or '+rawUnitLabel(p,'alt'))}">${contGlyph(p.container)}<span class="cname">${isES()?'contar en':'count in'} ${esc(rawUnitLabel(p,'base'))} ${isES()?'o':'or'} ${esc(rawUnitLabel(p,'alt'))}</span></span>`
+            :`<span class="y-cont" title="Count this item in ${esc(p.container)}${p.container_es?' · '+esc(p.container_es):''}${Number(p.cpb)!==1?` — one batch fills about ${fmtQ(p.cpb)}`:''}">${contGlyph(p.container)}<span class="cname">count in ${esc(p.container)}${bil&&p.container_es?` · ${esc(p.container_es)}`:''}</span></span>`}
+            ${Number(p.cpb)!==1?`<span class="y-amt" title="One batch fills about ${fmtQ(p.cpb)} ${esc(p.container)}"><i>1 batch fills</i><b>${fmtQ(p.cpb)}</b></span>`:''}
+            <span class="y-amt parchip no-print" onclick="parSheetOpen('${p.id}')" title="Min par for THIS place — tap to change it · Toca para cambiar el par mínimo"><i>min par</i><b>${Number(p.min_par)>0?fmtQ(p.min_par):'—'}</b></span>
+            ${sheetAlias(p)}
+          </div></div>
+        ${can('count.start')?`<div class="stp">
+          <button onclick="bumpCount('${p.id}',-${COUNT_STEP})" aria-label="One less · Uno menos">–</button>
+          <div><input type="number" inputmode="decimal" step="any" id="cin-${p.id}" value="${p.raw?rawShown(p):(S.split[p.id]?fmtQ(S.counts[p.id]):'')}" placeholder="${S.cantCount[p.id]?'?':'—'}" onchange="saveCount('${p.id}','${slot}',this.value)">
+            <div class="u" id="cu-${p.id}">${p.raw?esc(rawUnitLabel(p,rawUnitOf(p))):esc(p.container)}</div></div>
+          <button class="up" onclick="bumpCount('${p.id}',${COUNT_STEP})" aria-label="One more · Uno más">+</button>
+        </div>
+        ${p.raw?`<div class="no-print raw-u" id="cuw-${p.id}" style="flex:1 1 100%;display:flex;align-items:center;gap:6px;padding:2px 0 0 0">
+          <span class="muted" style="font-size:11px">${isES()?'contar en':'count in'}</span>
+          <button class="chip btn-sm${rawUnitOf(p)==='base'?' on':''}" data-u="base" onclick="rawUnitSet('${p.id}','base')">${esc(rawUnitLabel(p,'base'))}</button>
+          <button class="chip btn-sm${rawUnitOf(p)==='alt'?' on':''}" data-u="alt" onclick="rawUnitSet('${p.id}','alt')">${esc(rawUnitLabel(p,'alt'))}</button>
+          <span class="muted" id="co-${p.id}" style="font-size:11px;margin-left:auto">${rawOtherTxt(p)}</span>
+        </div>`:''}
+        ${TM()?'':`<div class="no-print" style="flex:1 1 100%;display:flex;gap:6px;flex-wrap:wrap;padding:2px 0 0 0">
+          <button class="chip btn-sm ${S.zeroMark[p.id]?'on':''}" style="font-size:11px${S.zeroMark[p.id]?';background:var(--palm);border-color:var(--palm);color:#fff':''}" onclick="markNotPrepped('${p.id}')" title="A real zero — nothing of this exists right now. Counts as measured.">${p.raw?'⌀ None in house · No hay':'⌀ Not prepped · No preparado'}</button>
+          <button class="chip btn-sm ${S.cantCount[p.id]?'on':''}" style="font-size:11px${S.cantCount[p.id]?';background:#b78300;border-color:#b78300;color:#fff':''}" onclick="markCantCount('${p.id}')" title="Could not count this one — an honest unknown, never assumed to be zero by you.">? Can't count · Sin contar</button>
+          ${can('admin.items')&&!o.lite?`<button class="chip btn-sm cnt-mv" style="font-size:12px;margin-left:auto" onclick="cntMoveAsk('${p.id}')" title="Move this item to another station · Mover a otra estación">⇄ Move</button><button class="chip btn-sm trash-btn" style="font-size:11px" onclick="trashStationItem('${p.id}')" title="Take this off the count list. It is kept in the database with its station, and goes back in one tap from Admin.">${ic('trash','ico-sm')}</button>`:''}
+        </div>`}`
+        :`<div class="cnt"><div><label>Counted · Contado</label><div class="tot" id="tot-${p.id}">${S.counts[p.id]!=null?fmtQ(S.counts[p.id]):'—'}</div></div></div>`}
+      </div>`; }
 async function viewCount(){
   const d=S.selDate||todayLA(); S.selDate=d;
   if(S._tmCountFor!==d){ S._tmCountFor=d; tbMark('count.start', d); }
@@ -10429,14 +10580,12 @@ async function viewCount(){
   // Protein sits at the top of the stack (Dan, Aug 17 2026) and carries its own summary, so a
   // closed drawer still says whether today's sheet has been filled in.
   const pSum=(()=>{
-    const items=(typeof protItems==='function')?protItems():[];
-    if(!items.length) return '';
-    const done=items.filter(it=>{const r=S.protein&&S.protein.rows&&S.protein.rows[it.key];
-      return r && ['beg','add_on','sold','end_inv'].every(f=>r[f]!=null&&r[f]!=='');}).length;
-    return `<span class="lh-sum${done===items.length?' ok':''}">${done}/${items.length} done</span>`;
+    const items=protPreps(); if(!items.length) return '';
+    const n=items.filter(p=>S.split[p.id]).length;
+    return `<span class="lh-sum${n===items.length?' ok':''}">${n}/${items.length} ${isES()?'contados':'counted'}</span>`;
   })();
   const proteinList=listCard('protein','Protein count','Conteo de proteínas', pSum, proteinCard(d),
-    {sub:'daily — from your printed PROTEIN COUNT sheet'});
+    {sub:close?'part of the closing count · typed in the app':'part of the opening count · typed in the app'});
   // One place that decides what the prep drawer's closed summary says, so it can never
   // disagree with what is inside it.
   const prepSum = !c ? `<span class="lh-sum warn">not started</span>`
@@ -10555,7 +10704,7 @@ async function viewCount(){
   }
 
   // ---------- 3. open: fill it in, then submit ----------
-  const secs=countSections(kitchen);
+  const secs=countSections(kitchen.filter(p=>!protHas(p.id)));   // proteins have their own drawer (Oct 8 2026)
   if(!secs.some(s=>s.key===S.countSection)) S.countSection=secs.length?secs[0].key:'walkin';
   const curSec=secs.find(s=>s.key===S.countSection)||secs[0];   // NOT `sec`: that is the global permission helper
   // A count with no sections used to crash here — secs[0] is undefined and curSec.label threw
@@ -10613,37 +10762,7 @@ async function viewCount(){
     ${S.reorder===curSec.key ? reorderPanel(curSec) : `
     ${packDressings(curSec.items, curSec.key).map(grp=>`${grp.label?`<div class="grp-h">${grp.label}<span>${grp.items.length}</span></div>`:''}
     <div class="st-list drag-list" data-grp="${grp.key}" data-sec="${curSec.key}">
-    ${grp.items.map(p=>{
-      const slot=slotOf(p), has=!!S.split[p.id];
-      return `<div class="task-line count-row${has?' done':''}" id="crow-${p.id}" data-pid="${p.id}">
-        ${can('admin.items')?`<button class="grip no-print" aria-label="Drag to reorder · Arrastra para ordenar" title="Hold and slide to move this item up or down"><svg class="ico ico-sm" aria-hidden="true"><use href="#i-grip"/></svg></button>`:''}
-        <div class="nm"><b>${esc(isES()&&p.name_es?p.name_es:p.name_en)}</b>${noteFlag(p)}
-          <div class="yield" style="justify-content:flex-start;margin-top:4px">
-            ${p.raw?`<span class="y-cont" title="${esc(isES()?'Se cuenta en '+rawUnitLabel(p,'base')+' o en '+rawUnitLabel(p,'alt'):'Count in '+rawUnitLabel(p,'base')+' or '+rawUnitLabel(p,'alt'))}">${contGlyph(p.container)}<span class="cname">${isES()?'contar en':'count in'} ${esc(rawUnitLabel(p,'base'))} ${isES()?'o':'or'} ${esc(rawUnitLabel(p,'alt'))}</span></span>`
-            :`<span class="y-cont" title="Count this item in ${esc(p.container)}${p.container_es?' · '+esc(p.container_es):''}${Number(p.cpb)!==1?` — one batch fills about ${fmtQ(p.cpb)}`:''}">${contGlyph(p.container)}<span class="cname">count in ${esc(p.container)}${bil&&p.container_es?` · ${esc(p.container_es)}`:''}</span></span>`}
-            ${Number(p.cpb)!==1?`<span class="y-amt" title="One batch fills about ${fmtQ(p.cpb)} ${esc(p.container)}"><i>1 batch fills</i><b>${fmtQ(p.cpb)}</b></span>`:''}
-            <span class="y-amt parchip no-print" onclick="parSheetOpen('${p.id}')" title="Min par for THIS place — tap to change it · Toca para cambiar el par mínimo"><i>min par</i><b>${Number(p.min_par)>0?fmtQ(p.min_par):'—'}</b></span>
-            ${sheetAlias(p)}
-          </div></div>
-        ${can('count.start')?`<div class="stp">
-          <button onclick="bumpCount('${p.id}',-${COUNT_STEP})" aria-label="One less · Uno menos">–</button>
-          <div><input type="number" inputmode="decimal" step="any" id="cin-${p.id}" value="${p.raw?rawShown(p):(S.split[p.id]?fmtQ(S.counts[p.id]):'')}" placeholder="${S.cantCount[p.id]?'?':'—'}" onchange="saveCount('${p.id}','${slot}',this.value)">
-            <div class="u" id="cu-${p.id}">${p.raw?esc(rawUnitLabel(p,rawUnitOf(p))):esc(p.container)}</div></div>
-          <button class="up" onclick="bumpCount('${p.id}',${COUNT_STEP})" aria-label="One more · Uno más">+</button>
-        </div>
-        ${p.raw?`<div class="no-print raw-u" id="cuw-${p.id}" style="flex:1 1 100%;display:flex;align-items:center;gap:6px;padding:2px 0 0 0">
-          <span class="muted" style="font-size:11px">${isES()?'contar en':'count in'}</span>
-          <button class="chip btn-sm${rawUnitOf(p)==='base'?' on':''}" data-u="base" onclick="rawUnitSet('${p.id}','base')">${esc(rawUnitLabel(p,'base'))}</button>
-          <button class="chip btn-sm${rawUnitOf(p)==='alt'?' on':''}" data-u="alt" onclick="rawUnitSet('${p.id}','alt')">${esc(rawUnitLabel(p,'alt'))}</button>
-          <span class="muted" id="co-${p.id}" style="font-size:11px;margin-left:auto">${rawOtherTxt(p)}</span>
-        </div>`:''}
-        ${TM()?'':`<div class="no-print" style="flex:1 1 100%;display:flex;gap:6px;flex-wrap:wrap;padding:2px 0 0 0">
-          <button class="chip btn-sm ${S.zeroMark[p.id]?'on':''}" style="font-size:11px${S.zeroMark[p.id]?';background:var(--palm);border-color:var(--palm);color:#fff':''}" onclick="markNotPrepped('${p.id}')" title="A real zero — nothing of this exists right now. Counts as measured.">${p.raw?'⌀ None in house · No hay':'⌀ Not prepped · No preparado'}</button>
-          <button class="chip btn-sm ${S.cantCount[p.id]?'on':''}" style="font-size:11px${S.cantCount[p.id]?';background:#b78300;border-color:#b78300;color:#fff':''}" onclick="markCantCount('${p.id}')" title="Could not count this one — an honest unknown, never assumed to be zero by you.">? Can't count · Sin contar</button>
-          ${can('admin.items')?`<button class="chip btn-sm cnt-mv" style="font-size:12px;margin-left:auto" onclick="cntMoveAsk('${p.id}')" title="Move this item to another station · Mover a otra estación">⇄ Move</button><button class="chip btn-sm trash-btn" style="font-size:11px" onclick="trashStationItem('${p.id}')" title="Take this off the count list. It is kept in the database with its station, and goes back in one tap from Admin.">${ic('trash','ico-sm')}</button>`:''}
-        </div>`}`
-        :`<div class="cnt"><div><label>Counted · Contado</label><div class="tot" id="tot-${p.id}">${S.counts[p.id]!=null?fmtQ(S.counts[p.id]):'—'}</div></div></div>`}
-      </div>`;}).join('')}</div>`).join('')}
+    ${grp.items.map(p=>cntRowHtml(p)).join('')}</div>`).join('')}
     ${can('inv.edit')&&curSec.key!=='other'?`<div class="addrow no-print">
       ${S.addTo===curSec.key ? addPickerHtml(curSec)
         : `<button onclick="openAddPicker('${curSec.key}')">${ic('plus','ico-sm')}Add an item to ${esc(curSec.label)} · Añadir artículo</button>`}
@@ -14090,125 +14209,54 @@ async function viewPars(){
   </div>`);
 }
 
-// ---------- protein count (daily reconciliation, on the Count tab) ----------
-// Built from Dan's printed PROTEIN COUNT sheet (photo, Aug 11): per item, per day —
-// BEG + ADD ON − SOLD − END INV, with a VER (verified) mark. It is a reconciliation,
-// not an order guide: it exists to catch the gap between what should be left and what
-// is left. Item list lives in tb_model('proteins'); the sheet photo showed one item
-// (6oz Steak), so that is the only one seeded — Dan adds the rest, nothing invented.
-// SOLD is typed from the POS for now; once the Oracle item mapping covers the steak
-// items it can pre-fill, but it will be labeled when it does.
-async function loadProteins(d){
-  if(S.protein.loadedFor===d && S.protein.itemsCfg) return;
-  try{
-    const [cfg,rows,prev]=await Promise.all([
-      S.protein.itemsCfg?Promise.resolve(null):db.from('tb_model').select('value').eq('key','proteins').maybeSingle(),
-      db.from('tb_protein_count').select('*').eq('business_date',d),
-      db.from('tb_protein_count').select('item_key,end_inv').eq('business_date',shiftDay(d,-1)),
-    ]);
-    if(cfg&&cfg.data) S.protein.itemsCfg=cfg.data.value||{version:1,items:[]};
-    S.protein.rows={}; (rows.data||[]).forEach(r=>{ S.protein.rows[r.item_key]=r; });
-    S.protein.prev={}; (prev.data||[]).forEach(r=>{ S.protein.prev[r.item_key]=r.end_inv; });
-  }catch(e){ S.protein.rows=S.protein.rows||{}; S.protein.prev={}; if(!S.protein.itemsCfg) S.protein.itemsCfg={version:1,items:[]}; }
-  S.protein.loadedFor=d;
+// ---------- protein count (on the Count tab) ----------
+// Aug 11 2026: started as Dan's printed PROTEIN COUNT sheet (BEG + ADD ON − SOLD − END INV) in its
+// own table, tb_protein_count. Oct 8 2026 (Dan): "it should be like the count for prep, where they
+// input it" — so the protein count is now the proteins OF THE DAY'S COUNT: the same inventory rows
+// the prep count already had (raw chicken / Denver / patties / mahi / butterfly shrimp in their
+// pieces-or-lb boxes, and the Ahi 3 oz & 4 oz portions, coco shrimp and lemon chicken in theirs),
+// typed as what is on hand. They come OFF the station walk and sit in their own drawer, but they
+// save into the same count, so the prep list, pars, food cost and the submit check read them
+// exactly as before — nothing downstream changed. The list is tb_model('proteins') v2:
+// {items:[{inv:<inventory id>}]} in Dan's order. Pan sizes (200 / half / third) come once Dan
+// gives how many fit (he will send them in a dev note). tb_protein_count keeps its one old day.
+async function loadProteins(){
+  if(S.protein.itemsCfg) return;
+  try{ const q=await db.from('tb_model').select('value').eq('key','proteins').maybeSingle(); S.protein.itemsCfg=(q.data&&q.data.value)||{version:2,items:[]}; }
+  catch(e){ S.protein.itemsCfg=null; }
 }
-function protItems(){ return ((S.protein.itemsCfg||{}).items||[]).filter(i=>i.active!==false); }
-function protVarHtml(r){
-  const has=v=>v!=null&&v!=='';
-  if(!r || !(has(r.beg)&&has(r.add_on)&&has(r.sold)&&has(r.end_inv)))
-    return `<span class="muted" style="font-size:11px">fill all four to check the day · llena los cuatro</span>`;
-  const dv=Number(r.beg)+Number(r.add_on)-Number(r.sold)-Number(r.end_inv);
-  const v=Math.round(dv*100)/100;
-  if(v===0) return `<b style="color:var(--ok)">even — every one accounted for · cuadra</b>`;
-  return v>0
-    ? `<b style="color:var(--coral)">${fmtQ(v)} short · faltan</b> <span class="muted" style="font-size:11px">(started+added minus sold says ${fmtQ(v)} more should be left)</span>`
-    : `<b style="color:var(--warn)">${fmtQ(-v)} over · sobran</b> <span class="muted" style="font-size:11px">(more left than the math expects — check SOLD)</span>`;
+function protIds(){ const c=S.protein&&S.protein.itemsCfg; if(!c||Number(c.version)!==2) return []; return (c.items||[]).filter(i=>i&&i.inv&&i.active!==false).map(i=>i.inv); }
+function protHas(id){ return protIds().includes(id); }
+function protPreps(){ return protIds().map(id=>S.preps.find(p=>p.id===id)).filter(Boolean); }
+// the kitchen items the station walk shows: everything but the bar and the proteins
+function countKitchen(){ return S.preps.filter(p=>p.station!=='bar' && !protHas(p.id)); }
+// how many proteins are counted in a day's OPENING count — read from the database, so the Lists
+// tab and the checklist's "Protein count done" agree no matter which count is on screen
+async function protStatus(d){
+  const ids=protIds(); const out={d, n:0, tot:ids.length};
+  if(ids.length){ try{
+    const c=await db.from('inventory_counts').select('id').eq('restaurant_id',TBID).eq('notes',cNotes(d,'open')).order('created_at',{ascending:true}).limit(1);
+    const cid=c.data&&c.data[0]&&c.data[0].id;
+    if(cid){ const q=await db.from('inventory_count_items').select('inventory_item_id,status').eq('count_id',cid).in('inventory_item_id',ids);
+      const got=new Set((q.data||[]).filter(r=>r.status==='counted').map(r=>r.inventory_item_id)); out.n=ids.filter(id=>got.has(id)).length; }
+  }catch(e){} }
+  S.protStat=out; return out;
 }
-window.protSet=async(key,field,val)=>{
-  if(!guard('count.start')) return;
-  const d=S.selDate||todayLA();
-  const v=(val===''||val==null)?null:Number(val);
-  if(v!=null&&(!isFinite(v)||v<0)){ toast('Numbers only · Solo números'); return; }
-  const row=S.protein.rows[key]||{business_date:d,item_key:key};
-  row[field]=v; row.updated_by=(S.user&&S.user.name)||'';
-  S.protein.rows[key]=row;
-  const el=document.getElementById('pvar-'+key); if(el) el.innerHTML=protVarHtml(row);
-  try{
-    const {error}=await db.from('tb_protein_count').upsert({business_date:d,item_key:key,[field]:v,updated_by:row.updated_by},{onConflict:'business_date,item_key'});
-    if(error) throw error;
-  }catch(e){ toast('Did not save — '+(e.message||e)); }
-};
-window.protVer=async(key)=>{
-  if(!guard('count.start')) return;
-  const d=S.selDate||todayLA();
-  const who=(S.user&&S.user.name)||'';
-  const row=S.protein.rows[key]||{business_date:d,item_key:key};
-  row.ver_by=who; row.ver_at=new Date().toISOString(); S.protein.rows[key]=row;
-  try{
-    const {error}=await db.from('tb_protein_count').upsert({business_date:d,item_key:key,ver_by:who,ver_at:row.ver_at},{onConflict:'business_date,item_key'});
-    if(error) throw error;
-  }catch(e){ toast('Did not save — '+(e.message||e)); }
-  const b=document.getElementById('pver-'+key);
-  if(b) b.outerHTML=`<span class="drtag ok" id="pver-${key}">VER · ${esc(who)}</span>`;
-};
-window.protAdd=async()=>{
-  if(!guard('admin.items')) return;
-  const en=(document.getElementById('prot-new-en')||{}).value||'';
-  const es=(document.getElementById('prot-new-es')||{}).value||'';
-  if(!en.trim()){ toast('Name it first · Ponle nombre'); return; }
-  const key=en.trim().toLowerCase().replace(/[^a-z0-9]+/g,'_').replace(/^_|_$/g,'').slice(0,40)||('p'+Date.now());
-  const cfg=S.protein.itemsCfg||{version:1,items:[]};
-  if(cfg.items.some(i=>i.key===key)){ toast('Already on the list · Ya está'); return; }
-  cfg.items.push({key, en:en.trim(), es:es.trim()});
-  try{
-    const {error}=await db.from('tb_model').update({value:cfg}).eq('key','proteins');
-    if(error) throw error;
-    S.protein.itemsCfg=cfg; render();
-  }catch(e){ toast('Did not save — '+(e.message||e)); }
-};
-window.protOff=async(key)=>{
-  if(!guard('admin.items')) return;
-  const cfg=S.protein.itemsCfg||{version:1,items:[]};
-  const it=cfg.items.find(i=>i.key===key); if(!it) return;
-  it.active=false;
-  try{
-    const {error}=await db.from('tb_model').update({value:cfg}).eq('key','proteins');
-    if(error) throw error;
-    S.protein.itemsCfg=cfg; render();
-  }catch(e){ toast('Did not save — '+(e.message||e)); }
-};
 function proteinCard(d){
-  const items=protItems(); const bil=S.settings&&S.settings.bilingual;
-  const num=(r,f,ph)=>`<div style="flex:1;min-width:64px"><label style="font-size:9px;text-transform:uppercase;letter-spacing:.05em;color:var(--muted);font-weight:700">${ph}</label>
-    <input class="qty" type="number" inputmode="decimal" step="0.5" min="0" style="width:100%;font-size:15px"
-      value="${r&&r[f]!=null?r[f]:''}" onchange="protSet('${r?r.item_key:''}','${f}',this.value)"></div>`;
-  // The heading lives on the drawer now, not in here, so it is not printed twice.
-  return `<div class="card">
-    <div class="muted" style="font-size:12.5px;margin-bottom:8px">Same math as the paper: <b>BEG + ADD ON − SOLD − END INV</b> should land on zero. Saves as you type — it is <b>its own list</b>, separate from the prep count below, and submitting that count never touches this one.${bil?'<br><span style="opacity:.85">Igual que la hoja: BEG + agregado − vendido − inventario final debe dar cero. Se guarda solo.</span>':''}</div>
-    ${items.length?items.map(it=>{
-      const r=S.protein.rows[it.key]; const prev=S.protein.prev&&S.protein.prev[it.key];
-      const rr=r||{item_key:it.key};
-      return `<div style="background:var(--white);border:1px solid var(--line);border-radius:12px;padding:10px 12px;margin-bottom:9px">
-        <div style="display:flex;align-items:baseline;gap:8px;flex-wrap:wrap">
-          <b style="font-size:14.5px">${esc(isES()&&it.es?it.es:it.en)}</b>
-          ${prev!=null?`<span class="muted" style="font-size:11px">yesterday ended: ${fmtQ(prev)} · ayer cerró con ${fmtQ(prev)}</span>`:''}
-          ${r&&r.ver_by?`<span class="drtag ok" id="pver-${it.key}">VER · ${esc(r.ver_by)}</span>`
-            :(can('count.start')?`<button class="btn-ghost btn-sm" id="pver-${it.key}" style="margin-left:auto" onclick="protVer('${it.key}')">VER ✓</button>`:'')}
-          ${can('admin.items')?`<button class="btn-ghost btn-sm" onclick="protOff('${it.key}')" title="Take off the protein list">Off</button>`:''}
-        </div>
-        <div style="display:flex;gap:8px;margin-top:7px">
-          ${num(rr,'beg','BEG')}${num(rr,'add_on','ADD ON')}${num(rr,'sold','SOLD')}${num(rr,'end_inv','END INV')}
-        </div>
-        <div id="pvar-${it.key}" style="margin-top:7px;font-size:12.5px">${protVarHtml(r)}</div>
-      </div>`;}).join('')
-    :`<div class="muted" style="font-size:12.5px">Only 6oz Steak came off the sheet photo so far — if the list is empty here, the config did not load; reload the page.</div>`}
-    ${can('admin.items')?`<div style="display:flex;gap:8px;margin-top:6px;flex-wrap:wrap">
-      <input id="prot-new-en" placeholder="Add a protein (EN)" style="flex:1;min-width:130px">
-      <input id="prot-new-es" placeholder="(ES, optional)" style="flex:1;min-width:110px">
-      <button class="btn-secondary btn-sm" onclick="protAdd()">${ic('plus','ico-sm')}Add</button>
-    </div>
-    <div class="muted" style="font-size:11px;margin-top:5px">The sheet photo only showed <b>6oz Steak</b>, so that is all that was seeded — add the rest of the sheet's proteins here or send photos of the other pages.</div>`:''}
-  </div>`;
+  const es=isES(); const items=protPreps();
+  if(!items.length) return `<div class="card"><div class="muted" style="font-size:12.5px">${S.protein&&S.protein.itemsCfg?(es?'No hay proteínas en la lista.':'No proteins on the list.'):(es?'La lista de proteínas no cargó — recarga la página.':'The protein list did not load — reload the page.')}</div></div>`;
+  const c=S.count; const done=!!c&&c.status==='completed'; const close=(c?c.when:S.countWhen)==='close';
+  const intro=`<div class="muted" style="font-size:12.5px;margin-bottom:8px">${es
+    ?`Escribe lo que hay de cada proteína, igual que el conteo de prep. Es parte del mismo conteo de ${close?'cierre':'apertura'}: la lista de prep y el costo de comida lo leen igual que antes.`
+    :`Type what is on hand for each protein, the same way as the prep count. It is part of the same ${close?'closing':'opening'} count, so the prep list and food cost read it exactly as before.`}</div>`;
+  if(!c) return `<div class="card">${intro}${can('count.start')
+    ?`<button class="btn-primary" onclick="startCount()">${ic('count','ico-sm')}${es?'Empezar el conteo de':'Start the count for'} ${fmtDate(d)}</button><div class="muted" style="font-size:11.5px;margin-top:6px">${es?'Las proteínas se guardan en el conteo del día, así que primero se empieza.':'The proteins save into the day\'s count, so it starts first.'}</div>`
+    :`<div class="muted" style="font-size:12.5px">${es?'Nadie ha empezado el conteo de este día.':'Nobody has started this day\'s count yet.'}</div>`}</div>`;
+  if(done) return `<div class="card">${intro}${items.map(p=>{ const has=!!S.split[p.id]; const u=p.raw?rawUnitLabel(p,'base'):p.container;
+      return `<div class="ck-li"><span style="flex:1"><b>${esc(es&&p.name_es?p.name_es:p.name_en)}</b></span><span style="white-space:nowrap">${has?`<b>${fmtQ(S.counts[p.id])}</b> <span class="muted" style="font-size:11px">${esc(u||'')}</span>`
+        :S.cantCount[p.id]?`<span class="pill" style="font-size:10px;color:#b78300;border-color:#b78300">${es?'sin contar':'couldn\'t count'}</span>`:`<span class="pill" style="font-size:10px;color:var(--coral);border-color:var(--coral)">${es?'no contado':'not counted'}</span>`}</span></div>`; }).join('')}
+    <div class="muted" style="font-size:11.5px;margin-top:8px">${es?'El conteo ya se envió. Para cambiar un número, reabre el conteo abajo.':'This count is submitted. To change a number, reopen the count below.'}</div></div>`;
+  return `<div class="card">${intro}<div class="st-list">${items.map(p=>cntRowHtml(p,{lite:true})).join('')}</div></div>`;
 }
 
 // ---------- order guides (Orders tab) ----------
@@ -16642,28 +16690,30 @@ async function viewLists(){
   const d=todayLA(), es=isES(); S.selDate=S.selDate||d;
   const jobs=[];
   if(sec('checklist')) jobs.push(ckLoad(d));
-  if(sec('count')) jobs.push(loadCounts(d), loadProteins(d));
+  if(sec('count')) jobs.push(loadCounts(d), loadProteins(d).then(()=>protStatus(d)));
   if(sec('prep')||sec('count')) jobs.push(loadTasks(d));
   await Promise.all(jobs.map(p=>Promise.resolve(p).catch(()=>{})));
   let n=0, left=0; const html=[];
   const ckStep=(shift)=>{
-    const items=ckItems(shift); const run=ckRun(d,shift); const log=ckLogOf(run);
+    const items=ckItems(shift); if(!items.length) return '';   // Oct 8 2026: only the person's own level's lists
+    const run=ckRun(d,shift); const log=ckLogOf(run);
     const done=items.filter(i=>log[i.id]&&log[i.id].result!=='skipped').length;
     const lab=shift==='closing'?(es?'Lista de cierre':'Closing checklist'):(es?'Lista de apertura':'Opening checklist');
     n++;
-    if(run&&run.status!=='open') return tmStep('done','✓',lab,`${es?'cerrada por':'closed by'} ${esc(run.closed_by||'')} · ${done}/${items.length}`,'',`tmCk('${shift}')`);
+    if(run&&run.status!=='open') return tmStep('done','✓',lab,`${es?'cerrada por':'closed by'} ${esc(run.closed_by||'')} · ${done}/${items.length}${ckDueHtml(d,shift,run)}`,'',`tmCk('${shift}')`);
     left++;
-    if(run) return tmStep('now',n,lab,`${es?'en curso':'in progress'} · ${done}/${items.length}`,`<span class="tm-st go">${es?'Seguir':'Continue'}</span>`,`tmCk('${shift}')`);
-    return tmStep('',n,lab,`${items.length} ${es?'puntos · unos':'items · about'} ${Math.max(2,Math.round(items.length*0.8))} min`,`<span class="tm-st go">${es?'Empezar':'Start'}</span>`,`tmCk('${shift}')`);
+    if(run) return tmStep('now',n,lab,`${es?'en curso':'in progress'} · ${done}/${items.length}${ckDueHtml(d,shift,run)}`,`<span class="tm-st go">${es?'Seguir':'Continue'}</span>`,`tmCk('${shift}')`);
+    return tmStep('',n,lab,`${items.length} ${es?'puntos · unos':'items · about'} ${Math.max(2,Math.round(items.length*0.8))} min${ckDueHtml(d,shift,null)}`,`<span class="tm-st go">${es?'Empezar':'Start'}</span>`,`tmCk('${shift}')`);
   };
-  if(sec('checklist')||sec('count')) html.push(`<div class="tm-time">${es?'AL ABRIR':'START OF DAY'}</div>`);
-  if(sec('checklist')) html.push(ckStep('opening'));
-  if(sec('count')&&typeof protItems==='function'&&protItems().length){
-    const items=protItems();
-    const pd=items.filter(it=>{const r=S.protein&&S.protein.rows&&S.protein.rows[it.key]; return r && ['beg','add_on','sold','end_inv'].every(f=>r[f]!=null&&r[f]!=='');}).length;
-    n++; if(pd<items.length) left++;
-    html.push(tmStep(pd===items.length?'done':'', pd===items.length?'✓':n, es?'Conteo de proteínas':'Protein count', es?'de la hoja impresa PROTEIN COUNT':'from the printed PROTEIN COUNT sheet', `<span class="tm-st${pd===items.length?' ok':''}">${pd}/${items.length}</span>`, `tmGoCount('protein')`));
+  // Oct 8 2026: a person with no list of their own gets no empty "START OF DAY" heading
+  const sod=[];
+  if(sec('checklist')) sod.push(ckStep('opening'));
+  if(sec('count')&&protIds().length){
+    const st=(S.protStat&&S.protStat.d===d)?S.protStat:{n:0,tot:protIds().length}; const ok=!!st.tot&&st.n>=st.tot;
+    n++; if(!ok) left++;
+    sod.push(tmStep(ok?'done':'', ok?'✓':n, es?'Conteo de proteínas':'Protein count', es?'parte del conteo de apertura · se escribe en la app':'part of the opening count · typed in the app', `<span class="tm-st${ok?' ok':''}">${st.n}/${st.tot}</span>`, `tmGoCount('protein')`));
   }
+  if(sod.some(x=>x)) html.push(`<div class="tm-time">${es?'AL ABRIR':'START OF DAY'}</div>`, ...sod);
   if(sec('prep')||sec('count')){
     html.push(`<div class="tm-time">${es?'CONTEO Y PREP':'COUNT & PREP'}</div>`); n++;
     const mgr=can('prep.generate')||can('prep.assign'); const me=pu();
@@ -16688,7 +16738,8 @@ async function viewLists(){
       html.push(`<div id="tm-cp">${tmStep('off', n, es?'Lista de prep':'Prep list', es?'Todavía no hay lista. Sale aquí cuando se envíe el conteo.':'No list yet. It shows up here once the count is in.', '', '')}</div>`);
     }
   }
-  if(sec('checklist')){ html.push(`<div class="tm-time">${es?'AL CERRAR':'END OF DAY'}</div>`); html.push(ckStep('closing')); }
+  if(sec('checklist')){ const cl=ckStep('closing'); if(cl) html.push(`<div class="tm-time">${es?'AL CERRAR':'END OF DAY'}</div>`, cl); }
+  if(!html.length) html.push(`<div class="muted" style="font-size:12.5px;padding:12px 0 4px">${es?'Hoy no tienes listas aquí.':'No lists for you here today.'}</div>`);
   S.tmLeft=left;
   shell(`${tmQuickHtml()}<div class="card" id="tm-lists"><h2 style="margin-bottom:0">${fmtDate(d)}</h2><div class="muted" style="font-size:12px">${es?'las listas del día, en el orden del día':'the day’s lists, in the order the day happens'}</div>${html.join('')}</div>
     ${sec('count')?`<div class="card" style="padding:4px 14px">${`<div class="tm-row" onclick="tmGoCount('pars')"><div class="av">${ic('pars','')}</div><div class="nm"><b>${es?'Fijar pares':'Setting pars'}</b><span>${es?'lo que siempre debe haber':'what should always be on hand'}</span></div><span class="chev">›</span></div>`}</div>`:''}`);
@@ -17288,7 +17339,7 @@ async function rpLoad(rep,a,b){
       rpAll(()=>db.from('prep_lists').select('id,date,created_at').eq('restaurant_id',TBID).gte('date',a).lte('date',b)),
       rpAll(()=>db.from('waste_records').select('*').eq('restaurant_id',TBID).gte('date',a).lte('date',b)),
       rpAll(()=>db.from('tb_86').select('*').eq('restaurant_id',TBID).gte('date',a).lte('date',b)),
-      rpAll(()=>db.from('tb_check_runs').select('on_date,shift,status,opened_by,closed_by,seconds').gte('on_date',a).lte('on_date',b)),
+      rpAll(()=>db.from('tb_check_runs').select('on_date,shift,level,late,status,opened_by,closed_by,seconds').gte('on_date',a).lte('on_date',b)),
       rpAll(()=>db.from('tb_vendor_orders').select('id,status,created_at,finished_at,order_date').gte('order_date',a).lte('order_date',b))]);
     L.hist=dhFix(hist); L.waste=waste; L.e86=e86; L.check=check; L.vorders=orders.filter(o=>!['abandoned','duplicate'].includes(o.status));
     L.counts=counts.filter(c=>/^\d{4}-\d{2}-\d{2}/.test(String(c.notes||''))).sort((x,y)=>String(x.started_at).localeCompare(String(y.started_at)));
@@ -17342,7 +17393,7 @@ function rpCP(L){
   const wp=new Set(W.waste.map(x=>x.pid).filter(Boolean));
   W.wastePrep=W.byItem.filter(r=>lines.some(l=>l.item===r[0]&&wp.has(l.pid)));
   W.e86=L.e86;
-  W.check=L.check.map(c=>({date:String(c.on_date), shift:c.shift, status:c.status, by:c.closed_by||c.opened_by, minutes:c.seconds?Math.round(c.seconds/6)/10:null})).sort((x,y)=>(x.date+x.shift).localeCompare(y.date+y.shift));
+  W.check=L.check.map(c=>({date:String(c.on_date), shift:c.shift+(c.level&&c.level!=='management'?' · '+c.level:''), status:c.status+(c.late?' · late':''), by:c.closed_by||c.opened_by, minutes:c.seconds?Math.round(c.seconds/6)/10:null})).sort((x,y)=>(x.date+x.shift).localeCompare(y.date+y.shift));
   const om=L.vorders.map(o=>rpMins(o.created_at,o.finished_at));
   W.work={countMin:W.counts.filter(c=>c.minutes!=null&&!c.leftOpen).reduce((t,c)=>t+c.minutes,0), countN:W.counts.filter(c=>c.minutes!=null&&!c.leftOpen).length,
     countLeftOpen:W.counts.filter(c=>c.leftOpen).length, prepMinEst:W.minutes,
@@ -18714,7 +18765,7 @@ const TOURS={
   {el:()=>tq('#cnt-blank'), en:'At the end: anything left blank? Choose to treat it as empty (prep to par) or leave it off the list.', es:'Al final: ¿quedó algo en blanco? Escoge tratarlo como vacío (preparar al par) o dejarlo fuera de la lista.'},
   {el:()=>tBtn('Submit — build the list')||tBtn('Start the'), en:'Submit builds the prep list: you pick who’s prepping and it opens on Prep. Left mid-count? Nothing is lost.', es:'Enviar arma la lista de prep: escoges quién prepara y se abre en Prep. ¿Te saliste a medias? No se pierde nada.'},
   {el:()=>tBtn('Reopen count'), en:'Made a mistake after submitting? Reopen, fix it, submit again. The list rebuilds (its ticks clear).', es:'¿Error después de enviar? Corregir, arréglalo y envía otra vez. La lista se rehace (se borran las palomitas).'},
-  {el:()=>document.querySelectorAll('#app .card.lcard')[0]||null, en:'Protein count: same as the paper sheet — beginning, add on, sold, end.', es:'Conteo de proteínas: igual que la hoja — inicio, agregado, vendido, final.'},
+  {el:()=>document.querySelectorAll('#app .card.lcard')[0]||null, en:'Protein count: the proteins of today\'s count — type what is on hand, like the prep count.', es:'Conteo de proteínas: las proteínas del conteo de hoy — escribe lo que hay, como el conteo de prep.'},
   {when:()=>!TM(), el:()=>document.querySelectorAll('#app .card.lcard')[3]||null, en:'Count log: every count ever taken, week by week.', es:'Historial: cada conteo que se ha hecho, semana por semana.'}
  ],
  prep:()=>{
