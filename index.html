@@ -1533,7 +1533,7 @@ const SB_KEY='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZ
 const TBID='9f8d7c6b-5a49-4e38-b271-06d5f00dbeef'; // Tommy Bahama tenant inside ChefOpsAI
 // Stamped by publish.sh at upload time. It is the only version label there is now —
 // one address, updated in place, so this tells you which build that address is serving.
-const BUILD='Oct 9, 2026 · prep sheet: one page per cook, name on top, clear counts';
+const BUILD='Oct 9, 2026 · prep sheet redo + the upload card on Today';
 // ---------- IS THIS PHONE EVEN RUNNING THE LATEST BUILD? ----------
 // Sep 3 2026. Three prep fixes shipped and Dan still saw the old behaviour, because the app
 // installs to the home screen and an installed web app does not go back and re-fetch its own
@@ -2392,11 +2392,51 @@ async function fcAfterDailyUpload(bdates){
   const thruA=fcHistThru(), now=new Date().toISOString(), u=pu()||{}, last=(bdates||[]).slice().sort().slice(-1)[0]||null;
   const rows=[];
   span.forEach(x=>{ let X=null; try{ X=fcExplain(x); }catch(e){} if(!X||!X.v2s) return; const b=before[x]||{}; const sv=Math.round(X.v2s);
-    if(b.s===sv && b.g===X.v2g && thruA===thruB) return;      // nothing moved, nothing to log
+    // Oct 9 2026: every day is logged, moved or not — the Today card has to be able to say "did not move"
     rows.push({business_date:x, made_at:now, trigger:'upload', upload_for:last, hist_thru_before:thruB, hist_thru:thruA,
       v2_s_before:b.s!=null?b.s:null, v2_g_before:b.g!=null?b.g:null, v2_s:sv, v2_g:X.v2g, made_by:u.name||null, build:BUILD}); });
   if(rows.length && !S.previewUser){ try{ await db.from('tb_forecast_rev').insert(rows); }catch(e){} }
+  S._fcRev=rows.concat(S._fcRev||[]);
   return rows.length;
+}
+// ---- Oct 9 2026 (Dan): "if it changes the forecast make sure it shows it clearly, and if it doesn't
+// move the forecast also make sure it shows." A card on Today after each Daily Operations upload:
+// the day that landed (sold vs its morning forecast), then today and the next six days before →
+// after, or the plain line that nothing moved. Read from tb_forecast_rev, so every phone sees it,
+// not only the one that uploaded. "Got it" hides that upload's card on this phone.
+async function fcRevLoad(d){
+  try{ const q=await db.from('tb_forecast_rev').select('*').gte('business_date',d).order('made_at',{ascending:false}).limit(70); S._fcRev=q.data||[]; }catch(e){ S._fcRev=S._fcRev||[]; }
+}
+function fcUploadCardHtml(d){
+  if(d!==todayLA()) return '';
+  const all=S._fcRev||[]; if(!all.length) return '';
+  const madeAt=all[0].made_at; if(fcLAday(madeAt)!==d) return '';          // only the day of the upload
+  const key='tb_upl_seen_'+madeAt; try{ if(localStorage.getItem(key)==='1') return ''; }catch(e){}
+  const rows=all.filter(r=>r.made_at===madeAt).sort((a,b)=>String(a.business_date).localeCompare(String(b.business_date)));
+  if(!rows.length) return '';
+  const es=isES(), money=(typeof can==='function')&&can('analytics.money');
+  const usd=v=>'$'+Math.round(Number(v)).toLocaleString();
+  const pct=(a,b)=>(a>0&&b!=null)?`${b>=a?'+':'−'}${(Math.abs(b-a)/a*100).toFixed(1)}%`:'';
+  const r0=rows[0]; const up=r0.upload_for?String(r0.upload_for):null;
+  // the day that landed, against the number the kitchen saw that morning
+  let landed='';
+  if(up){ const f=(S.fc2rows||[]).find(x=>String(x.business_date)===up); const h=FC2.hist[up];
+    if(h&&f&&f.v2_g!=null){ const g=`${h.g} ${es?'cubiertos':'covers'} vs ${f.v2_g} ${es?'pronosticados':'forecast'} (${pct(Number(f.v2_g),h.g)})`;
+      const sl=(money&&f.v2_s!=null)?` · ${usd(h.s)} vs ${usd(f.v2_s)} (${pct(Number(f.v2_s),h.s)})`:'';
+      landed=`<div class="or-d">${es?'Vendido':'Sold'}: ${g}${sl}</div>`; }
+    else if(h) landed=`<div class="or-d">${es?'Vendido':'Sold'}: ${h.g} ${es?'cubiertos':'covers'}${money?' · '+usd(h.s):''} · ${es?'sin pronóstico de esa mañana':'no morning forecast on file for it'}</div>`; }
+  const moved=rows.filter(r=>r.v2_g_before!=null&&(Number(r.v2_g_before)!==Number(r.v2_g)||(money&&Math.round(Number(r.v2_s_before))!==Math.round(Number(r.v2_s)))));
+  const wd=x=>{ const o=dateObjLA(x); const n=es?['dom','lun','mar','mié','jue','vie','sáb']:['Sun','Mon','Tue','Wed','Thu','Fri','Sat']; return `${n[o.getDay()]} ${o.getDate()}`; };
+  const chip=r=>{ const same=Number(r.v2_g_before)===Number(r.v2_g); const isT=String(r.business_date)===d;
+    return `<span style="display:inline-block;background:${same?'var(--sand-dark)':'#e6f3ea'};border-radius:8px;padding:3px 8px;margin:3px 4px 0 0;font-size:12px;white-space:nowrap"><b>${isT?(es?'hoy':'today'):wd(String(r.business_date))}</b> ${r.v2_g_before!=null?r.v2_g_before+' → ':''}<b>${r.v2_g}</b>${money&&r.v2_s!=null?` · ${r.v2_s_before!=null?usd(r.v2_s_before)+' → ':''}${usd(r.v2_s)}`:''}</span>`; };
+  const body=moved.length
+    ? `<div style="margin-top:4px"><b>${es?'El pronóstico se movió':'The forecast moved'}</b> · ${moved.length} ${es?'de':'of'} ${rows.length} ${es?'días':'days'}${rows[0]&&String(rows[0].business_date)===d&&rows[0].v2_g_before!=null?` · ${es?'hoy':'today'} ${pct(Number(rows[0].v2_g_before),Number(rows[0].v2_g))}`:''}</div><div>${rows.map(chip).join('')}</div>`
+    : `<div style="margin-top:4px"><b>${es?'El pronóstico no se movió':'The forecast did not move'}</b> · ${es?'hoy y los próximos 6 días quedan igual':'today and the next 6 days are unchanged'}</div><div>${rows.map(chip).join('')}</div>`;
+  const morning=(S.fc2rows||[]).find(x=>String(x.business_date)===d);
+  const note=(morning&&morning.v2_g!=null&&moved.some(r=>String(r.business_date)===d))?`<div class="or-d">${es?`El número de la mañana (${morning.v2_g}) queda en el registro para calificar; las pantallas ya usan el nuevo.`:`The morning number (${morning.v2_g}) stays on record for grading; the screens now use the new one.`}</div>`:'';
+  const upLab=up?(es?pdfDateES(up):fmtDate(up)):(es?'la subida':'the upload');
+  return `<div class="or-card"><b>${es?'Números del':'Numbers in for'} ${upLab}</b> · ${es?'subido':'uploaded'} ${new Date(madeAt).toLocaleTimeString('en-US',{timeZone:'America/Los_Angeles',hour:'numeric',minute:'2-digit'})}${r0.made_by?' · '+esc(r0.made_by):''}${landed}${body}${note}
+    <div class="t2-abtn"><button class="btn-ghost or-btn" onclick="try{localStorage.setItem('${key}','1')}catch(e){};render()">Got it · Entendido</button></div></div>`;
 }
 // Grade both engines the moment a day's Oracle file lands. Called from applyDailyOperations.
 async function fcScoreDay(d, guests, sales){
@@ -7675,7 +7715,7 @@ function bigDayRealHtml(){
     return `${t2Day(x,es)} ${es?'hizo':'did'} <b>${kTxt(R.s[x])}</b> (${R.g[x]} ${es?'clientes':'guests'}${h?' · '+esc(h.name):''})`; }).join(' · ')}</div>`;
 }
 // The alerts section. Another module's notice is one more function here, returning '' when quiet.
-const TODAY_ALERTS=[ d=>gsCardHtml(), d=>bigDayAlertHtml(), d=>bigDayRealHtml(), d=>orCardHtml(d), d=>ckAlertsHtml(d) ];
+const TODAY_ALERTS=[ d=>gsCardHtml(), d=>fcUploadCardHtml(d), d=>bigDayAlertHtml(), d=>bigDayRealHtml(), d=>orCardHtml(d), d=>ckAlertsHtml(d) ];
 function todayAlertsHtml(d){
   const parts=TODAY_ALERTS.map(f=>{ try{ return f(d)||''; }catch(e){ return ''; } }).filter(x=>x.trim());
   if(!parts.some(x=>x.replace('<div id="gs-card"></div>','').trim())) return parts.join('');   // nothing to show (keeps the gs placeholder)
@@ -8094,6 +8134,7 @@ async function viewToday(){
   const p86=load86(d);
   // Oct 8 2026: the checklist alerts (Izzi) read the same lists the Checklist screen does
   const pCk=(d===todayLA() && sec('checklist')) ? ckLoad(d).catch(()=>null) : null;
+  const pRv=(d===todayLA()) ? fcRevLoad(d) : null;   // Oct 9 2026: the upload card
   if(!S._dyn) dynLoad().catch(()=>{});   // the dynamic par, warmed in the background (Sep 30)
   if(!S.wx.loaded) await loadWeather();
   await wxEnsureHours(d);
@@ -8101,6 +8142,7 @@ async function viewToday(){
   if(!S.evMonth) S.evMonth=d.slice(0,7);
   await p86;
   if(pCk) await pCk;
+  if(pRv) await pRv;
   const wxf=wxGuestFactor(d);
   const baseGuests=guestForecast(d);
   if(d>=todayLA()) await fcLogShown(d);   // freeze the morning number so the ledger grades what was shown
