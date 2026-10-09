@@ -1533,7 +1533,7 @@ const SB_KEY='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZ
 const TBID='9f8d7c6b-5a49-4e38-b271-06d5f00dbeef'; // Tommy Bahama tenant inside ChefOpsAI
 // Stamped by publish.sh at upload time. It is the only version label there is now —
 // one address, updated in place, so this tells you which build that address is serving.
-const BUILD='Oct 8, 2026 · daily uploads update the forecast + weekly report';
+const BUILD='Oct 9, 2026 · prep sheet: one page per cook, name on top, clear counts';
 // ---------- IS THIS PHONE EVEN RUNNING THE LATEST BUILD? ----------
 // Sep 3 2026. Three prep fixes shipped and Dan still saw the old behaviour, because the app
 // installs to the home screen and an installed web app does not go back and re-fetch its own
@@ -4945,13 +4945,16 @@ async function loadTasks(dstr){
 // three CDN scripts; a kitchen tablet on bad wifi does not need a fourth, 350KB one to print
 // the list it already has on screen. A table of text and boxes is a few hundred bytes of
 // PDF operators, and writing them means the layout is exactly the paper Dan showed me.
-const PDF_ROWS_PER_PAGE=6;
+// Oct 9 2026 (Dan): the name only at the top (NOMBRE column gone), thin rows, no box at the bottom,
+// each cook's list on one page when it fits. Rows: 24 per page at 27 pt, so a 16-line list is one
+// page and a 30-line list is two. CONTADO is wider so "3.25 food boxes (12x18)" no longer runs into
+// TIEMPOS; anything still too long shrinks to fit its cell instead of crossing the line.
+const PDF_ROWS_PER_PAGE=24;
 const PDF_COLS=[
-  {k:'item', w:210, es:'QUÉ HACER',  en:'what to make'},
-  {k:'cnt',  w:80,  es:'CONTADO',    en:'counted'},
-  {k:'make', w:80,  es:'TIEMPOS',    en:'batches'},
-  {k:'done', w:52,  es:'HECHO',      en:'done'},
-  {k:'who',  w:110, es:'NOMBRE',     en:'name'}];
+  {k:'item', w:262, es:'QUÉ HACER',  en:'what to make'},
+  {k:'cnt',  w:130, es:'CONTADO',    en:'counted'},
+  {k:'make', w:70,  es:'TIEMPOS',    en:'batches'},
+  {k:'done', w:70,  es:'HECHO',      en:'done'}];
 const PDF_MONTHS_ES=['enero','febrero','marzo','abril','mayo','junio','julio','agosto',
                      'septiembre','octubre','noviembre','diciembre'];
 const PDF_DAYS_ES=['domingo','lunes','martes','miércoles','jueves','viernes','sábado'];
@@ -4980,6 +4983,8 @@ function pdfStr(t){
   return out;
 }
 function pdfNum(n){ return (Math.round(Number(n)*100)/100).toString(); }
+// Helvetica is about 0.55 em wide on average (bold 0.6); close enough to keep a string inside its cell.
+function pdfFit(t, size, maxW, bold){ const w=String(t||'').length*size*(bold?0.6:0.55); return w<=maxW?size:Math.max(6, Math.floor(size*maxW/w*10)/10); }
 function pdfQty(n, cont){
   if(n==null) return '—';
   // fmtQ keeps one decimal, so a counted 0.25 pan printed as "0.3". Dan counts in quarters —
@@ -5001,6 +5006,9 @@ function pdfSheetRows(){
     .map(t=>({
       item: t.item_name||'',
       cnt : t.not_counted ? 'sin contar' : (t.on_hand==null?'—':pdfQty(t.on_hand,t.container)),
+      // Oct 9 2026 (Dan): the number and the container drawn apart — "2" big and bold, "1/6 pans" small
+      cntQ: t.not_counted||t.on_hand==null ? null : pdfQty(t.on_hand,null),
+      cntU: t.not_counted||t.on_hand==null ? null : pdfQty(t.on_hand,t.container).slice(pdfQty(t.on_hand,null).length).trim(),
       // batches, written the way his paper writes them: 4x, 1.5x
       make: fmtQ(t.final_qty)+'x',
       who : staff[t.assigned_to]||'',
@@ -5009,7 +5017,7 @@ function pdfSheetRows(){
 function pdfBuild(rows, dstr){
   const W=612, H=792, M=40;
   const tblW=PDF_COLS.reduce((a,c)=>a+c.w,0);
-  const HDR_H=26, ROW_H=52;
+  const HDR_H=24, ROW_H=27;
   // one stack per cook, exactly like the two sheets Dan photographed
   const byWho={}, order=[];
   rows.forEach(r=>{ const k=r.who||'—'; if(!byWho[k]){ byWho[k]=[]; order.push(k); } byWho[k].push(r); });
@@ -5027,19 +5035,20 @@ function pdfBuild(rows, dstr){
     const line=(x1,y1,x2,y2,w)=>{ c+=`${pdfNum(w||0.8)} w ${pdfNum(x1)} ${pdfNum(y1)} m ${pdfNum(x2)} ${pdfNum(y2)} l S\n`; };
     const rect=(x,y,w,h)=>`${pdfNum(x)} ${pdfNum(y)} ${pdfNum(w)} ${pdfNum(h)} re`;
     const text=(x,y,t,size,bold)=>{ c+=`BT /${bold?'F2':'F1'} ${size} Tf ${pdfNum(x)} ${pdfNum(y)} Td (${pdfStr(t)}) Tj ET\n`; };
-    // header
+    // header: the cook's name, the date, and the line count — the only place the name appears
     let y=H-M;
     text(M, y-14, 'PREPARACIÓN — '+String(pg.who).toUpperCase(), 15, true);
-    text(M+tblW-150, y-14, pdfDateES(dstr), 10, false);
+    const sub=`${pdfDateES(dstr)} · ${pg.total} líneas${pg.of>1?` · página ${pg.page} de ${pg.of}`:''}`;
+    text(M+tblW-pdfFit(sub,10,260,false)*sub.length*0.55, y-14, sub, 10, false);
     c+=`0 0 0 RG\n`;
     line(M, y-22, M+tblW, y-22, 1.6);
-    y-=34;
+    y-=32;
     // column headings on a blue band
     c+=`q 0.624 0.776 0.871 rg ${rect(M,y-HDR_H,tblW,HDR_H)} f Q\n`;
     let x=M;
     PDF_COLS.forEach(col=>{
-      text(x+5, y-11, col.es, 8.5, true);
-      text(x+5, y-21, col.en, 6.5, false);
+      text(x+5, y-10, col.es, 8.5, true);
+      text(x+5, y-19, col.en, 6.5, false);
       x+=col.w;
     });
     // grid
@@ -5056,23 +5065,25 @@ function pdfBuild(rows, dstr){
       c+=`q 0.624 0.776 0.871 rg ${rect(M, rowTop-(i+1)*ROW_H, PDF_COLS[0].w, ROW_H)} f Q\n`;
     });
     // ...then the text and the grid on top of it, so no fill can bury a separator
+    const ty=ROW_H/2+3.5;                      // baseline that centres a 9–11 pt line in the row
     pg.rows.forEach((r,i)=>{
       const ry=rowTop-i*ROW_H;
       let cx=M;
-      text(cx+5, ry-19, String(r.item).toUpperCase(), 9.5, true); cx+=PDF_COLS[0].w;
-      text(cx+5, ry-19, r.cnt,  9, false);  cx+=PDF_COLS[1].w;
-      text(cx+5, ry-19, r.make, 11, true);  cx+=PDF_COLS[2].w;
-      if(r.done) text(cx+18, ry-19, 'X', 12, true);
-      cx+=PDF_COLS[3].w;
-      text(cx+5, ry-19, r.who, 9, false);
+      const it=String(r.item).toUpperCase();
+      text(cx+5, ry-ty, it, pdfFit(it,9.5,PDF_COLS[0].w-10,true), true); cx+=PDF_COLS[0].w;
+      if(r.cntQ!=null){
+        // the quantity bold at 11 pt, the container regular at 8 pt and grey, a clear gap between them
+        text(cx+5, ry-ty, r.cntQ, 11, true);
+        const qw=String(r.cntQ).length*11*0.6+9;
+        c+=`q 0.3 0.3 0.3 rg\n`; text(cx+5+qw, ry-ty, r.cntU, pdfFit(r.cntU,8,PDF_COLS[1].w-10-qw,false), false); c+=`Q\n`;
+      } else text(cx+5, ry-ty, r.cnt, 9, false);
+      cx+=PDF_COLS[1].w;
+      text(cx+5, ry-ty, r.make, 11, true);  cx+=PDF_COLS[2].w;
+      // a box to tick, drawn, so the X has a home
+      c+=`q 0.35 0.35 0.35 RG 0.7 w ${rect(cx+PDF_COLS[3].w/2-7, ry-ROW_H/2-7, 14, 14)} S Q\n`;
+      if(r.done) text(cx+PDF_COLS[3].w/2-4, ry-ty, 'X', 12, true);
       line(M, ry-ROW_H, M+tblW, ry-ROW_H, 0.8);
     });
-    y=rowTop-pg.rows.length*ROW_H;
-    // the margin Dan writes his extras in, given an actual box
-    const boxH=Math.max(56, y-M-26);
-    c+=`q 0.45 0.45 0.45 RG [3 3] 0 d 0.8 w ${rect(M,y-boxH-8,tblW,boxH)} S [] 0 d Q\n`;
-    text(M+5, y-20, 'AGREGADO A MANO · added by hand', 7.5, false);
-    text(M+tblW-140, M-2, `página ${pg.page} de ${pg.of} · ${pg.total} líneas`, 8, false);
     return c;
   });
 
