@@ -1533,7 +1533,7 @@ const SB_KEY='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZ
 const TBID='9f8d7c6b-5a49-4e38-b271-06d5f00dbeef'; // Tommy Bahama tenant inside ChefOpsAI
 // Stamped by publish.sh at upload time. It is the only version label there is now —
 // one address, updated in place, so this tells you which build that address is serving.
-const BUILD='Oct 9, 2026 · prep sheet redo + the upload card on Today';
+const BUILD='Oct 9, 2026 · prep sheet, upload card, auto-refresh, Mon–Sun weeks';
 // ---------- IS THIS PHONE EVEN RUNNING THE LATEST BUILD? ----------
 // Sep 3 2026. Three prep fixes shipped and Dan still saw the old behaviour, because the app
 // installs to the home screen and an installed web app does not go back and re-fetch its own
@@ -5843,13 +5843,15 @@ window.trashAllOpenCounts=async()=>{ if(!guard('count.delete')) return;
   }catch(e){ toast('Could not clear them'); }
 };
 
-// One page per Tue–Mon week (Dan, Aug 14) — the same week the Oracle exports and the
-// forecast-vs-actual card already use, so a page here lines up with a week there instead of
-// straddling it. A page is a WEEK, not a row count: a day can hold two counts, so a full week
-// is up to 14 rows, and a week nobody counted simply has no page.
-function cWeekStart(dstr){            // the Tuesday on or before dstr
+// One page per week (Dan, Aug 14) — the same week the forecast-vs-actual card uses, so a page
+// here lines up with a week there instead of straddling it. A page is a WEEK, not a row count:
+// a day can hold two counts, so a full week is up to 14 rows, and a week nobody counted simply
+// has no page. Oct 9 2026 (Dan): weeks run MONDAY to SUNDAY, the same as the Day by day strip
+// on Today, instead of the Tue–Mon Oracle week. Earlier attach-rate ledger rows keep their
+// Monday week_end; new ones end on Sunday.
+function cWeekStart(dstr){            // the Monday on or before dstr
   const d=dateObjLA(dstr);
-  const back=(d.getDay()-2+7)%7;      // 2 = Tuesday
+  const back=(d.getDay()-1+7)%7;      // 1 = Monday
   const t=new Date(d); t.setDate(d.getDate()-back);
   return t.toISOString().slice(0,10);
 }
@@ -5980,8 +5982,8 @@ function countLog(){
   return `<div class="card no-print">
     ${weeks.length?`<div class="muted" style="font-size:11.5px;margin:-2px 0 8px">${weeks.length} week${weeks.length===1?'':'s'} of history</div>`:''}
     ${rows.length? `
-    <div class="muted" style="margin-bottom:8px">Every count that has ever been started, one page per week (Tuesday–Monday, the same week your Oracle reports use). Open one to see the exact numbers that were typed. A day can hold two: one taken at open and one taken at close.<br>
-    Cada conteo guardado — una página por semana (martes a lunes). Un día puede tener dos, al abrir y al cerrar.</div>
+    <div class="muted" style="margin-bottom:8px">Every count that has ever been started, one page per week (Monday–Sunday, the same week as Day by day). Open one to see the exact numbers that were typed. A day can hold two: one taken at open and one taken at close.<br>
+    Cada conteo guardado — una página por semana (lunes a domingo). Un día puede tener dos, al abrir y al cerrar.</div>
     ${pager}
     ${wk?`<div class="cl-wk">Week of <b>${fmtDate(wk.start)}</b> → <b>${fmtDate(wk.end)}</b> · ${wk.rows.length} count${wk.rows.length===1?'':'s'}${pi===0?' <span class="muted">· current week</span>':''}</div>`:''}
     <div class="tbl-wrap"><table>
@@ -8021,7 +8023,7 @@ function danWeekHtml(o){
   let fold='';
   if(nA>0){
     let open=false; try{ open=localStorage.getItem('tb_wkfold_open')==='1'; }catch(e){}
-    const scStart=shiftDay(wk[0],1), scEnd=shiftDay(wk[0],7);
+    const scStart=wk[0], scEnd=wk[6];   // Oct 9 2026: the scorecard week is this strip's week
     fold=`<div class="card t2-fold${open?' open':''}" id="t2-fold">
       <div class="t2-fshut muted">${es?'Proyectado vs real · error de la semana · ventas · reporte':'Projected vs real · week miss · net sales · scorecard'}</div>
       <div class="t2-fbody">
@@ -8033,7 +8035,7 @@ function danWeekHtml(o){
         </div>
         <div class="muted" style="font-size:10.5px;margin-top:5px">${nA} of 7 days uploaded${nA<7?' — days without an Oracle upload show the plan only, never a filled-in guess':''}. “Projected” is the number frozen that morning where one was saved, otherwise today's model recomputing that date.</div>
         ${GRADES()?`<button class="wkbtn" onclick="goToWeekReport('${scEnd}')">Full week scorecard · ${short(scStart)} – ${short(scEnd)} →</button>
-        <div class="muted" style="font-size:10.5px;margin-top:4px;text-align:center">The scorecard runs Tue–Mon, so its window sits one day later than this strip.</div>`:''}
+`:''}
       </div>
       <button class="t2-fbtn" onclick="wkFold()"><span class="c">${es?'Reporte de la semana ▾':'Week scorecard ▾'}</span><span class="o">▴ ${es?'ocultar':'hide'}</span></button>
     </div>`;
@@ -9283,7 +9285,7 @@ function weeklyZipCard(bil){
   } else if(Z.stage==='done'){
     const R=Z.receipt||{};
     const label=R.dates&&R.dates.length?`${fmtDate(R.dates[0])} – ${fmtDate(R.dates[R.dates.length-1])}`:'this batch';
-    // Every Tue–Mon Oracle week the batch touched gets its own button. A batch that spans two
+    // Every Mon–Sun week the batch touched gets its own button. A batch that spans two
     // weeks used to point at only the later one, which buried half the upload.
     const weeks=R.dates&&R.dates.length?[...new Set(R.dates.map(d=>cWeekStart(d)))].sort():[];
     body=`<div class="zip-receipt">
@@ -11926,11 +11928,11 @@ function minObsLabel(){ const n=Number((S.par&&S.par.cfg&&S.par.cfg.min_obs))||1
 // ---------- forecast vs actual (approved from mockup Aug 13) ----------
 // Rebuilds itself from whatever real days exist — every weekly upload that loads new
 // actuals changes this card on the next Analytics visit, nothing to press. Weeks run
-// Tue–Mon because that is the restaurant's own Oracle week. A forecast saved in advance
+// Mon–Sun (Dan, Oct 9 2026; Tue–Mon before that). A forecast saved in advance
 // (tb_day_forecast) is marked ●; days without one show the model's number for that date,
 // labeled reconstructed — the same formula the app runs, applied openly, never passed
 // off as a prediction that existed at the time.
-// weekEnd (optional): an explicit Monday to score, for the Weekly Reports archive
+// weekEnd (optional): an explicit Sunday to score, for the Weekly Reports archive
 // (mockup Option B, approved Aug 17 2026) opening a past week instead of the latest one.
 // Omitted (the normal Analytics-tab call), it keeps finding the most recent complete
 // week exactly as before — this stayed a pure addition, nothing about the default
@@ -11941,14 +11943,14 @@ function fvaCompute(hist, fcRows, itemRows, families, scores, weekEnd){
   const dates=Object.keys(actual).sort();
   if(!dates.length) return null;
   const latest=dates[dates.length-1];
-  // find the most recent Tue–Mon week ending on a Monday on/before the latest actual,
+  // find the most recent Mon–Sun week ending on a Sunday on/before the latest actual,
   // requiring at least 4 real days so a sparse week never poses as a scored one
   let end=weekEnd||null;
   if(!end){
     for(let k=0;k<14;k++){
       const t=dateObjLA(latest); t.setDate(t.getDate()-k);
       const ds=t.toISOString().slice(0,10);
-      if(t.getDay()===1){ // Monday
+      if(t.getDay()===0){ // Sunday
         let have=0;
         for(let j=0;j<7;j++){ const q=dateObjLA(ds); q.setDate(q.getDate()-j); if(actual[q.toISOString().slice(0,10)]!=null) have++; }
         if(have>=4){ end=ds; break; }
@@ -12231,7 +12233,7 @@ function fvaSalesBarsHtml(F){
 // Approved from mockup Aug 17 2026 as the detail screen for the Weekly Reports archive.
 function fvaCardHtml(F, suggs, isCurrent){
   if(!F) return `<div class="card"><h2>Forecast vs Actual · Pronóstico vs Real</h2>
-    <div class="muted" style="font-size:12.5px">Needs a Tue–Mon week with at least 4 real days on file. Upload a week of Daily Operations exports and this card builds itself. · Se construye solo cuando hay una semana de datos reales.</div></div>`;
+    <div class="muted" style="font-size:12.5px">Needs a Mon–Sun week with at least 4 real days on file. Upload a week of Daily Operations exports and this card builds itself. · Se construye solo cuando hay una semana de datos reales.</div></div>`;
   return `<div class="card">
     <button class="btn-ghost btn-sm" onclick="closeWeekReport()">${ic('back','ico-sm')}Back to Weekly Reports · Volver</button>
     <h2 style="margin-top:10px">Forecast vs Actual · Pronóstico vs Real<span class="h2sub">week of ${fmtDate(F.start)} – ${fmtDate(F.end)}${F.scored<7?` · only ${F.scored} of 7 days in yet, still filling in`:''}${isCurrent?' · rebuilt automatically when new days arrive':''}</span></h2>
@@ -12327,14 +12329,14 @@ function fvaUploadHtml(F){
     <div class="muted" style="font-size:11px;margin-top:6px">${es?'Ventas, motor v2. Pocos días todavía: un día raro mueve estos promedios; se leen mejor según se juntan semanas. Mañana = el número congelado ese mismo día. Tras subir = el último pronóstico después de una subida de Daily Operations hecha ese día o antes.':'Sales, the v2 engine. Few days so far — one odd day moves these averages; they read better as weeks build up. Morning = the number frozen that same day. After uploads = the last forecast after a Daily Operations upload made on or before that day.'}</div>`;
 }
 // The Weekly Reports archive list (mockup Option B, approved Aug 17 2026) — every
-// complete Tue–Mon week found in the last 90 days of tb_daily_history, newest first.
+// complete Mon–Sun week found in the last 90 days of tb_daily_history, newest first.
 // weeks[] entries are {start,end,F} — F is null for a bucket with <4 real days (a week
 // still in progress, e.g. the current one right after it starts). Those are filtered out
 // below rather than shown as placeholder rows: a barely-started week adds noise, not signal.
 function weeklyReportsListHtml(weeks, currentEnd){
   const have=weeks.filter(w=>w.F);
   if(!have.length) return `<div class="card"><h2>Weekly Reports · Reportes semanales</h2>
-    <div class="muted" style="font-size:12.5px">Needs a Tue–Mon week with at least 4 real days on file. Upload a week of Daily Operations exports and this list builds itself. · Se construye solo cuando hay una semana de datos reales.</div></div>`;
+    <div class="muted" style="font-size:12.5px">Needs a Mon–Sun week with at least 4 real days on file. Upload a week of Daily Operations exports and this list builds itself. · Se construye solo cuando hay una semana de datos reales.</div></div>`;
   return `<div class="card">
     <h2>Weekly Reports · Reportes semanales<span class="h2sub">${have.length} week(s) on file · tap one for the full breakdown</span></h2>
     <div style="margin-top:8px">
@@ -12865,7 +12867,7 @@ async function viewAnalytics(){
   // week's detail instantly (no second round trip), and so re-opening the current week's
   // detail after this load can still show its live correction/suggestion sections.
   S._anaHist={dh:dhq.data||[], fc:fcq.data||[], ih:ihq.data||[], currentEnd:fva?fva.end:null, fvaSuggs, revs:(rvq&&rvq.data)||[]};
-  // Weekly Reports archive list — every Tue–Mon week bucket found in the 90 days just
+  // Weekly Reports archive list — every Mon–Sun week bucket found in the 90 days just
   // fetched (cWeeks already implements this exact bucketing for the Count log). The
   // current week reuses the already-computed fva instead of scoring it twice.
   const weeks=cWeeks((dhq.data||[]).map(r=>({d:r.business_date})))
@@ -18797,12 +18799,32 @@ async function dailyRefresh(force){
   }
 }
 setInterval(()=>dailyRefresh(false), 60000);
+// Oct 9 2026 (Dan): "the daily doesn't automatically update after me uploading the datasets." A
+// Daily Operations file uploaded on the laptop has to show on the phone without anyone reloading.
+// Every 3 minutes, and each time the app comes back to the front, one tiny request asks the
+// database how many real days it holds and the newest one; if that differs from what this phone
+// loaded, it reloads and redraws. Same guard as dailyRefresh: a count in progress is left alone.
+async function freshCheck(){
+  try{
+    if(document.hidden || !S.user || !(S.dhRows&&S.dhRows.length)) return;
+    if(S._freshBusy) return; S._freshBusy=true;
+    const q=await db.from('tb_daily_history').select('business_date').eq('synthetic',false).order('business_date',{ascending:false}).limit(1);
+    const c=await db.from('tb_daily_history').select('business_date',{count:'exact',head:true}).eq('synthetic',false);
+    const newest=q.data&&q.data[0]?String(q.data[0].business_date):null, n=(c&&c.count!=null)?c.count:null;
+    const haveNewest=S.dhRows.reduce((m,r)=>String(r.business_date)>m?String(r.business_date):m,''), haveN=S.dhRows.length;
+    if(newest && (newest!==haveNewest || (n!=null && n!==haveN))){
+      const counting = S.view==='count' && S.countId && S.count && S.count.status!=='completed';
+      if(!counting){ await loadAll(); S._anaHist=null; S._fcSpan=null; render(); toast(isES()?'Datos nuevos cargados':'New data loaded'); }
+    }
+  }catch(e){} finally{ S._freshBusy=false; }
+}
+setInterval(freshCheck, 180000);
 document.addEventListener('visibilitychange',()=>{
   if(!document.hidden){
     const idleMin=(Date.now()-(S.lastSeen||Date.now()))/60000;
     S.lastSeen=Date.now();
     if(idleMin>1) secRecheck();
-    if(idleMin>10) dailyRefresh(true);
+    if(idleMin>10) dailyRefresh(true); else if(idleMin>0.5) freshCheck();
   } else { S.lastSeen=Date.now(); }
 });
 
@@ -19005,7 +19027,7 @@ const TOURS={
  analytics:()=>[
   {when:()=>!!tq('#rp-launch'), el:()=>tq('#rp-launch'), en:'Count & Prep and Ordering reports: pick any dates, read the summary, then download the Excel or a PDF to print.', es:'Reportes de conteo y prep y de pedidos: escoge las fechas, lee el resumen y baja el Excel o un PDF para imprimir.'},
   {el:()=>tCard('Analytics · Analíticas'), en:()=>can('today.exact')?'Covers today, this week, next week, and where the season is.':'Guests today, this week and next week as likely ranges, and where the season is.', es:()=>can('today.exact')?'Cubiertos hoy, esta semana, la próxima, y cómo va la temporada.':'Clientes hoy, esta semana y la próxima como rangos, y cómo va la temporada.'},
-  {when:()=>GRADES(), el:()=>tCard('Weekly Reports'), en:'Weekly reports: forecast against what happened, Tuesday to Monday. Tap a week for the detail.', es:'Reportes semanales: pronóstico contra lo que pasó, de martes a lunes. Toca una semana para el detalle.'},
+  {when:()=>GRADES(), el:()=>tCard('Weekly Reports'), en:'Weekly reports: forecast against what happened, Monday to Sunday. Tap a week for the detail.', es:'Reportes semanales: pronóstico contra lo que pasó, de lunes a domingo. Toca una semana para el detalle.'},
   {el:()=>tq('#dayrep-card'), en:'Day report: one day start to finish — the count, the list, the waste and what got used.', es:'Reporte del día: un día de principio a fin — el conteo, la lista, la merma y lo que se usó.'},
   {when:()=>GRADES(), el:()=>tCard('11 · Forecast accuracy'), en:'Is the forecast right? The average miss, day by day.', es:'¿Acierta el pronóstico? El error promedio, día por día.'},
   {el:()=>tCard('Monthly report'), en:'End of month: Build report makes a one-page summary for the chef meeting. Print or save as PDF.', es:'Fin de mes: Crear reporte hace un resumen de una página para la junta. Imprime o guarda en PDF.'}
