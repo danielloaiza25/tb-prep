@@ -8,8 +8,10 @@
 <meta name="apple-mobile-web-app-title" content="ChefOpsAI">
 <title>ChefOpsAI · Palm Springs</title>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/jszip@3.10.1/dist/jszip.min.js"></script>
+<!-- Oct 10 2026 (speed): the spreadsheet reader (xlsx, 861 KB) and the zip reader (jszip, 95 KB) used
+     to load and compile before the app could start, on every open, for a file that is read a few
+     times a week from the laptop. They now load the first time a file actually needs them (libXlsx /
+     libZip below). -->
 <style>
   :root{
     /* Island palette — deep ocean, warm linen, sunset coral, palm, rattan */
@@ -1533,7 +1535,7 @@ const SB_KEY='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZ
 const TBID='9f8d7c6b-5a49-4e38-b271-06d5f00dbeef'; // Tommy Bahama tenant inside ChefOpsAI
 // Stamped by publish.sh at upload time. It is the only version label there is now —
 // one address, updated in place, so this tells you which build that address is serving.
-const BUILD='Oct 9, 2026 · prep sheet, upload card, auto-refresh, Mon–Sun weeks';
+const BUILD='Oct 10, 2026 · speed: fewer trips per screen, libraries on demand';
 // ---------- IS THIS PHONE EVEN RUNNING THE LATEST BUILD? ----------
 // Sep 3 2026. Three prep fixes shipped and Dan still saw the old behaviour, because the app
 // installs to the home screen and an installed web app does not go back and re-fetch its own
@@ -2386,6 +2388,7 @@ async function fcAfterDailyUpload(bdates){
   const T=todayLA(), span=[]; for(let i=0;i<7;i++) span.push(shiftDay(T,i));
   const thruB=fcHistThru(), before={};
   span.forEach(x=>{ try{ const X=fcExplain(x); if(X&&X.v2s) before[x]={s:Math.round(X.v2s), g:X.v2g}; }catch(e){} });
+  t20Invalidate(); S._anaPull=null;
   try{ await loadAll(); }catch(e){}
   S._anaHist=null; S._fcSpan=null;
   if(S.weekReport&&S.weekReport.open){ S.pendingWeekOpen=S.weekReport.weekEnd; S.weekReport={open:false, weekEnd:null, F:null, isCurrent:false}; }
@@ -2660,7 +2663,8 @@ async function wxRefreshForecast(){
       // would quietly destroy the only real history the app has.
       .filter(r=>r.business_date>=t0 && r.tmax_f!=null);
     rows.forEach(r=>{ S.wx.byDate[r.business_date]=r; });
-    if(rows.length) await db.from('tb_weather_daily').upsert(rows,{onConflict:'business_date'});
+    // Oct 10 2026: the app already has the numbers; saving them is not something the screen waits for.
+    if(rows.length) db.from('tb_weather_daily').upsert(rows,{onConflict:'business_date'}).then(()=>{},()=>{});
   }
 }
 
@@ -2698,7 +2702,10 @@ async function loadWeather(force){
     const tr=S.wx.byDate[todayLA()];
     const fresh=tr && tr.source==='forecast' && tr.fetched_at && (Date.now()-new Date(tr.fetched_at).getTime()) < 6*3600e3;
     if(fresh){ wxRefreshForecast().catch(()=>{}); }
-    else { await wxRefreshForecast(); }
+    // Oct 10 2026 (speed): the first open of the day waits for Open-Meteo, but never more than
+    // 2.5 s. A slow or unreachable weather service used to hold the whole Today screen; now the
+    // screen draws with the forecast on file and the fresh one lands behind it.
+    else { await Promise.race([wxRefreshForecast().catch(()=>{}), new Promise(r=>setTimeout(r,2500))]); }
   }catch(e){ S.wx.err=e.message||String(e); }
   S.wx.loading=false; S.wx.loaded=true;
 }
@@ -3433,6 +3440,8 @@ const dhFixQ=r=>{ if(r&&r.data) dhFix(Array.isArray(r.data)?r.data:[r.data]); re
 async function loadAll(){
   // Sep 24 2026 speed pass: the event calendar loads in the SAME round trip as everything else
   // (it only needs today's date), instead of a second trip after the first one lands.
+  // Oct 10 2026: so do the Top 20 item rows (t20Items), which Today needs the moment it draws.
+  try{ t20Items().catch(()=>{}); }catch(e){}
   const [,emp,inv,rec,fam,mo,se,pe,fcm,fsq,dhq,f2q,vrq] = await Promise.all([
     loadEvents().then(()=>null,()=>null),
     db.from('employees').select('*').eq('restaurant_id',TBID).order('created_at'),
@@ -3532,7 +3541,9 @@ async function loadCounts(dstr){
   S.cntFailed={}; S._cntRowId={}; S._cntQ={}; S._cntAll=new Set();
   try{ cntUnsavedPaint(); }catch(e){}
   S.counts={}; S.split={}; S.zeroMark={}; S.cantCount={}; S.countedAt={}; S.rawUnit={}; S.countId=null; S.count=null; S.countRows={open:null, close:null};
-  const {data:cs}=await db.from('inventory_counts').select('*').eq('restaurant_id',TBID)
+  // Oct 10 2026 (speed): the count rows and their lines come back in one request (PostgREST
+  // embeds inventory_count_items through its foreign key) instead of header first, lines second.
+  const {data:cs}=await db.from('inventory_counts').select('*, inventory_count_items(*)').eq('restaurant_id',TBID)
     .in('notes',[dstr, dstr+' close']);
   const mk=r=>({id:r.id, when:cIsClose(r.notes)?'close':'open', d:cDateOf(r.notes),
                 status:r.status||'in_progress', started_at:r.started_at||r.created_at,
@@ -3541,7 +3552,7 @@ async function loadCounts(dstr){
   (cs||[]).forEach(r=>{ const o=mk(r); if(!S.countRows[o.when]) S.countRows[o.when]=o; });
   const ids=['open','close'].map(k=>S.countRows[k]&&S.countRows[k].id).filter(Boolean);
   if(!ids.length) return;
-  const {data:items}=await db.from('inventory_count_items').select('*').in('count_id',ids);
+  const items=[]; (cs||[]).forEach(r=>{ if(ids.includes(r.id)) items.push(...(r.inventory_count_items||[])); });
   // How many rows each of the two has, so the chooser can show progress for the one you are
   // not looking at.
   (items||[]).forEach(it=>{ ['open','close'].forEach(k=>{ if(S.countRows[k]&&it.count_id===S.countRows[k].id) S.countRows[k].n++; }); });
@@ -4939,10 +4950,11 @@ window.pickWasteItem=v=>{
 
 async function loadTasks(dstr){
   S.tasks=[]; S.listId=null; S.listMeta={};
-  const {data:ls}=await db.from('prep_lists').select('*').eq('restaurant_id',TBID).eq('date',dstr).order('created_at',{ascending:false}).limit(1);
+  // Oct 10 2026 (speed): the list and its lines in one request (embedded through the foreign key).
+  const {data:ls}=await db.from('prep_lists').select('*, prep_list_items(*)').eq('restaurant_id',TBID).eq('date',dstr).order('created_at',{ascending:false}).limit(1);
   if(!ls||!ls.length) return;
   S.listId=ls[0].id; S.listMeta=jparse(ls[0].notes,{});
-  const {data:items}=await db.from('prep_list_items').select('*').eq('prep_list_id',S.listId);
+  const items=ls[0].prep_list_items||[];
   // Three ways back to the real prep item, tried in order of how much they can be trusted.
   // inventory_item_id (added 2026-08-24) is the real, durable link — every list written from
   // now on carries it, and it is the ONLY one of the three that survives two different items
@@ -7550,7 +7562,11 @@ async function lyAligned(d){
   let a=null; try{ a=fcAligned(d); }catch(e){}
   if(!a) return null;
   const dates=a.date?[a.date]:(a.dates||[]); if(!dates.length) return null;
-  const q=await db.from('tb_daily_history').select('business_date,guests,net_sales,synthetic').in('business_date',dates);
+  // Oct 10 2026 (speed): every real day is already in memory (S.dhRows, loaded at boot) — the
+  // same rows this query returned. The query stays as the fallback before that load.
+  const q=(S.dhRows&&S.dhRows.length)
+    ? {data:S.dhRows.filter(r=>dates.includes(String(r.business_date))).map(r=>Object.assign({synthetic:false},r))}
+    : await db.from('tb_daily_history').select('business_date,guests,net_sales,synthetic').in('business_date',dates);
   const rows=dhFix(q.data||[]).filter(r=>Number(r.guests)>0);
   if(!rows.length) return null;
   const avg=k=>Math.round(rows.reduce((t,r)=>t+Number(r[k]||0),0)/rows.length);
@@ -8137,6 +8153,11 @@ async function viewToday(){
   // Oct 8 2026: the checklist alerts (Izzi) read the same lists the Checklist screen does
   const pCk=(d===todayLA() && sec('checklist')) ? ckLoad(d).catch(()=>null) : null;
   const pRv=(d===todayLA()) ? fcRevLoad(d) : null;   // Oct 9 2026: the upload card
+  // Oct 10 2026 (speed): the week strip's frozen forecasts and the Top 20 rows start now too,
+  // instead of after the weather / 86 / checklist reads come back — one trip, not two or three.
+  const wkDays=weekMonSun(d);   // Sep 25 2026: Mon–Sun, same week as everyone's tiles
+  const pWk=db.from('tb_day_forecast').select('business_date,guests_forecast').gte('business_date',wkDays[0]).lte('business_date',wkDays[6]);
+  const pT20=t20Items().then(data=>({data}),()=>({data:[]}));
   if(!S._dyn) dynLoad().catch(()=>{});   // the dynamic par, warmed in the background (Sep 30)
   if(!S.wx.loaded) await loadWeather();
   await wxEnsureHours(d);
@@ -8152,19 +8173,13 @@ async function viewToday(){
   // as its own line, never folded in silently. With the dial off, adj is exactly baseGuests.
   const adjGuests=wxf?Math.round(baseGuests*wxf.f):baseGuests;
   const guests = S.guestsOverride ?? adjGuests;
-  const wkDays=weekMonSun(d);   // Sep 25 2026: Mon–Sun, same week as everyone's tiles
   // last-year same-day actuals from daily history (synthetic until real exports land), fallback to model estimate
   // The LY day header line keeps its query; the old per-item LY column is gone (Dan, Aug 26 —
   // it leaned on sample item rows anyway). In its place: the measured swing, fetched as every
-  // real item-day on file. Small today (~500 rows) and always true — nothing cached, nothing stale.
-  const [LA,swIq,wkFcQ]=await Promise.all([
-    lyAligned(d).catch(()=>null),
-    // Oct 4 2026: paged — 1,476 real item rows by Sep 30, and one request stops at 1,000.
-    t20Items().then(data=>({data}),()=>({data:[]})),
-    // What the app actually promised on each day of the strip's week. A past day shows the
-    // number it was given that morning, not today's recomputation of it.
-    db.from('tb_day_forecast').select('business_date,guests_forecast').gte('business_date',wkDays[0]).lte('business_date',wkDays[6])
-  ]);
+  // real item-day on file (t20Items — one fetch per session since Oct 10 2026).
+  // wkFcQ: what the app actually promised on each day of the strip's week. A past day shows the
+  // number it was given that morning, not today's recomputation of it.
+  const [LA,swIq,wkFcQ]=await Promise.all([ lyAligned(d).catch(()=>null), pT20, pWk ]);
   const wkFrozen={}; (wkFcQ.data||[]).forEach(r=>{ if(r.guests_forecast!=null) wkFrozen[String(r.business_date)]=Number(r.guests_forecast); });
   const lyRow=LA||null;   // Sep 25: last year's SAME WEEKDAY (fcAligned), not the calendar date
   const ly = lyRow ? {guests:lyRow.guests, sales:lyRow.sales, syn:lyRow.syn} : lastYearEst(d);
@@ -8383,7 +8398,11 @@ function isOracleLeafItem(row){
   return isFinite(qty) && isFinite(gross) && qty>0 && gross>0;
 }
 
+// Oct 10 2026: the two file libraries, fetched on first use (rpScript caches by the window global).
+function libXlsx(){ return rpScript('https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js',()=>!!window.XLSX); }
+function libZip(){ return rpScript('https://cdn.jsdelivr.net/npm/jszip@3.10.1/dist/jszip.min.js',()=>!!window.JSZip); }
 async function readOracleRows(file){
+  try{ await libXlsx(); }catch(e){}
   if(!window.XLSX) throw new Error('xlsx reader did not load');
   const buf=await file.arrayBuffer();
   const wb=XLSX.read(buf,{type:'array'});
@@ -8486,7 +8505,7 @@ async function applyDailyOperations(bdate, parsed){
       if(fid){ byFam[fid]=(byFam[fid]||0)+it.qty; itemsLoaded++; } else itemsSkipped++;
     });
     const rows=Object.entries(byFam).map(([fid,units])=>({business_date:bdate, family_id:Number(fid), units, synthetic:false}));
-    if(rows.length) await db.from('tb_daily_item_history').upsert(rows);
+    if(rows.length){ await db.from('tb_daily_item_history').upsert(rows); t20Invalidate(); }
   }
   // Forecast-accuracy scoring: only meaningful when a forecast was actually saved for this
   // date beforehand. No forecast on file is reported as exactly that, not skipped silently.
@@ -9152,6 +9171,7 @@ function zipMime(name){
 }
 async function handleZipFile(file){
   if(!guard('admin.import')) return;
+  try{ await libZip(); }catch(e){}
   if(!window.JSZip){ toast('Zip reader failed to load — check the connection and try again.'); return; }
   if(!/\.zip$/i.test(file.name)){ toast('That\'s not a .zip file · Eso no es un .zip'); return; }
   if(file.size>MAXUP){ toast(`Too big (${fmtBytes(file.size)}, limit ${fmtBytes(MAXUP)}). Send it through Claude instead.`); return; }
@@ -12839,11 +12859,15 @@ async function viewAnalytics(){
   // ---- async pulls
   const since=new Date(dateObjLA(d)); since.setDate(since.getDate()-45);
   const sinceStr=since.toISOString().slice(0,10);
-  const [ihq, plq, fcq, wsq, dhq, asq, rvq] = await Promise.all([
+  // Oct 10 2026 (speed): one pull per three minutes. Flipping Today → Analytics → Today → Analytics
+  // re-read a megabyte each time; now the second open within three minutes draws from the first.
+  // Dropped by a Daily Operations upload, the freshness check and the day change.
+  const _ap=S._anaPull, _apHit=!!(_ap&&_ap.d===d&&Date.now()-_ap.at<3*60e3);
+  const [ihq, plq, fcq, wsq, dhq, asq, rvq] = _apHit ? _ap.res : await Promise.all([
     // Oct 5 2026: paged. The item file passed 1,000 rows (1,581 on Oct 5) and one request stops at
     // 1,000 — the weekly report saw 3 of the 6 item days in the week ending Oct 5.
     t20Items().then(data=>({data}),e=>({data:[],error:e})),
-    db.from('prep_lists').select('id,date,notes').eq('restaurant_id',TBID).gte('date',sinceStr).order('date',{ascending:false}),
+    db.from('prep_lists').select('id,date').eq('restaurant_id',TBID).gte('date',sinceStr).order('date',{ascending:false}),   // Oct 10 2026: ids only (the notes blob was 95 KB nobody read)
     db.from('tb_day_forecast').select('*').order('business_date',{ascending:false}).limit(60),
     db.from('waste_records').select('*').eq('restaurant_id',TBID).gte('date',sinceStr).order('date',{ascending:false}),
     db.from('tb_daily_history').select('business_date,guests,net_sales').eq('synthetic',false).order('business_date',{ascending:false}).limit(90).then(dhFixQ),
@@ -12851,6 +12875,7 @@ async function viewAnalytics(){
     // Oct 8 2026: before / after each Daily Operations upload, for the weekly report
     db.from('tb_forecast_rev').select('*').gte('business_date',shiftDay(d,-100)).order('made_at',{ascending:true}).limit(3000)
   ]);
+  if(!_apHit) S._anaPull={d, at:Date.now(), res:[ihq, plq, fcq, wsq, dhq, asq, rvq]};
   const fva=fvaCompute(dhq.data||[], fcq.data||[], ihq.data||[], S.families, S.scores);
   // Record this week's attach rates into the weekly ledger (idempotent upsert) so the
   // 3-week persistence rule has real weeks to count, then compute suggestions from it.
@@ -12908,8 +12933,10 @@ async function viewAnalytics(){
   const lists=plq.data||[]; const listIds=lists.map(l=>l.id);
   let items=[];
   if(listIds.length){
-    const {data}=await db.from('prep_list_items').select('*').in('prep_list_id',listIds);
-    items=data||[];
+    // Oct 10 2026 (speed): the seven columns this section adds up — select('*') was 676 KB a visit —
+    // and kept with the rest of the pull for three minutes.
+    if(_apHit&&_ap.items) items=_ap.items;
+    else { const {data}=await db.from('prep_list_items').select('prep_list_id,estimated_minutes,quantity,status,assigned_to,station,item_name').in('prep_list_id',listIds); items=data||[]; if(S._anaPull) S._anaPull.items=items; }
   }
   const nameById={}; S.staff.forEach(s=>nameById[s.id]=s.name);
   const byPerson={}, byStation={}, byItem={};
@@ -14624,47 +14651,51 @@ function ogPlanText(plan){
   return plan.cases.map(c=>`${fmtCase(c.n)} × ${esc(c.item.pack||'case')}`).join(' + ');
 }
 async function loadOG(vendor){
+  // Oct 10 2026 (speed): the first open of a vendor used to make up to eleven round trips one
+  // after another — rooms, categories, hidden rooms, order days, lead times, items, SKU map,
+  // vendor items + prices, past orders, their lines, the open order's lines — 3–5 s on the phone
+  // and up to 12 s when the price view was slow (Dan's phone: Orders at 4–5 s, Oct 5–9).
+  // Everything that depends on nothing else now goes out in one trip; the reads that need an
+  // answer first follow in a second; and the last-paid-price lookup (tb_purchase_price_latest,
+  // the slow one) never holds the walk up — it lands in the background and only the price line
+  // of each card repaints (ogPriceSoft), never a card somebody is typing in.
+  const jobs=[];
   // Rooms and their walk order live in one shared list, so every vendor walks the kitchen the
   // same way. confirmed=false means the name came off a vendor's sheet and the walk says so.
   if(!S.og.roomPos){
     S.og.roomPos={}; S.og.roomOk={};
-    try{
-      const {data}=await db.from('tb_order_guide_rooms').select('name,position,confirmed').eq('active',true);
-      (data||[]).forEach(r=>{ S.og.roomPos[r.name]=Number(r.position); S.og.roomOk[r.name]=!!r.confirmed; });
-    }catch(e){}
+    jobs.push(db.from('tb_order_guide_rooms').select('name,position,confirmed').eq('active',true)
+      .then(({data})=>{ (data||[]).forEach(r=>{ S.og.roomPos[r.name]=Number(r.position); S.og.roomOk[r.name]=!!r.confirmed; }); },()=>{}));
   }
   // Categories are the second half of the split (Aug 27): room = where you walk, category =
   // what the thing is. They deliberately cross rooms, so this list drives the toggle only.
   if(!S.og.catPos){
     S.og.catPos={};
-    try{
-      const {data}=await db.from('tb_order_guide_categories').select('name,position').eq('active',true);
-      (data||[]).forEach(c=>{ S.og.catPos[c.name]=Number(c.position); });
-    }catch(e){}
+    jobs.push(db.from('tb_order_guide_categories').select('name,position').eq('active',true)
+      .then(({data})=>{ (data||[]).forEach(c=>{ S.og.catPos[c.name]=Number(c.position); }); },()=>{}));
   }
   if(!S.ogWalk.units){
     try{ S.ogWalk.units=JSON.parse(localStorage.getItem('tbog:units')||'{}')||{}; }catch(e){ S.ogWalk.units={}; }
   }
   if(!S.ogWalk.hiddenLoaded){
     S.ogWalk.hiddenLoaded=true;
-    try{ const {data}=await db.from('tb_model').select('value').eq('key','og_hidden_rooms').maybeSingle();
-      if(data&&data.value&&typeof data.value==='object') S.ogWalk.hidden=data.value;
-    }catch(e){}
+    jobs.push(db.from('tb_model').select('value').eq('key','og_hidden_rooms').maybeSingle()
+      .then(({data})=>{ if(data&&data.value&&typeof data.value==='object') S.ogWalk.hidden=data.value; },()=>{}));
   }
   if(!S.og.orderDays){
-    try{ const od=await db.from('tb_model').select('value').eq('key','order_days').maybeSingle();
-      S.og.orderDays=(od.data&&od.data.value)||{}; }catch(e){ S.og.orderDays={}; }
+    jobs.push(db.from('tb_model').select('value').eq('key','order_days').maybeSingle()
+      .then(od=>{ S.og.orderDays=(od.data&&od.data.value)||{}; },()=>{ S.og.orderDays={}; }));
   }
   // Lead time: days between the order going in and it landing. Until Aug 28 2026 this was
   // read but never loaded or written anywhere, so every coverage window silently assumed 1 day
   // and said "assumed" with no way for Dan to fix it.
   if(!S.og.lead){
-    try{ const ld=await db.from('tb_model').select('value').eq('key','og_lead').maybeSingle();
-      S.og.lead=(ld.data&&ld.data.value)||{}; }catch(e){ S.og.lead={}; }
+    jobs.push(db.from('tb_model').select('value').eq('key','og_lead').maybeSingle()
+      .then(ld=>{ S.og.lead=(ld.data&&ld.data.value)||{}; },()=>{ S.og.lead={}; }));
   }
   if(!S.og.items[vendor]){
-    const r=await db.from('tb_order_guide_items').select('*').eq('vendor',vendor).eq('active',true).order('sort');
-    S.og.items[vendor]=r.data||[];
+    jobs.push(db.from('tb_order_guide_items').select('*').eq('vendor',vendor).eq('active',true).order('sort')
+      .then(r=>{ S.og.items[vendor]=r.data||[]; },()=>{ S.og.items[vendor]=[]; }));
   }
   // Sep 30 2026 (mockup D): the vendor's own pack and the last price paid, keyed by guide item.
   // Pack from R365's vendor items, price from R365 receiving (tb_purchase_price_latest, per R365
@@ -14672,44 +14703,54 @@ async function loadOG(vendor){
   if(!S.og.skuInfo) S.og.skuInfo={};
   if(!S.og.skuInfoFor||!S.og.skuInfoFor[vendor]){
     S.og.skuInfoFor=S.og.skuInfoFor||{}; S.og.skuInfoFor[vendor]=true;
-    try{
-      const mq=await db.from('tb_sku_map').select('sku,item_id,status').eq('vendor',vendor).not('item_id','is',null);
-      const skus=[...new Set((mq.data||[]).map(m=>String(m.sku)))];
-      if(skus.length){
-        const [vi,pl]=await Promise.all([
-          db.from('tb_vendor_items').select('sku,r365_item,purchase_uom,pack_size,split_uom,price,effective_on').eq('vendor',vendor).in('sku',skus),
-          db.from('tb_purchase_price_latest').select('sku,r365_item,unit,price,price_on,prev_price,prev_on,pct_change,n_lines,first_on').eq('vendor',vendor).in('sku',skus)]);
-        const byS={}; (vi.data||[]).forEach(v=>{ byS[v.sku]=byS[v.sku]||{}; byS[v.sku].pack=v.purchase_uom||v.pack_size||null; byS[v.sku].r365=v.r365_item; });
-        (pl.data||[]).forEach(v=>{ const o=byS[v.sku]=byS[v.sku]||{}; if(!o.price_on||String(v.price_on)>String(o.price_on)){ Object.assign(o,{unit:v.unit,price:Number(v.price),price_on:v.price_on,prev:v.prev_price!=null?Number(v.prev_price):null,prev_on:v.prev_on,pct:v.pct_change!=null?Number(v.pct_change):null,n:v.n_lines,first_on:v.first_on,r365:o.r365||v.r365_item}); } });
-        (mq.data||[]).forEach(m=>{ const o=byS[String(m.sku)]; if(o) S.og.skuInfo[m.item_id]=Object.assign({vendor, sku:String(m.sku)},o); });
-      }
-    }catch(e){}
+    jobs.push((async()=>{
+      try{
+        const mq=await db.from('tb_sku_map').select('sku,item_id,status').eq('vendor',vendor).not('item_id','is',null);
+        const skus=[...new Set((mq.data||[]).map(m=>String(m.sku)))];
+        if(!skus.length) return;
+        const byS={};
+        const apply=()=>{ (mq.data||[]).forEach(m=>{ const o=byS[String(m.sku)]; if(o) S.og.skuInfo[m.item_id]=Object.assign({vendor, sku:String(m.sku)},o); }); };
+        const vi=await db.from('tb_vendor_items').select('sku,r365_item,purchase_uom,pack_size,split_uom,price,effective_on').eq('vendor',vendor).in('sku',skus);
+        (vi.data||[]).forEach(v=>{ byS[v.sku]=byS[v.sku]||{}; byS[v.sku].pack=v.purchase_uom||v.pack_size||null; byS[v.sku].r365=v.r365_item; });
+        apply();
+        // the slow read, off the critical path: the walk draws, the prices fill in when they land
+        db.from('tb_purchase_price_latest').select('sku,r365_item,unit,price,price_on,prev_price,prev_on,pct_change,n_lines,first_on').eq('vendor',vendor).in('sku',skus)
+          .then(pl=>{
+            if(!pl.data||!pl.data.length) return;
+            pl.data.forEach(v=>{ const o=byS[v.sku]=byS[v.sku]||{}; if(!o.price_on||String(v.price_on)>String(o.price_on)){ Object.assign(o,{unit:v.unit,price:Number(v.price),price_on:v.price_on,prev:v.prev_price!=null?Number(v.prev_price):null,prev_on:v.prev_on,pct:v.pct_change!=null?Number(v.pct_change):null,n:v.n_lines,first_on:v.first_on,r365:o.r365||v.r365_item}); } });
+            apply(); ogPriceSoft(vendor);
+          },()=>{});
+      }catch(e){}
+    })());
   }
   if(S.og.histFor!==vendor){
-    const h=await db.from('tb_vendor_orders').select('*').eq('vendor',vendor).order('created_at',{ascending:false}).limit(40);
-    S.og.history=h.data||[]; S.og.histFor=vendor;
-    // Every past reading of every item on this guide, so the walk can show what the shelf
-    // held the LAST few times you stood here. A number on its own tells you nothing;
-    // "1, then 0.4, then 0.3 going into a weekend" tells you the par is wrong.
-    // 'duplicate' orders are excluded — the app double-fired and made two sessions on one
-    // tap, and counting that twin as a second reading would invent a trend that never happened.
-    S.og.hist={};
-    try{
-      const ids=(S.og.history||[]).filter(o=>o.status!=='duplicate').map(o=>o.id);
-      const byId={}; (S.og.history||[]).forEach(o=>{ byId[o.id]=o; });
-      if(ids.length){
-        const hl=await db.from('tb_vendor_order_lines').select('order_id,item_id,oh')
-          .in('order_id',ids).not('oh','is',null);
-        (hl.data||[]).forEach(r=>{
-          const o=byId[r.order_id]; if(!o) return;
-          (S.og.hist[r.item_id]=S.og.hist[r.item_id]||[]).push({d:o.order_date, oh:Number(r.oh), st:o.status});
-        });
-        Object.keys(S.og.hist).forEach(k=>{
-          S.og.hist[k].sort((a,b)=> a.d<b.d?-1:a.d>b.d?1:0);
-        });
-      }
-    }catch(e){ S.og.hist={}; }
+    jobs.push((async()=>{
+      const h=await db.from('tb_vendor_orders').select('*').eq('vendor',vendor).order('created_at',{ascending:false}).limit(40);
+      S.og.history=h.data||[]; S.og.histFor=vendor;
+      // Every past reading of every item on this guide, so the walk can show what the shelf
+      // held the LAST few times you stood here. A number on its own tells you nothing;
+      // "1, then 0.4, then 0.3 going into a weekend" tells you the par is wrong.
+      // 'duplicate' orders are excluded — the app double-fired and made two sessions on one
+      // tap, and counting that twin as a second reading would invent a trend that never happened.
+      S.og.hist={};
+      try{
+        const ids=(S.og.history||[]).filter(o=>o.status!=='duplicate').map(o=>o.id);
+        const byId={}; (S.og.history||[]).forEach(o=>{ byId[o.id]=o; });
+        if(ids.length){
+          const hl=await db.from('tb_vendor_order_lines').select('order_id,item_id,oh')
+            .in('order_id',ids).not('oh','is',null);
+          (hl.data||[]).forEach(r=>{
+            const o=byId[r.order_id]; if(!o) return;
+            (S.og.hist[r.item_id]=S.og.hist[r.item_id]||[]).push({d:o.order_date, oh:Number(r.oh), st:o.status});
+          });
+          Object.keys(S.og.hist).forEach(k=>{
+            S.og.hist[k].sort((a,b)=> a.d<b.d?-1:a.d>b.d?1:0);
+          });
+        }
+      }catch(e){ S.og.hist={}; }
+    })());
   }
+  await Promise.all(jobs);
   // Reopen an unfinished order so a half-done count survives a reload.
   // Until Sep 14 2026 this only matched order_date===today, which meant a count you PARKED
   // was invisible the next morning: the rows sat in the database with nothing pointing at
@@ -14729,6 +14770,23 @@ async function loadOG(vendor){
       S.og.lines={}; (l.data||[]).forEach(x=>{ S.og.lines[x.item_id]=x; });
     } else { S.og.resumedFrom=null; S.og.staleOpen=0; }
   }
+}
+// Oct 10 2026: the last-paid prices land after the walk is on screen. Only the price line of
+// each card that is showing is redrawn — never a card with a number being typed in it, and the
+// page does not scroll or rebuild. Tablet mode shows no price line, so nothing to do there.
+function ogPriceSoft(vendor){
+  try{
+    if(S.view!=='orders'||S.og.vendor!==vendor||TM()) return;
+    (S.og.items[vendor]||[]).forEach(it=>{
+      if(!S.og.skuInfo[it.id]) return;
+      const card=document.getElementById('ogrow-'+it.id); if(!card) return;
+      const a=document.activeElement; if(a&&card.contains(a)) return;
+      const hd=card.querySelector(':scope > .og-hd'); if(!hd) return;
+      const html=ogPriceLine(it), old=card.querySelector(':scope > .og-sub');
+      if(old){ if(html) old.outerHTML=html; else old.remove(); }
+      else if(html) hd.insertAdjacentHTML('afterend',html);
+    });
+  }catch(e){}
 }
 async function ogEnsureOrder(){
   if(S.og.order) return S.og.order;
@@ -15989,6 +16047,7 @@ async function viewOrders(){
   const bil=S.settings&&S.settings.bilingual;
   // ---- page: upload invoices (vendor files live here, not on the Oracle screen) ----
   if(S.og.page==='upload'){
+    libXlsx().catch(()=>{});   // Oct 10 2026: warm the spreadsheet reader while the page draws
     await loadOrdersDash();
     await upLoadKnown();
     shell(ogUploadPage());
@@ -15996,29 +16055,25 @@ async function viewOrders(){
   }
   // ---- page: pick a vendor ----
   if(S.og.page==='pick'||!S.og.vendor){
-    await upLoadKnown();
-    // last saved order per vendor, one query
-    let last={};
-    try{
-      // 'saved' alone was wrong the moment orders could be 'sent': the most important order
-      // a vendor has — the one actually placed — was the one excluded from "last: ...".
-      const r=await db.from('tb_vendor_orders').select('*')
-        .in('status',['sent','saved']).order('order_date',{ascending:false}).limit(60);
-      (r.data||[]).forEach(o=>{ if(!last[o.vendor]) last[o.vendor]=o; });
-    }catch(e){}
-    // The Order Book belongs HERE, on the screen Dan lands on when he taps Orders — not
-    // buried under 150 item cards inside one vendor's walk, which is where it first shipped.
-    try{
-      const bk=await db.from('tb_vendor_orders').select('*')
-        .order('order_date',{ascending:false}).order('created_at',{ascending:false}).limit(40);
-      S.og.book=bk.data||[];
-    }catch(e){ S.og.book=[]; }
-    await loadOrdersDash();
-    let counts={};
-    try{
-      const c=await db.from('tb_order_guide_items').select('vendor').eq('active',true);
-      (c.data||[]).forEach(x=>counts[x.vendor]=(counts[x.vendor]||0)+1);
-    }catch(e){}
+    // Oct 10 2026 (speed): five independent reads used to go out one after another (known
+    // invoices, last order per vendor, the order book, the dashboard, item counts) — the screen
+    // waited for the slowest chain. They leave together now.
+    let last={}, counts={};
+    await Promise.all([
+      upLoadKnown(),
+      // last saved order per vendor, one query. 'saved' alone was wrong the moment orders could
+      // be 'sent': the most important order a vendor has — the one actually placed — was the one
+      // excluded from "last: ...".
+      db.from('tb_vendor_orders').select('*').in('status',['sent','saved']).order('order_date',{ascending:false}).limit(60)
+        .then(r=>{ (r.data||[]).forEach(o=>{ if(!last[o.vendor]) last[o.vendor]=o; }); },()=>{}),
+      // The Order Book belongs HERE, on the screen Dan lands on when he taps Orders — not
+      // buried under 150 item cards inside one vendor's walk, which is where it first shipped.
+      db.from('tb_vendor_orders').select('*').order('order_date',{ascending:false}).order('created_at',{ascending:false}).limit(40)
+        .then(bk=>{ S.og.book=bk.data||[]; },()=>{ S.og.book=[]; }),
+      loadOrdersDash(),
+      db.from('tb_order_guide_items').select('vendor').eq('active',true)
+        .then(c=>{ (c.data||[]).forEach(x=>counts[x.vendor]=(counts[x.vendor]||0)+1); },()=>{})
+    ]);
     // Dan, Sep 3 2026: "i want the order guides to be on the top" and "price moves all the
     // way to the buttom". The guides are what he opens this screen to USE; everything else is
     // something to read afterwards. So: guides, then what actually got billed, then the
@@ -17056,9 +17111,19 @@ function t20Basis(){ return ((S.settings||{}).top20_basis==='guests')?'guests':'
 function t20Fams(){ return (S.families||[]).filter(f=>(f.category==='food'||f.category==='dessert')&&f.active!==false).slice(0,20); }
 function t20RealDays(){ const o={}; (S.dhRows||[]).forEach(r=>{ const g=Number(r.guests), s=Number(r.net_sales); if(g>0&&s>0) o[String(r.business_date)]={g,s}; }); return o; }
 // every real Oracle item-day on file — 1,476 rows on Oct 4, past the 1,000-row page, so paged
+// Oct 10 2026 (speed): fetched once and kept for the session (30 min at most). Today, Lists and
+// Analytics each pulled the same 1,500 rows in two trips on every open; now the first caller
+// fetches and everyone else reads the copy. Dropped the moment an item file lands (the upload
+// path), when the 3-minute freshness check finds new days, and at the day change.
 function t20Items(){
-  return dynPaged(()=>db.from('tb_daily_item_history').select('family_id,units,business_date').eq('synthetic',false).order('business_date').order('family_id'));
+  const c=S._t20C;
+  if(c&&c.p&&Date.now()-c.at<30*60e3) return c.p.then(a=>a.slice());
+  const p=dynPaged(()=>db.from('tb_daily_item_history').select('family_id,units,business_date').eq('synthetic',false).order('business_date').order('family_id'))
+    .catch(e=>{ if(S._t20C&&S._t20C.p===p) S._t20C=null; throw e; });
+  S._t20C={p, at:Date.now()};
+  return p.then(a=>a.slice());
 }
+function t20Invalidate(){ S._t20C=null; }
 // plates per $1,000 for each Top 20 item over the 28 days before the day, recent days weighted more (before today for a day
 // still ahead). Only days that have both an Oracle item file and real sales count.
 function t20SalesRates(items, d){
@@ -17940,6 +18005,7 @@ window.rpExcel=async()=>{
   }catch(e){
     // ExcelJS didn't load (offline, blocked): same tabs and numbers through SheetJS, without the colours.
     try{
+      await libXlsx();
       const wb=XLSX.utils.book_new();
       const sumRows=[[spec.title],[`${rpFd(R.from)} – ${rpFd(R.to)} · ${spec.who}`],[],['Key numbers']].concat(spec.sum.map(x=>[x[0],(x[1]&&typeof x[1]==='object')?x[1].r:x[1],x[3]||'']));
       XLSX.utils.book_append_sheet(wb,XLSX.utils.aoa_to_sheet(sumRows),'Summary');
@@ -18794,6 +18860,7 @@ async function dailyRefresh(force){
   if(force || S.dayStamp!==today){
     S.dayStamp=today; S.selDate=today; S.guestsOverride=null; S.book=null; S.par.loaded=false;
     // On the sign-in screen of a secured phone there is nothing to load but names.
+    t20Invalidate(); S._anaPull=null;
     try{ if(SEC.mode==='secure' && !SEC.bound) await loadRoster(); else await loadAll(); }catch(e){}
     render();
   }
@@ -18808,13 +18875,14 @@ async function freshCheck(){
   try{
     if(document.hidden || !S.user || !(S.dhRows&&S.dhRows.length)) return;
     if(S._freshBusy) return; S._freshBusy=true;
-    const q=await db.from('tb_daily_history').select('business_date').eq('synthetic',false).order('business_date',{ascending:false}).limit(1);
-    const c=await db.from('tb_daily_history').select('business_date',{count:'exact',head:true}).eq('synthetic',false);
+    const [q,c]=await Promise.all([
+      db.from('tb_daily_history').select('business_date').eq('synthetic',false).order('business_date',{ascending:false}).limit(1),
+      db.from('tb_daily_history').select('business_date',{count:'exact',head:true}).eq('synthetic',false)]);
     const newest=q.data&&q.data[0]?String(q.data[0].business_date):null, n=(c&&c.count!=null)?c.count:null;
     const haveNewest=S.dhRows.reduce((m,r)=>String(r.business_date)>m?String(r.business_date):m,''), haveN=S.dhRows.length;
     if(newest && (newest!==haveNewest || (n!=null && n!==haveN))){
       const counting = S.view==='count' && S.countId && S.count && S.count.status!=='completed';
-      if(!counting){ await loadAll(); S._anaHist=null; S._fcSpan=null; render(); toast(isES()?'Datos nuevos cargados':'New data loaded'); }
+      if(!counting){ t20Invalidate(); S._anaPull=null; await loadAll(); S._anaHist=null; S._fcSpan=null; render(); toast(isES()?'Datos nuevos cargados':'New data loaded'); }
     }
   }catch(e){} finally{ S._freshBusy=false; }
 }
