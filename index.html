@@ -1535,7 +1535,7 @@ const SB_KEY='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZ
 const TBID='9f8d7c6b-5a49-4e38-b271-06d5f00dbeef'; // Tommy Bahama tenant inside ChefOpsAI
 // Stamped by publish.sh at upload time. It is the only version label there is now —
 // one address, updated in place, so this tells you which build that address is serving.
-const BUILD='Oct 10, 2026 · speed: fewer trips per screen, libraries on demand';
+const BUILD='Oct 10, 2026 · event lifts re-read from their own days + Today sales line';
 // ---------- IS THIS PHONE EVEN RUNNING THE LATEST BUILD? ----------
 // Sep 3 2026. Three prep fixes shipped and Dan still saw the old behaviour, because the app
 // installs to the home screen and an installed web app does not go back and re-fetch its own
@@ -2083,7 +2083,15 @@ async function measureEvents(){
   const done=[], skipped=[];
   const note=async(e,why)=>{ if(e.skip!==why){ await db.rpc('tb_event_set_skip',{p_id:e.id,p_reason:why}); e.skip=why; } skipped.push({name:e.name,start:e.start,why}); };
   for(const e of S.events){
-    if(e.kind==='baseline' || e.lift!=null) continue;
+    if(e.kind==='baseline') continue;
+    // Oct 10 2026 (Dan, the Friday miss): a lift written BEFORE the event's last day cannot have come
+    // from the event's own days — it was carried over from another year. The Dinah 2026 carried
+    // 2025's 1.245 as "measured"; its own six days, once in, read 0.93 (the mini edition). With the
+    // carried number the engine forecast Oct 1–4 10–33% high, then — dividing those days by 1.245 in
+    // the year-over-year trend — ran Thu/Fri Oct 8–9 10–17% low. Such a lift is re-measured from the
+    // event's own days the first time they are all on file. A lift measured from the event's own
+    // days (written after it ended) is kept, as before.
+    if(e.lift!=null && !(e.liftAt && fcLAday(e.liftAt)<=e.end)) continue;
     const days=[]; let n=0;
     for(let d=e.start; d<=e.end && n<400; d=nextDay(d), n++) days.push(d);
     if(!days.length) continue;
@@ -8192,14 +8200,23 @@ async function viewToday(){
   const realDays=(realHistRows).filter(r=>Number(r.guests)>0 && r.net_sales!=null);
   const realGuestsSum=realDays.reduce((a,r)=>a+Number(r.guests),0);
   const realSalesSum=realDays.reduce((a,r)=>a+Number(r.net_sales),0);
-  const avgCheck=realGuestsSum>0 ? realSalesSum/realGuestsSum : null;
+  const avgCheckAll=realGuestsSum>0 ? realSalesSum/realGuestsSum : null;
+  // Oct 10 2026 (Dan): the card said ~$9k for Friday while the engine's own number was $10,661 —
+  // this line multiplied the covers by the ALL-TIME check ($51.67, dragged down by 2025) while the
+  // engine turns sales into covers with the check by season ($58.62 that day). One number now: the
+  // check the engine used (fcExplain().chk — last year's same weeks, scaled to how this year's check
+  // is running), so covers × check is the sales forecast the ledger grades. The all-time check stays
+  // as the fallback before the v2 engine has data.
+  let fcChk=null, fcX=null; try{ fcX=(FC2.on&&FC2.dates.length)?fcExplain(d):null; if(fcX&&fcX.chk>0) fcChk=fcX.chk; }catch(e){}
+  const avgCheck=fcChk||avgCheckAll;
   // Reality, keyed by date — reused by the walkable week strip below. No extra query: these
   // are the same real days the average check is measured from.
   const actualByDate={}, salesByDate={};
   realDays.forEach(r=>{ const k=String(r.business_date);
     if(Number(r.guests)>0) actualByDate[k]=Number(r.guests);
     if(r.net_sales!=null) salesByDate[k]=Number(r.net_sales); });
-  const salesForecast=avgCheck!=null ? Math.round(guests*avgCheck) : null;
+  // the engine's own sales number when the covers shown are the engine's (no override, no weather dial)
+  const salesForecast=(fcChk&&fcX&&fcX.v2s&&guests===fcX.v2g) ? fcX.v2s : (avgCheck!=null ? Math.round(guests*avgCheck) : null);
   // Typical miss per family — measured, never modeled (Option A, Dan's pick Aug 26).
   // For every real day a family sold, compare what the attach-rate model would have said at
   // that day's REAL covers with the units Oracle actually counted. Mean absolute miss over
@@ -8253,7 +8270,7 @@ async function viewToday(){
       <div style="margin-left:auto;text-align:right" class="muted">${fmtDate(d)}<br>${lateClose?'11am–9pm':'11am–8pm'}</div>
     </div>
     ${can('analytics.money')?`<div class="muted" style="margin-top:4px;font-size:11.5px">${avgCheck!=null
-      ? `Sales forecast · Pronóstico de ventas: ${guests} covers × $${avgCheck.toFixed(2)}/cover average check = <b>$${salesForecast.toLocaleString()}</b> <span class="drtag est">derived</span> — average check measured across ${realDays.length} real Oracle day${realDays.length===1?'':'s'} on file so far.`
+      ? `Sales forecast · Pronóstico de ventas: ${guests} covers × $${avgCheck.toFixed(2)}/cover = <b>$${salesForecast.toLocaleString()}</b> <span class="drtag est">derived</span> — ${fcChk?`the check the engine uses for this day: last year's same weeks, scaled to how this year's check is running (all-time average $${avgCheckAll?avgCheckAll.toFixed(2):'—'}).`:`average check measured across ${realDays.length} real Oracle day${realDays.length===1?'':'s'} on file so far.`}`
       : `No real Oracle day has an average check yet, so there is nothing to multiply the cover forecast by — this fills in as exports upload.`}</div>`:''}
     ${fcNoteHtml(d)}
     ${wxf?`<div style="margin-top:8px;font-size:12.5px;background:var(--sand);border-radius:8px;padding:8px 10px">
@@ -10169,7 +10186,7 @@ async function loadEvents(){
   S.events=(data||[]).map(r=>({id:r.id, name:r.name, city:r.city, start:r.start_date, end:r.end_date||r.start_date,
     leg:r.leg||'', kind:r.kind||'festival', att:r.attendance, attSrc:r.attendance_src||'',
     pc:!!r.on_palm_canyon, conf:r.confidence||'', src:r.source_url||'', note:r.note||'',
-    lift:r.measured_lift!=null?Number(r.measured_lift):null, liftN:r.measured_n||0,
+    lift:r.measured_lift!=null?Number(r.measured_lift):null, liftN:r.measured_n||0, liftAt:r.measured_at||null, liftHow:r.measured_method||'',
     est:r.est_lift!=null?Number(r.est_lift):null, estNote:r.est_note||'',
     estSrc:r.est_src||'', measNote:r.measured_note||'', skip:r.skip_reason||''}));
   // Sorted here rather than trusting the query's ORDER BY. Everything downstream slices "the

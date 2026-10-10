@@ -1,1 +1,1 @@
-Oct 10, 2026 · speed: fewer trips per screen, libraries on demand
+Oct 10, 2026 · event lifts re-read from their own days + Today sales line
