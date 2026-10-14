@@ -1465,6 +1465,66 @@
   .og-bx.comes .cm{display:flex;align-items:center;justify-content:center;gap:4px;font-weight:800;font-size:12px;color:var(--ocean-dark)}
   .og-bx.comes .glyph{width:20px;height:20px}
   @media print{.tm-quick,.tm-back,details.tm-fold>summary{display:none!important}}
+  /* ---- Review before the list (Oct 14 2026, Option A) ---- */
+  .rv-head{padding:12px 13px 10px}
+  .rv-ttl{display:flex;align-items:baseline;gap:8px;flex-wrap:wrap}.rv-ttl b{font-size:17px;color:var(--ocean-dark)}.rv-ttl span{font-size:12.5px;color:var(--muted)}
+  .rv-sub{font-size:12px;color:var(--muted);margin-top:3px;line-height:1.4}.rv-sub b{color:var(--ocean-dark)}
+  .rv-hint{font-size:11.5px;color:var(--muted);margin-top:6px;line-height:1.4;background:var(--sand);border-radius:9px;padding:6px 9px}
+  .rv-search{width:100%;margin-top:9px;border:1.5px solid var(--line);border-radius:11px;padding:9px 11px;font-size:14px;font-family:inherit;background:var(--white)}
+  .rv-hits{margin-top:6px;border-top:1px solid var(--sand-dark)}
+  .rv-hit{display:flex;align-items:center;gap:8px;padding:7px 0;border-bottom:1px solid var(--sand-dark)}.rv-hit:last-child{border-bottom:0}
+  .rv-ontag{font-size:11px;font-weight:700;color:var(--palm);background:#e6f3ea;border-radius:8px;padding:4px 8px;white-space:nowrap}
+  .rv-grp{font-size:11px;font-weight:800;letter-spacing:.4px;color:var(--ocean);margin:12px 2px 4px;display:flex;justify-content:space-between;gap:8px;align-items:baseline}
+  .rv-grp span{font-weight:600;color:var(--muted);letter-spacing:0;text-align:right}
+  .rv-grp-bad{color:var(--danger)}
+  .rv-card{padding:4px 11px}
+  .rv-empty{font-size:12px;padding:8px 0}
+  .rv-row{padding:9px 0;border-bottom:1px solid var(--sand-dark)}.rv-row:last-child{border-bottom:0}
+  .rv-row.off .rv-nm b{color:var(--muted)}
+  .rv-top{display:flex;align-items:center;gap:8px}
+  .rv-nm{flex:1;min-width:0}.rv-nm b{display:block;font-size:13.5px;line-height:1.2;color:var(--ink)}.rv-nm small{color:var(--muted);font-size:10.5px;line-height:1.3}
+  .rv-bad{color:var(--danger);font-weight:700}
+  .rv-chips{display:flex;gap:6px;margin-top:6px;align-items:stretch}
+  .rv-chip{cursor:pointer;min-width:86px;position:relative;flex:0 0 auto;padding:3px 8px 4px}
+  .rv-chip:active{background:#d4ead9}
+  .rv-chip b small{font-size:9.5px;font-weight:700;color:#3f6d4f;display:block;line-height:1;margin-top:1px}
+  .rv-chip em{display:block;font-style:normal;font-size:9px;color:var(--muted);line-height:1.2;margin-top:2px}
+  .rv-chip em.fc{color:var(--ocean)}.rv-chip em.cap{color:#b78300}
+  .rv-chip.hot{border-style:dashed;border-color:var(--coral);background:#fdf1ee}.rv-chip.hot b{color:var(--coral)}.rv-chip.hot i{color:#98301b}.rv-chip.hot b small{color:#98301b}
+  .rv-need{align-self:center;font-size:10.5px;color:var(--muted);flex:1;line-height:1.3;min-width:0}
+  .rv-step{display:flex;align-items:center;border:1.5px solid var(--ocean);border-radius:10px;overflow:hidden;flex:0 0 auto;margin-left:auto}
+  .rv-step button{width:34px;height:40px;border:0;background:var(--white);color:var(--ocean);font-size:19px;font-weight:800;font-family:inherit;cursor:pointer}
+  .rv-step .q{min-width:60px;text-align:center;font-weight:800;font-size:14.5px;background:var(--sand);line-height:1;padding:0 4px}
+  .rv-step .q small{font-weight:600;color:var(--muted);font-size:9.5px;display:block;margin-top:2px;white-space:nowrap}
+  .rv-x{border:0;background:none;color:var(--danger);font-size:18px;width:28px;font-family:inherit;cursor:pointer;padding:0}
+  .rv-fine{margin-left:auto;flex:0 0 auto}.rv-fine b.ok{color:var(--palm)}
+  .rv-add{border:1.5px solid var(--ocean);background:var(--white);color:var(--ocean);border-radius:9px;padding:7px 10px;font-weight:800;font-size:12px;font-family:inherit;cursor:pointer;white-space:nowrap}
+  .rv-pad{height:12px}
+  .rv-foot{position:fixed;bottom:78px;left:0;right:0;z-index:30;display:flex;gap:8px;align-items:center;padding:9px 12px;background:var(--ocean);color:var(--sand);max-width:820px;margin:0 auto;box-shadow:0 -4px 16px rgba(31,46,44,.18);border-radius:14px 14px 0 0}
+  .rv-foot .t{flex:1;font-size:12px;line-height:1.3}.rv-foot .t b{font-size:14px}.rv-foot .t span{opacity:.8}
+  .rv-foot button{border:0;border-radius:11px;padding:10px 12px;font-weight:800;font-size:13px;font-family:inherit;cursor:pointer}
+  .rv-back{background:rgba(255,255,255,.14);color:var(--sand)}
+  .rv-go{background:var(--coral);color:#fff}
+  .rv-big{display:flex;align-items:center;gap:10px;justify-content:center;margin:6px 0 10px}
+  .rv-big button{width:46px;height:46px;border-radius:12px;border:1.5px solid var(--ocean);background:var(--white);font-size:22px;font-weight:800;color:var(--ocean);font-family:inherit;cursor:pointer}
+  .rv-big input{width:120px;font-size:28px;font-weight:800;text-align:center;border:1.5px solid var(--line);border-radius:12px;padding:6px;font-family:inherit;color:var(--palm)}
+  .rv-big .u{font-size:11px;color:var(--muted);text-align:center;margin-top:2px}
+  .rv-eff{background:var(--sand);border-radius:10px;padding:8px 10px;font-size:12.5px;line-height:1.45;margin:8px 0 0}.rv-eff b{color:var(--ocean-dark)}
+  .rv-opts{display:flex;gap:6px;margin:4px 0 8px}.rv-opts button{flex:1;border:1.5px solid var(--line);background:var(--white);border-radius:10px;padding:7px 4px;font-size:11.5px;font-weight:700;font-family:inherit;color:var(--ink);cursor:pointer}
+  .rv-save{flex:1.6;background:var(--teal-dark);color:#fff;border:none;border-radius:10px;font-weight:700;font-size:14px;padding:11px;cursor:pointer;font-family:inherit}
+  .rv-tabs{display:flex;gap:6px;padding:12px 16px 0}.rv-tabs button{flex:1;border:1.5px solid var(--line);background:var(--white);border-radius:10px;padding:9px 6px;font-weight:800;font-size:12.5px;font-family:inherit;color:var(--ink);cursor:pointer}
+  .rv-tabs button.on{border-color:var(--ocean);background:var(--ocean);color:#fff}
+  .rv-why{font-size:13px}
+  .rv-why-line{display:flex;justify-content:space-between;align-items:baseline;gap:10px;padding:7px 0 2px;border-top:1px solid var(--sand-dark)}
+  .rv-why-line:first-child{border-top:0;padding-top:0}
+  .rv-why-line span{color:var(--ink);font-weight:700}.rv-why-line span small{font-weight:600;color:var(--muted);font-size:11px}
+  .rv-why-line b{font-size:16px;color:var(--ocean-dark);white-space:nowrap}.rv-why-line b small{font-size:10.5px;color:var(--muted);font-weight:600}
+  .rv-why-line.big{background:#e6f3ea;border:1px solid #a9d3b8;border-radius:10px;padding:8px 10px;margin-bottom:6px}.rv-why-line.big b{font-size:20px;color:var(--palm)}.rv-why-line.big span small{color:#3f6d4f}
+  .rv-why-sub{font-size:11.5px;color:var(--muted);line-height:1.45;padding:0 0 6px}.rv-why-sub b{color:var(--ocean-dark)}
+  .rv-why-t{width:100%;border-collapse:collapse;font-size:12px;margin:0 0 8px}.rv-why-t th{text-align:left;font-size:10px;color:var(--muted);font-weight:700;padding:2px 4px;border-bottom:1px solid var(--line)}
+  .rv-why-t td{padding:4px;border-bottom:1px solid var(--sand-dark)}.rv-why-t .n{text-align:right;font-variant-numeric:tabular-nums}.rv-why-t tr.sum td{border-bottom:0;font-weight:700}
+  @media (max-width:420px){ .rv-chip{min-width:78px} .rv-step .q{min-width:52px} }
+  body.rv-on #devfab{bottom:calc(154px + var(--sab))}
 </style>
 <script>
 // The background choice is a per-device thing — Dan's phone and the kitchen tablet can
@@ -1535,7 +1595,7 @@ const SB_KEY='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZ
 const TBID='9f8d7c6b-5a49-4e38-b271-06d5f00dbeef'; // Tommy Bahama tenant inside ChefOpsAI
 // Stamped by publish.sh at upload time. It is the only version label there is now —
 // one address, updated in place, so this tells you which build that address is serving.
-const BUILD='Oct 10, 2026 · event lifts re-read from their own days + Today sales line';
+const BUILD='Oct 14, 2026 · count → review → who → sheet + dynamic par: why this number / set a par';
 // ---------- IS THIS PHONE EVEN RUNNING THE LATEST BUILD? ----------
 // Sep 3 2026. Three prep fixes shipped and Dan still saw the old behaviour, because the app
 // installs to the home screen and an installed web app does not go back and re-fetch its own
@@ -2927,7 +2987,7 @@ function dynLineRatio(m, q, status, cpbGroup, past){
   const clip=r=>Math.max(0.5, Math.min(2, r));
   if(m && m.dyn){ const y=m.dyn, oh=Math.max(0,Number(y.oh)||0), c=Number(y.cpb)||cpbGroup||1, b0=Number(y.b0)||0;
     const app=oh+b0*c; if(!(app>0)) return null;
-    if(m.removed) return clip(oh/app);
+    if(m.removed) return m.not_counted?null:clip(oh/app);   // Oct 14: an uncounted item taken off is not a measurement
     if(Math.abs(q-b0)>1e-9) return clip((oh+Math.max(0,q)*c)/app);
     return (status==='done'||status==='completed'||past)?1:null; }
   if(m && m.added_by && m.dyn_day){ const oh=Math.max(0,Number(m.on_hand)||0);
@@ -2991,7 +3051,9 @@ function prepPlan(dstr, guests, countsMap, opts){
     rows.push({prep:p, group:g, forecast:Math.round(needC*10)/10, par:Math.round(par*10)/10,
                minPar:floor, cap, onHand, make, batches, cpb, places:g.ids.length,
                minutes:dynMinutes(p, batches, cpb),
-               dyn:{through:win[span-1], span, shelf, load, rate:R.rate, base:R.base, prior:R.prior, src:R.src, meas:R.meas, n:R.n, c:R.c, m:R.m, capped}});
+               dyn:{through:win[span-1], span, shelf, load, rate:R.rate, base:R.base, prior:R.prior, src:R.src, meas:R.meas, n:R.n, c:R.c, m:R.m, capped,
+                    // Oct 14 2026 — the WHY sheet reads these; writePrepList does not store them
+                    ss, winNeed, near, short, days:win.slice(0,span).map((x,i)=>({d:x, g:covers[i], need:needs[i]}))}});
   }
   rows.sort((a,b)=>b.minutes-a.minutes);
   return rows;
@@ -3346,7 +3408,7 @@ function tmTabOn(v){
   if(v==='more') return sec('waste')||sec('analytics')||sec('admin');
   return false; }
 // which tab lights up for a screen opened from inside Lists or More
-function tmTabOf(view){ if(S.tmFrom && S.tmFrom.view===view) return S.tmFrom.tab; return ({count:'lists',prep:'lists',checklist:'lists',waste:'more',analytics:'more',admin:'more',pars:'more',dev:'more',items:'more'})[view]||view; }
+function tmTabOf(view){ if(S.tmFrom && S.tmFrom.view===view) return S.tmFrom.tab; return ({count:'lists',review:'lists',prep:'lists',checklist:'lists',waste:'more',analytics:'more',admin:'more',pars:'more',dev:'more',items:'more'})[view]||view; }
 // Every write handler asks this first. Preview is strictly read-only: while Dan is inside
 // somebody else's view, nothing writes — otherwise a tap made "as Adan" would be recorded
 // under Dan's name and the log would lie.
@@ -3722,13 +3784,13 @@ window.submitCount=async()=>{ if(!guard('count.start')) return;
   const counts={...S.counts};
   const skip=new Set();
   missing.forEach(p=>{ if(assumeZero) counts[p.id]=0; else skip.add(p.id); });
-  // Ask who's prepping BEFORE the list is built (approved from mockup Aug 12). The app
-  // used to hand the split silently to whoever happened to be toggled on the Prep tab.
-  // Nothing is written to the database until a choice is made; closing the sheet
-  // without choosing aborts the submit entirely.
-  askWhoPreps({d, cid, when, close, tgt, counts, skip:[...skip],
-               missingLen:missing.length, kitchenLen:kitchen.length,
-               blank:assumeZero?'assumed_empty':'left_off'});
+  // Oct 14 2026 (Dan, Option A): the count opens a REVIEW screen first — every item with the
+  // batches to make, what was not counted, what is fine — fixes happen there, then "who's
+  // prepping", then the list is written and the PDF downloads. Nothing is written to the
+  // database until a person answers who's prepping; leaving the review aborts the submit.
+  rvOpen({d, cid, when, close, tgt, counts, skip:[...skip],
+          missingLen:missing.length, kitchenLen:kitchen.length,
+          blank:assumeZero?'assumed_empty':'left_off'});
 };
 function askChipsHtml(staff){
   return staff.map(s=>`<span class="chip ${S._askIds.has(s.id)?'on':''}" onclick="askToggle('${s.id}')">${esc(s.name)}</span>`).join('');
@@ -3773,8 +3835,335 @@ window.askPrepGo=async(unassigned)=>{
   S.workingIds=new Set(ids);   // the Prep tab now reflects the choice that was actually made
   await submitCountGo(ctx, ids);
 };
+// ---- REVIEW BEFORE THE LIST — Oct 14 2026 (Dan, Option A of the three mockups) -----------------
+// Count → Review → who's prepping → list saved → the PDF downloads by itself.
+// The Review screen lists every item the plan knows about: what to make (batches, ±, take off),
+// what was not counted (standing in as 0, or left off), and what is fine for now (+ add). Both
+// green chips are live: ON HAND fixes that line of the count (saveCount — the same write the
+// Count tab makes); PAR opens the dynamic-par sheet: WHY the number is what it is, or SET a par
+// (setMinPar — the same write the par sheet makes). Nothing else is written until a person
+// answers "who's prepping"; leaving the screen abandons the submit, the count stays open.
+const RV_STEP=0.5;
+function rvQ(v){ v=Math.round((Number(v)||0)*100)/100; return String(v); }
+function rvRate(v){ v=Number(v)||0; const d=v>=1?2:v>=0.1?2:v>=0.01?3:4; return String(Math.round(v*Math.pow(10,d))/Math.pow(10,d)); }
+function rvHm(m){ m=Math.round(Number(m)||0); return m>=60?`${Math.floor(m/60)}h ${String(m%60).padStart(2,'0')}m`:`${m}m`; }
+// The half-week this list's par covers: Thu–Sun or Mon–Wed, from the target day forward.
+function rvBlock(d){ const w=dynHalf(d); const a=dynDayName(w[0]), b=dynDayName(w[w.length-1]); return w.length>1?`${a}–${b}`:a; }
+function rvGuests(ctx){ return ctx.close ? guestPlan(ctx.tgt) : (S.guestsOverride ?? guestPlan(ctx.d)); }
+// Is today's par the forecast's number or Dan's floor? One answer, used by every chip and sheet.
+function rvParSrc(r){
+  if(!r||!r.dyn) return {k:'min', es:'tu par mínimo', en:'your min par'};
+  if(r.dyn.capped || (r.cap!=null && Math.abs(r.par-r.cap)<1e-9 && r.par>r.minPar+1e-9)) return {k:'cap', es:'tu tope', en:'your cap'};
+  if(r.par>r.minPar+1e-9){ const thru=r.dyn.span>1?dynDayName(r.dyn.through):(isES()?'hoy':'today');
+    return {k:'fc', es:`pronóstico → ${thru}`, en:`forecast → ${thru}`}; }
+  return {k:'min', es:'tu par mínimo', en:'your min par'};
+}
+async function rvOpen(ctx){
+  try{ await dynLoad(); }catch(e){}
+  const guests=rvGuests(ctx);
+  S._rv={ctx, guests, rows:[], q:'', from:S.view, ohWas:{}, parWas:{}, at:Date.now()};
+  rvRecalc();
+  S.view='review'; render();
+}
+// Re-run the plan with the count as it stands now. Dan's own decisions (taken off, added, a
+// stepped quantity) survive the recalc unless the app's own number for that line moved — a fixed
+// count or a changed par resets the batches to the new honest number, as the mockup did.
+function rvRecalc(){
+  const R=S._rv; if(!R) return;
+  const ctx=R.ctx, skip=new Set(ctx.skip);
+  const rows=prepPlan(ctx.tgt, R.guests, ctx.counts);
+  const prev={}; R.rows.forEach(r=>{ prev[r.group.key]=r; });
+  R.order=R.order||{}; let ord=Object.keys(R.order).length;
+  rows.forEach(r=>{
+    const p=prev[r.group.key];
+    r.b0=r.batches;
+    r.skipped=r.group.ids.every(id=>skip.has(id));
+    r.countedPlaces=groupCounted(r.group,S.split); r.notCounted=!r.countedPlaces;
+    r.dec=p?p.dec:null;
+    const keep=!!(p && p.touched && p.b0===r.b0);
+    r.q=keep?p.q:r.batches; r.touched=keep;
+    if(r.dec==='add' && !(r.q>0)){ r.q=1; r.touched=true; }
+    r.on = r.dec==='off' ? false : r.dec==='add' ? true : (r.q>0 && !r.skipped);
+  });
+  // lines added by search for items the plan has no row for: carried along, on hand refreshed
+  R.rows.filter(r=>r.synth && !rows.some(x=>x.group.key===r.group.key)).forEach(r=>{
+    r.onHand=groupOnHand(r.group, ctx.counts); r.countedPlaces=groupCounted(r.group,S.split); r.notCounted=!r.countedPlaces;
+    r.skipped=r.group.ids.every(id=>skip.has(id)); r.on=r.dec!=='off' && r.q>0; rows.push(r); });
+  rows.forEach(r=>{ if(R.order[r.group.key]==null) R.order[r.group.key]=ord++; });
+  rows.sort((a,b)=>R.order[a.group.key]-R.order[b.group.key]);
+  R.rows=rows;
+}
+function rvRow(r,i){
+  const es=isES(), p=r.prep, cont=p.container||'', on=r.on&&r.q>0, R=S._rv;
+  const src=rvParSrc(r);
+  const ohWas=R.ohWas[r.group.key], parWas=R.parWas[r.group.key];
+  const ohChanged=ohWas!=null && Math.abs(ohWas-r.onHand)>1e-9, parChanged=parWas!=null && Math.abs(parWas-r.par)>1e-9;
+  const nameEs=(es?p.name_en:p.name_es);
+  const status = r.notCounted
+    ? `<span class="rv-bad">${r.skipped?(es?'sin contar · fuera de la lista':'not counted · left off'):(es?'sin contar · se toma como 0':'not counted · treated as 0')}</span>`
+    : `${es?'contado':'counted'}${r.countedPlaces<r.places?` ${r.countedPlaces}/${r.places}`:''}`;
+  const need=r.forecast>0?` · ${es?'vende ~':'sells ~'}${fmtQ(r.forecast)} ${esc(cont)} ${es?'hoy':'today'}`:'';
+  const right = on
+    ? `<div class="rv-step"><button onclick="rvAdj(${i},-${RV_STEP})" aria-label="less">−</button><div class="q">${rvQ(r.q)}<small>${r.cpb!==1?(es?'tandas · ':'batches · '):''}${esc(cont)}</small></div><button onclick="rvAdj(${i},${RV_STEP})" aria-label="more">+</button></div><button class="rv-x" onclick="rvOff(${i})" title="${es?'Quitar de la lista':'Take off the list'}">✕</button>`
+    : r.dec==='off'
+      ? `<span class="st rv-fine"><i>${es?'quitado':'taken off'}</i><b>${rvQ(r.b0)}</b></span><button class="rv-add" onclick="rvUndo(${i})">${es?'deshacer':'undo'}</button>`
+      : `<span class="st rv-fine"><i>prep</i><b class="ok">✓ ${es?'bien':'fine'}</b></span><button class="rv-add" onclick="rvAdd(${i})">+ ${es?'añadir':'add'}</button>`;
+  const ohTxt = r.notCounted ? (r.skipped?'—':'0') : rvQ(r.onHand);
+  const short=Math.max(0, r.par-r.onHand);
+  const needLine = on
+    ? `${es?'faltan':'short'} ${rvQ(short)} ${esc(cont)}${r.cpb!==1?` · ${es?'1 tanda llena':'1 batch fills'} ${rvQ(r.cpb)}`:''}`
+    : (r.onHand>=r.par-1e-9 ? `${rvQ(r.onHand-r.par)} ${es?'sobre el par':'over par'}` : `${es?'alcanza para hoy + mañana':'covers today + tomorrow'}`);
+  return `<div class="rv-row${on?'':' off'}" data-i="${i}">
+    <div class="rv-top"><div class="rv-nm"><b>${esc(es&&p.name_es?p.name_es:p.name_en)}</b><small>${status}${need}${nameEs?` · ${esc(nameEs)}`:''}</small></div>${right}</div>
+    <div class="rv-chips">
+      <span class="st y-amt rv-chip${r.notCounted?' hot':''}${ohChanged?' hot':''}" onclick="rvOhOpen(${i})" title="${es?'Toca para corregir el conteo':'Tap to fix the count'}"><i>${es?'Hay':'On hand'} ✎</i><b>${ohTxt}<small>${esc(cont)}</small></b>${ohChanged?`<em>${es?'era':'was'} ${rvQ(ohWas)}</em>`:(r.notCounted&&!r.skipped?`<em>${es?'se toma como 0':'treated as 0'}</em>`:'')}</span>
+      <span class="st y-amt rv-chip${parChanged?' hot':''}" onclick="dynParSheetOpen('${p.id}','rv')" title="${es?'Toca: por qué este par, o fijar un par':'Tap: why this par, or set a par'}"><i>Par ✎</i><b>${rvQ(r.par)}<small>${esc(cont)}</small></b><em class="${src.k}">${parChanged?`${es?'era':'was'} ${rvQ(parWas)} · `:''}${es?src.es:src.en}</em></span>
+      <div class="rv-need">${needLine}</div>
+    </div></div>`;
+}
+async function viewReview(){
+  const R=S._rv; if(!R){ S.view='count'; return render(); }
+  rvRecalc();
+  const es=isES(), ctx=R.ctx, rows=R.rows;
+  const idx=new Map(); rows.forEach((r,i)=>idx.set(r,i));
+  const row=r=>rvRow(r, idx.get(r));
+  const mk=rows.filter(r=>r.on&&r.q>0&&!r.notCounted);
+  const nc=rows.filter(r=>r.notCounted);
+  const fine=rows.filter(r=>!r.notCounted && !(r.on&&r.q>0));
+  const lines=rows.filter(r=>r.on&&r.q>0);
+  const mins=lines.reduce((a,r)=>a+dynMinutes(r.prep,r.q,r.cpb),0);
+  const kitchen=S.preps.filter(p=>p.station!=='bar'), counted=kitchen.filter(p=>S.split[p.id]).length;
+  const ncOn=nc.filter(r=>r.on&&r.q>0).length;
+  const D=S._dyn, dynOn=!!(D && !D.err.length);
+  shell(`<div class="rv">
+    <div class="card rv-head">
+      <div class="rv-ttl"><b>${es?'Revisa antes de la lista':'Review before the list'}</b><span>${ctx.close?(es?'lista de mañana · ':'tomorrow’s list · '):''}${fmtDate(ctx.tgt)}</span></div>
+      <div class="rv-sub">${R.guests} ${es?'clientes esperados':'covers expected'} · ${counted}/${kitchen.length} ${es?'contados':'counted'} · ${es?'par dinámico':'dynamic par'} ${dynOn?(es?'activo':'on'):(es?'apagado':'off')} · ${es?'bloque':'block'} <b>${rvBlock(ctx.tgt)}</b></div>
+      <div class="rv-hint">${es?'Toca <b>Hay</b> para corregir un conteo, <b>Par</b> para ver el porqué o fijar un par. ± cambia las tandas, ✕ quita la línea.':'Tap <b>On hand</b> to fix a count, <b>Par</b> to see why or set a par. ± changes the batches, ✕ takes a line off.'}</div>
+      <input class="rv-search" type="search" placeholder="${es?'Buscar cualquier producto para añadir…':'Search any item to add…'}" value="${esc(R.q||'')}" oninput="rvSearch(this.value)">
+      <div id="rv-hits">${rvHitsHtml()}</div>
+    </div>
+    <div class="rv-grp">${es?'PREPARAR':'MAKE'} <span>${mk.length} ${es?'líneas':'lines'}</span></div>
+    <div class="card rv-card">${mk.map(row).join('')||`<div class="muted rv-empty">${es?'Nada que preparar de lo contado — los pares están cubiertos.':'Nothing to make from what was counted — pars are covered.'}</div>`}</div>
+    ${nc.length?`<div class="rv-grp rv-grp-bad">${es?'SIN CONTAR':'NOT COUNTED'} <span>${nc.length}${ncOn?` · ${es?'se toman como 0 →':'treated as 0 →'} ${ncOn} ${es?'líneas más si no los corriges':'more lines unless you fix them'}`:(es?' · fuera de la lista':' · left off')}</span></div>
+    <div class="card rv-card">${nc.map(row).join('')}</div>`:''}
+    <div class="rv-grp">${es?'BIEN POR AHORA':'FINE FOR NOW'} <span>${fine.length} · ${es?'toca + para añadir':'tap + to add anyway'}</span></div>
+    <div class="card rv-card">${fine.map(row).join('')||`<div class="muted rv-empty">${es?'Todo lo contado necesita prep hoy.':'Everything counted needs prep today.'}</div>`}</div>
+    <div class="rv-pad"></div>
+  </div>
+  <div class="rv-foot no-print"><button class="rv-back" onclick="rvBack()">‹ ${es?'Conteo':'Count'}</button><div class="t"><b>${lines.length} ${es?'líneas':'lines'}</b> · ${rvHm(mins)}<br><span>${es?'la lista todavía no se ha creado':'nothing is saved yet'}</span></div><button class="rv-go" onclick="rvNext()">${es?'¿Quién prepara? ›':'Who’s prepping ›'}</button></div>`);
+}
+function rvHitsHtml(){
+  const R=S._rv; if(!R) return '';
+  const es=isES(), q=String(R.q||'').trim().toLowerCase(); if(!q) return '';
+  const byKey={}; R.rows.forEach((r,i)=>{ byKey[r.group.key]=i; });
+  const hits=prepGroups().filter(g=>!g.rep.raw && (g.rep.name_en+' '+(g.rep.name_es||'')).toLowerCase().includes(q)).slice(0,8);
+  if(!hits.length) return `<div class="muted rv-empty">${es?'No hay un producto de prep con ese nombre.':'No prep item on file by that name.'}</div>`;
+  return `<div class="rv-hits">${hits.map(g=>{ const i=byKey[g.key]; const r=i!=null?R.rows[i]:null; const p=g.rep;
+    const on=r&&r.on&&r.q>0;
+    return `<div class="rv-hit"><div class="rv-nm"><b>${esc(es&&p.name_es?p.name_es:p.name_en)}</b><small>${r?`${es?'hay':'on hand'} ${r.notCounted?(es?'sin contar':'not counted'):rvQ(r.onHand)} · par ${rvQ(r.par)} ${esc(p.container||'')}`:(es?'sin tasa de uso ni par mínimo — una tanda a tu criterio':'no usage rate and no min par — one batch, your call')}</small></div>
+      ${on?`<span class="rv-ontag">${es?'en la lista':'on the list'} · ${rvQ(r.q)}</span>`:(r?`<button class="rv-add" onclick="rvAdd(${i})">+ ${es?'añadir':'add'}</button>`:`<button class="rv-add" onclick="rvAddGroup('${esc(g.key)}')">+ ${es?'añadir':'add'}</button>`)}</div>`; }).join('')}</div>`;
+}
+window.rvSearch=v=>{ const R=S._rv; if(!R) return; R.q=v; const el=document.getElementById('rv-hits'); if(el) el.innerHTML=rvHitsHtml(); };
+window.rvAdj=(i,d)=>{ const R=S._rv; if(!R) return; const r=R.rows[i]; if(!r) return;
+  r.q=Math.max(0, Math.round((r.q+d)*4)/4); r.touched=true;
+  if(r.q<=0){ r.dec = r.b0>0 ? 'off' : null; } else if(r.dec==='off') r.dec=null;
+  render(); };
+window.rvOff=i=>{ const R=S._rv; if(!R) return; const r=R.rows[i]; if(!r) return; r.dec='off'; render(); };
+window.rvUndo=i=>{ const R=S._rv; if(!R) return; const r=R.rows[i]; if(!r) return; r.dec=null; r.touched=false; render(); };
+window.rvAdd=i=>{ const R=S._rv; if(!R) return; const r=R.rows[i]; if(!r) return;
+  r.dec='add'; if(!(r.q>0)){ r.q=r.b0>0?r.b0:1; } r.touched=true; R.q=''; render(); };
+// An item the plan has no row for (no usage rate and no min par): one honest line, Dan's call.
+window.rvAddGroup=key=>{ const R=S._rv; if(!R) return;
+  const g=prepGroups().find(x=>x.key===key); if(!g) return;
+  const p=g.rep, cpb=g.cpb, onHand=groupOnHand(g, R.ctx.counts);
+  const r={prep:p, group:g, forecast:0, par:g.minPar, minPar:g.minPar, cap:dynCapOf(g), onHand, make:cpb, batches:0, cpb,
+           places:g.ids.length, minutes:dynMinutes(p,1,cpb), dyn:null, b0:0, q:1, touched:true, dec:'add', on:true, synth:true,
+           skipped:g.ids.every(id=>new Set(R.ctx.skip).has(id)), countedPlaces:groupCounted(g,S.split)};
+  r.notCounted=!r.countedPlaces;
+  R.rows.push(r); R.q=''; render(); };
+window.rvBack=()=>{ const R=S._rv; if(!R) return;
+  S._rv=null; S.view=R.from||'count'; toast(isES()?'Conteo NO enviado — sigue abierto':'Count NOT submitted — still open'); render(); };
+window.rvNext=()=>{ const R=S._rv; if(!R) return;
+  const lines=R.rows.filter(r=>r.on&&r.q>0);
+  if(!lines.length && !confirm(isES()?'No hay líneas que preparar. ¿Enviar el conteo y guardar una lista vacía?':'No lines to prep. Submit the count and save an empty list?')) return;
+  askWhoPreps(Object.assign({}, R.ctx, {reviewed:true})); };
+// ---- ON HAND: fix the count from the review screen ----------------------------------------
+window.rvOhOpen=i=>{ const R=S._rv; if(!R) return; const r=R.rows[i]; if(!r) return;
+  const es=isES(), p=r.prep, cont=p.container||'', g=r.group;
+  const old=document.getElementById('rvsheet'); if(old) old.remove();
+  const el=document.createElement('div'); el.className='rcov no-print'; el.id='rvsheet';
+  el.onclick=e=>{ if(e.target===el) el.remove(); };
+  const one=g.members.length===1;
+  const val=m=>S.split[m.id]?fmtQ(S.counts[m.id]):'';
+  el.innerHTML=`<div class="sheet">
+    <div class="sh-head"><h3>${esc(es&&p.name_es?p.name_es:p.name_en)} — ${es?'hay':'on hand'}</h3>
+      <div class="sh-sub">${es?'Corrige el número del conteo. La línea del conteo se corrige también — el conteo sigue siendo la fuente.':'Fixing the number from the count. The count line gets corrected too — the count stays the source of truth.'}${one?'':(es?` Se cuenta en ${g.members.length} lugares; la lista usa la suma.`:` Counted in ${g.members.length} places; the list uses the total.`)}</div></div>
+    <div class="sh-body">
+      ${one?`<div class="rv-big"><button onclick="rvOhBump('${g.members[0].id}',-${RV_STEP},${i})">−</button><div><input type="number" inputmode="decimal" step="any" min="0" id="rvoh-${g.members[0].id}" value="${val(g.members[0])}" placeholder="—" oninput="rvOhLive(${i})"><div class="u">${esc(cont)}</div></div><button onclick="rvOhBump('${g.members[0].id}',${RV_STEP},${i})">+</button></div>`
+      :g.members.map(m=>`<div class="task-line" style="align-items:center"><div class="nm"><b>${esc(parPlaceLabel(m))}</b><div class="es">${S.split[m.id]?(es?'contado':'counted'):`<span class="rv-bad">${es?'sin contar':'not counted'}</span>`}</div></div>
+        <div class="stp"><button onclick="rvOhBump('${m.id}',-${RV_STEP},${i})" aria-label="less">–</button><div><input type="number" inputmode="decimal" step="any" min="0" id="rvoh-${m.id}" value="${val(m)}" placeholder="—" oninput="rvOhLive(${i})"><div class="u">${esc(m.container||cont)}</div></div><button class="up" onclick="rvOhBump('${m.id}',${RV_STEP},${i})" aria-label="more">+</button></div></div>`).join('')}
+      <div class="rv-eff" id="rv-eff"></div>
+    </div>
+    <div style="display:flex;gap:8px;padding:0 16px 14px">
+      <button class="btn-ghost" style="flex:1" onclick="document.getElementById('rvsheet').remove()">${es?'Cancelar':'Cancel'}</button>
+      <button id="rvoh-save" class="rv-save" onclick="rvOhSave(${i})">${es?'Corregir el conteo':'Fix the count'}</button>
+    </div></div>`;
+  document.body.appendChild(el); rvOhLive(i);
+};
+window.rvOhBump=(id,d,i)=>{ const el=document.getElementById('rvoh-'+id); if(!el) return;
+  const cur=Number(String(el.value||'').replace(',','.'))||0; el.value=fmtQ(Math.max(0, Math.round((cur+d)*100)/100)); rvOhLive(i); };
+function rvSheetTotals(r){
+  // typed values; a blank place keeps its current count (or stays uncounted)
+  let tot=0, any=false;
+  for(const m of r.group.members){ const el=document.getElementById('rvoh-'+m.id); const raw=el?String(el.value||'').trim().replace(',','.'):'';
+    if(raw!==''){ const n=Number(raw); if(isFinite(n)&&n>=0){ tot+=n; any=true; } }
+    else if(S.split[m.id]){ tot+=Number(S.counts[m.id])||0; any=true; } }
+  return {tot, any};
+}
+window.rvOhLive=i=>{ const R=S._rv; if(!R) return; const r=R.rows[i]; const el=document.getElementById('rv-eff'); if(!r||!el) return;
+  const es=isES(), cont=r.prep.container||'', {tot,any}=rvSheetTotals(r);
+  const short=Math.max(0, r.par-tot), q=Math.ceil((short/(r.cpb||1))*2-1e-9)/2;
+  el.innerHTML=`${es?'Hay':'On hand'} <b>${any?rvQ(tot):'—'}</b> · par <b>${rvQ(r.par)}</b> → ${es?'faltan':'short'} ${rvQ(short)} ${esc(cont)}${r.cpb!==1?` ÷ ${rvQ(r.cpb)} ${es?'por tanda':'per batch'}`:''} → <b>${es?'hacer':'make'} ${rvQ(q)}</b>${q>0?'':(es?' · sale de la lista':' · comes off the list')}${Math.abs(q-r.q)>1e-9?` <span class="muted">(${es?'era':'was'} ${rvQ(r.q)})</span>`:''}`; };
+window.rvOhSave=async i=>{ const R=S._rv; if(!R) return; const r=R.rows[i]; if(!r) return;
+  const btn=document.getElementById('rvoh-save'); if(btn){ btn.disabled=true; btn.textContent=isES()?'Guardando…':'Saving…'; }
+  const key=r.group.key; if(R.ohWas[key]==null) R.ohWas[key]=r.onHand;
+  const jobs=[];
+  for(const m of r.group.members){ const el=document.getElementById('rvoh-'+m.id); if(!el) continue;
+    const raw=String(el.value||'').trim().replace(',','.'); if(raw==='') continue;
+    const n=Number(raw); if(!isFinite(n)||n<0){ toast('Numbers only · Solo números'); if(btn){btn.disabled=false;btn.textContent='Fix the count';} return; }
+    const cur=S.split[m.id]?Number(S.counts[m.id]):null;
+    if(cur!=null && Math.abs(cur-n)<1e-9) continue;
+    jobs.push(saveCount(m.id, slotOf(m), n)); }
+  try{ await Promise.all(jobs); }catch(e){}
+  // the review's own copy of the count, and the "left off" set, follow what actually saved
+  const skip=new Set(R.ctx.skip);
+  for(const m of r.group.members){ if(S.split[m.id]){ R.ctx.counts[m.id]=S.counts[m.id]; skip.delete(m.id); } }
+  R.ctx.skip=[...skip];
+  const sh=document.getElementById('rvsheet'); if(sh) sh.remove();
+  render();
+};
+// ---- PAR: why this number, or set a par — the dynamic par explained line by line ----------------
+// Dan, Oct 14: "when I click on it, it should show 2 things: the option to set a par, or why the
+// dynamic par is set at that number … you usually go 30 a day on a 10k day and we're heading for
+// 3 10k days … so I can also test if the dynamic par is working." Every figure below is the one
+// prepPlan actually used; nothing is re-estimated for the sheet.
+function rvRowFor(pid, from){
+  if(from==='rv' && S._rv){ const r=S._rv.rows.find(x=>x.group.ids.indexOf(pid)>=0); if(r) return {r, d:S._rv.ctx.tgt, guests:S._rv.guests, counts:S._rv.ctx.counts}; return null; }
+  const d=S.selDate||todayLA(), guests=S.guestsOverride ?? guestPlan(d);
+  const r=prepPlan(d, guests, S.counts).find(x=>x.group.ids.indexOf(pid)>=0);
+  return r?{r, d, guests, counts:S.counts}:null;
+}
+function rvSalesOf(d, g){ try{ const X=fcExplain(d); if(X&&X.v2s&&X.v2g===g) return {s:X.v2s, chk:X.chk}; if(X&&X.chk>0) return {s:Math.round(g*X.chk), chk:X.chk}; }catch(e){} return null; }
+function rvK(n){ return n>=1000?`$${(Math.round(n/100)/10).toFixed(1)}k`:`$${Math.round(n)}`; }
+function dynWhyHtml(r, d){
+  const es=isES(), y=r.dyn, p=r.prep, cont=p.container||'', D=S._dyn||{};
+  if(!y) return `<div class="muted">${es?'Este producto no tiene par dinámico (sin tasa de uso): el par es tu par mínimo.':'No dynamic par for this item (no usage rate): the par is your min par.'}</div>`;
+  const rate=Number(y.rate)||0, days=y.days||[], ss=Number(y.ss)||0, winNeed=Number(y.winNeed)||0;
+  const srcTxt = y.src==='r365'
+    ? (es?`de tus recetas de platos en R365 × cuánto se vende cada plato (últimos ${D.plateDays||'—'} días con lista de platos de Oracle)`:`from your R365 plate builds × how often each plate sells (last ${D.plateDays||'—'} days with Oracle item lists)`)
+    : y.src==='model' ? (es?'del modelo de porcentaje de venta (este producto no tiene receta de plato en R365)':'from the attach-rate model (no R365 plate build for this item)')
+    : (es?'sin tasa de uso':'no usage rate');
+  const fix = (y.m>0 && Math.abs((Number(y.c)||1)-1)>=0.005) ? `<div class="rv-why-sub">${es?`× ${Number(y.c).toFixed(2)} por tus ajustes en ${y.m} lista${y.m===1?'':'s'} (lo que quitaste, cambiaste, añadiste o se acabó)`:`× ${Number(y.c).toFixed(2)} after your fixes on ${y.m} list${y.m===1?'':'s'} (what you took off, changed, added or ran out of)`}</div>` : (y.m>0?`<div class="rv-why-sub">${es?`tus ajustes en ${y.m} lista${y.m===1?'':'s'} no mueven la tasa (×${Number(y.c).toFixed(2)})`:`your fixes on ${y.m} list${y.m===1?'':'s'} leave the rate alone (×${Number(y.c).toFixed(2)})`}</div>`:'');
+  const sale=rvSalesOf(d, days.length?days[0].g:0);
+  const chk=sale&&sale.chk>0?sale.chk:null;
+  const feel = rate>0 ? `<div class="rv-why-sub">≈ <b>${rvQ(rate*100)}</b> ${esc(cont)} ${es?'por cada 100 clientes':'per 100 covers'}${chk?` · ${es?'un día de $10k':'a $10k day'} ≈ ${Math.round(10000/chk)} ${es?'clientes':'covers'} → ≈ <b>${rvQ(rate*10000/chk)}</b> ${esc(cont)}`:''}</div>` : '';
+  const dayRows=days.map(x=>{ const sl=rvSalesOf(x.d, x.g); return `<tr><td>${esc(dateObjLA(x.d).toLocaleDateString(es?'es-US':'en-US',{weekday:'short',month:'short',day:'numeric'}))}</td><td class="n">${x.g}</td><td class="n">${sl?rvK(sl.s):'—'}</td><td class="n"><b>${rvQ(x.need)}</b></td></tr>`; }).join('');
+  const win=dynHalf(d), cut=y.span<win.length;
+  const spanTxt = es
+    ? (y.load?`<b>Día de carga</b> (${dynDayName(d)}): se prepara para todo el bloque ${rvBlock(d)}.`:`No es día de carga: solo se completa lo que no alcance para hoy + mañana.`)+(cut?` Este producto dura <b>${y.shelf} día${y.shelf===1?'':'s'}</b>, así que se corta en ${dynDayName(y.through)}.`:'')
+    : (y.load?`<b>Load day</b> (${dynDayName(d)}): preps for the whole ${rvBlock(d)} block.`:`Not a load day: only tops up what won’t last today + tomorrow.`)+(cut?` This item keeps <b>${y.shelf} day${y.shelf===1?'':'s'}</b>, so it stops at ${dynDayName(y.through)}.`:'');
+  const fcPar=winNeed*(1+ss);
+  const floorWins=r.minPar>=fcPar-1e-9;
+  const capLine = r.cap!=null ? `<div class="rv-why-line"><span>${es?'Tu tope':'Your cap'}</span><b>${rvQ(r.cap)}</b></div>${y.capped?`<div class="rv-why-sub">${es?'el pronóstico pedía más; el tope manda':'the forecast asked for more; the cap wins'}</div>`:''}` : '';
+  const near=Number(y.near)||0;
+  const shortTxt = r.make>0
+    ? `${es?'hay':'on hand'} <b>${rvQ(r.onHand)}</b> → ${es?'faltan':'short'} ${rvQ(Math.max(0,r.par-r.onHand))}${r.cpb!==1?` ÷ ${rvQ(r.cpb)} ${es?'por tanda':'per batch'}`:''} → <b>${es?'hacer':'make'} ${rvQ(r.batches)}</b> ${r.batches===1?(es?'tanda':'batch'):(es?'tandas':'batches')} (${rvQ(r.make)} ${esc(cont)})`
+    : (r.onHand>=r.par-1e-9 ? `${es?'hay':'on hand'} <b>${rvQ(r.onHand)}</b> ≥ par ${rvQ(r.par)} → ${es?'nada que hacer':'nothing to make'}`
+       : `${es?'hay':'on hand'} <b>${rvQ(r.onHand)}</b> ${es?'alcanza para hoy + mañana':'covers today + tomorrow'} (${rvQ(near*(1+ss))}) ${es?'y está sobre tu mínimo':'and sits above your min'} → ${es?'hoy no se completa':'no top-up today'}`);
+  return `<div class="rv-why">
+    <div class="rv-why-line big"><span>${es?'Par':'Par'} <small>${es?rvParSrc(r).es:rvParSrc(r).en}</small></span><b>${rvQ(r.par)} <small>${esc(cont)}</small></b></div>
+    <div class="rv-why-line"><span>${es?'Uso por cliente':'Per cover'}</span><b>${rvRate(rate)} <small>${esc(cont)}</small></b></div>
+    <div class="rv-why-sub">${srcTxt}</div>${fix}${feel}
+    <div class="rv-why-line"><span>${es?'Días que cubre':'Days it covers'}</span><b>${days.length}</b></div>
+    <div class="rv-why-sub">${spanTxt}</div>
+    <table class="rv-why-t"><tr><th>${es?'día':'day'}</th><th class="n">${es?'clientes':'covers'}</th><th class="n">${es?'venta':'sales'}</th><th class="n">${es?'necesita':'needs'}</th></tr>${dayRows}<tr class="sum"><td>${es?'total':'total'}</td><td></td><td></td><td class="n"><b>${rvQ(winNeed)}</b></td></tr></table>
+    <div class="rv-why-line"><span>${es?'Colchón':'Safety'} +${Math.round(ss*100)}%</span><b>${rvQ(fcPar)}</b></div>
+    <div class="rv-why-line"><span>${es?'Tu par mínimo':'Your min par'}${r.places>1?` <small>(${r.places} ${es?'lugares':'places'})</small>`:''}</span><b>${rvQ(r.minPar)}</b></div>
+    <div class="rv-why-sub">${floorWins?(es?'tu mínimo es más alto que el pronóstico → <b>manda tu mínimo</b>':'your min is higher than the forecast → <b>your min wins</b>'):(es?'el pronóstico pide más que tu mínimo → <b>manda el pronóstico</b>':'the forecast asks for more than your min → <b>the forecast wins</b>')}</div>
+    ${capLine}
+    <div class="rv-why-line"><span>${es?'Hoy':'Today'}</span><b>${rvQ(r.par)} <small>${esc(cont)}</small></b></div>
+    <div class="rv-why-sub">${shortTxt}</div>
+    ${D.err&&D.err.length?`<div class="rv-why-sub rv-bad">${es?'Aviso: parte del par dinámico no cargó':'Note: part of the dynamic par did not load'}: ${esc(D.err.join(' · '))}</div>`:''}
+  </div>`;
+}
+function dynSetHtml(r){
+  const es=isES(), p=r.prep, cont=p.container||'', g=r.group, one=g.members.length===1, ed=can('admin.items');
+  const fcPar=r.dyn?(Number(r.dyn.winNeed)||0)*(1+(Number(r.dyn.ss)||0)):0;
+  const note=`<div class="rv-eff" style="margin-top:0">${es
+    ?`Fijar un par aquí cambia el <b>par mínimo</b> de este producto para todos los días — igual que en la hoja de par del conteo. Hoy el par es <b>${rvQ(r.par)}</b> (${rvParSrc(r).es}). Si el pronóstico pide más que tu mínimo, manda el pronóstico.`
+    :`Setting a par here changes this item’s <b>min par</b> for every day — the same as the par sheet on the Count tab. Today’s par is <b>${rvQ(r.par)}</b> (${rvParSrc(r).en}). When the forecast asks for more than your min, the forecast wins.`}</div>`;
+  if(!ed) return note+`<div class="muted" style="font-size:12px;margin-top:8px">${es?'Cambiar el par mínimo lo hace gerencia.':'Changing a min par is a management step.'}</div>`;
+  const picks = one ? `<div class="rv-opts">
+      <button onclick="rvParSet('${g.members[0].id}',${Math.round(r.par*4)/4})">${es?'par de hoy':'today’s par'} ${rvQ(Math.round(r.par*4)/4)}</button>
+      <button onclick="rvParSet('${g.members[0].id}',${Number(g.members[0].min_par)||0})">${es?'mínimo actual':'current min'} ${rvQ(Number(g.members[0].min_par)||0)}</button>
+      <button onclick="rvParSet('${g.members[0].id}',${Math.round(r.par*1.25*4)/4})">+25% → ${rvQ(Math.round(r.par*1.25*4)/4)}</button></div>` : '';
+  const body = one
+    ? `<div class="rv-big"><button onclick="rvParBump('${g.members[0].id}',-${PAR_STEP*2})">−</button><div><input type="number" inputmode="decimal" step="any" min="0" id="rvpar-${g.members[0].id}" value="${g.members[0].min_par==null?'':fmtQ(g.members[0].min_par)}" placeholder="—" oninput="rvParLive()"><div class="u">${esc(cont)}</div></div><button onclick="rvParBump('${g.members[0].id}',${PAR_STEP*2})">+</button></div>`
+    : g.members.map(m=>`<div class="task-line" style="align-items:center"><div class="nm"><b>${esc(parPlaceLabel(m))}</b><div class="es">${esc(m.container||cont)}${Number(m.cpb)!==1?` · ${es?'1 tanda llena':'1 batch fills'} ${rvQ(m.cpb)}`:''}</div></div>
+        <div class="stp"><button onclick="rvParBump('${m.id}',-${PAR_STEP})" aria-label="less">–</button><div><input type="number" inputmode="decimal" step="any" min="0" id="rvpar-${m.id}" value="${m.min_par==null?'':fmtQ(m.min_par)}" placeholder="—" oninput="rvParLive()"><div class="u">${esc(m.container||cont)}</div></div><button class="up" onclick="rvParBump('${m.id}',${PAR_STEP})" aria-label="more">+</button></div></div>`).join('');
+  return note+picks+body+`<div class="rv-eff" id="rv-par-eff" data-fc="${fcPar}"></div>
+    <div style="display:flex;gap:8px;margin-top:6px"><button class="btn-ghost" style="flex:1" onclick="document.getElementById('rvsheet').remove()">${es?'Cancelar':'Cancel'}</button><button id="rvpar-save" class="rv-save" onclick="rvParSave()">${es?'Guardar par':'Save par'}</button></div>`;
+}
+window.dynParSheetOpen=(pid, from)=>{
+  const hit=rvRowFor(pid, from);
+  if(!hit || !hit.r.dyn){ parSheetOpen(pid); return; }   // no dynamic par for this item: the plain par sheet
+  const {r, d}=hit, es=isES(), p=r.prep;
+  S._rvPar={pid, from, key:r.group.key, d};
+  const old=document.getElementById('rvsheet'); if(old) old.remove();
+  const el=document.createElement('div'); el.className='rcov no-print'; el.id='rvsheet';
+  el.onclick=e=>{ if(e.target===el){ el.remove(); S._rvPar=null; } };
+  el.innerHTML=`<div class="sheet">
+    <div class="sh-head"><h3>${esc(es&&p.name_es?p.name_es:p.name_en)} — par</h3>
+      <div class="sh-sub">${es?'Par dinámico':'Dynamic par'} · ${fmtDate(d)} · ${es?'bloque':'block'} ${rvBlock(d)}</div></div>
+    <div class="rv-tabs"><button class="on" id="rvt-why" onclick="rvParTab('why')">${es?'Por qué este número':'Why this number'}</button><button id="rvt-set" onclick="rvParTab('set')">${es?'Fijar un par':'Set a par'}</button></div>
+    <div class="sh-body" id="rvpar-why">${dynWhyHtml(r, d)}</div>
+    <div class="sh-body" id="rvpar-set" style="display:none">${dynSetHtml(r)}</div>
+    <div style="display:flex;gap:8px;padding:0 16px 14px" id="rvpar-close"><button class="btn-ghost" style="flex:1" onclick="document.getElementById('rvsheet').remove();S._rvPar=null">${es?'Cerrar':'Close'}</button></div>
+  </div>`;
+  document.body.appendChild(el);
+};
+window.rvParTab=k=>{ const w=document.getElementById('rvpar-why'), s=document.getElementById('rvpar-set'), c=document.getElementById('rvpar-close'); if(!w||!s) return;
+  w.style.display=k==='why'?'':'none'; s.style.display=k==='set'?'':'none'; if(c) c.style.display=k==='why'?'':'none';
+  document.getElementById('rvt-why').classList.toggle('on',k==='why'); document.getElementById('rvt-set').classList.toggle('on',k==='set');
+  if(k==='set') rvParLive(); };
+window.rvParSet=(id,v)=>{ const el=document.getElementById('rvpar-'+id); if(!el) return; el.value=fmtQ(v); rvParLive(); };
+window.rvParBump=(id,d)=>{ const el=document.getElementById('rvpar-'+id); if(!el) return; const cur=Number(String(el.value||'').replace(',','.'))||0; el.value=fmtQ(Math.max(0, Math.round((cur+d)*100)/100)); rvParLive(); };
+window.rvParLive=()=>{ const P=S._rvPar; const el=document.getElementById('rv-par-eff'); if(!P||!el) return;
+  const hit=rvRowFor(P.pid, P.from); if(!hit) return; const r=hit.r, es=isES(), cont=r.prep.container||'';
+  let floor=0; for(const m of r.group.members){ const x=document.getElementById('rvpar-'+m.id); const raw=x?String(x.value||'').trim().replace(',','.'):''; floor+= raw===''?0:(Number(raw)||0); }
+  const fc=Number(el.dataset.fc)||0; let par=Math.max(fc, floor); if(r.cap!=null && par>r.cap) par=Math.max(r.cap, floor);
+  const short=Math.max(0, par-r.onHand), q=Math.ceil((short/(r.cpb||1))*2-1e-9)/2;
+  el.innerHTML=`${es?'Par mínimo':'Min par'} <b>${rvQ(floor)}</b>${r.group.members.length>1?` (${es?'suma de':'sum of'} ${r.group.members.length})`:''} · ${es?'pronóstico':'forecast'} ${rvQ(fc)} → ${es?'par de hoy':'today’s par'} <b>${rvQ(par)}</b> ${esc(cont)}${floor<fc-1e-9?` <span class="muted">(${es?'el pronóstico es más alto, manda él':'the forecast is higher, it wins'})</span>`:''}<br>${es?'hay':'on hand'} ${rvQ(r.onHand)} → ${es?'faltan':'short'} ${rvQ(short)}${r.cpb!==1?` ÷ ${rvQ(r.cpb)}`:''} → <b>${es?'hacer':'make'} ${rvQ(q)}</b>${Math.abs(q-r.batches)>1e-9?` <span class="muted">(${es?'era':'was'} ${rvQ(r.batches)})</span>`:''}`; };
+window.rvParSave=async()=>{ if(!guard('admin.items')) return; const P=S._rvPar; if(!P) return;
+  const hit=rvRowFor(P.pid, P.from); if(!hit) return; const r=hit.r;
+  const btn=document.getElementById('rvpar-save'); if(btn){ btn.disabled=true; btn.textContent=isES()?'Guardando…':'Saving…'; }
+  if(P.from==='rv' && S._rv && S._rv.parWas[P.key]==null) S._rv.parWas[P.key]=r.par;
+  let changed=0, failed=0;
+  for(const m of r.group.members){ const el=document.getElementById('rvpar-'+m.id); if(!el) continue;
+    const raw=String(el.value||'').trim().replace(',','.'); const n=(raw==='')?null:Number(raw);
+    if(n!=null&&(!isFinite(n)||n<0)){ toast('Numbers only · Solo números'); if(btn){btn.disabled=false;btn.textContent='Save par';} return; }
+    if(Number(m.min_par)===Number(n)) continue;
+    await setMinPar(m.id, n);
+    if(Number(m.min_par)===Number(n)) changed++; else failed++; }
+  const sh=document.getElementById('rvsheet'); if(sh) sh.remove(); S._rvPar=null;
+  if(changed && !failed){ const g=r.group, total=g.members.reduce((t,m)=>t+(Number(m.min_par)||0),0); toast(`${r.prep.name_en}: min par ${fmtQ(total)} ${r.prep.container||''} ✔`); }
+  if(S._rv) rvRecalc();
+  render();
+};
 async function submitCountGo(ctx, ids){
-  const {d,cid,when,close,tgt,counts,missingLen,kitchenLen,blank}=ctx;
+  const {d,cid,when,close,tgt,counts,kitchenLen,blank}=ctx;
+  let missingLen=ctx.missingLen;
   const skip=new Set(ctx.skip);
   // The guest forecast has to be the TARGET day's. A number typed over today's forecast is
   // about today; carrying it onto tomorrow's list would be a guess wearing a measurement's
@@ -3784,8 +4173,34 @@ async function submitCountGo(ctx, ids){
   // the representative row alone used to drop a whole item because the walk-in was blank,
   // even when the line stations had been counted.
   await dynLoad();
-  const rows=prepPlan(tgt,guests,counts).filter(r=>r.make>0 && !r.group.ids.every(id=>skip.has(id)));
-  rows.forEach(r=>{ r.countedPlaces=groupCounted(r.group,S.split); r.notCounted=!r.countedPlaces; });
+  let rows, offRows=[];
+  const by=(S.user&&S.user.name)||'', at=new Date().toISOString();
+  if(ctx.reviewed && S._rv){
+    // Oct 14 2026 — the list is exactly what the Review screen shows, decision by decision:
+    // a stepped quantity is an edit (from the app's number), a line the app did not propose is
+    // an add, a proposed line taken off is kept in the record marked removed. The dynamic par
+    // reads all three back the same way it reads fixes made on the Prep tab.
+    const R=S._rv;
+    const kitchen=S.preps.filter(p=>p.station!=='bar');
+    missingLen=kitchen.filter(p=>!S.split[p.id]).length;   // counts fixed on the review screen count
+    rows=[];
+    for(const r of R.rows){
+      const on=r.on && r.q>0;
+      if(on){
+        if(r.touched && r.b0>0 && Math.abs(r.q-r.b0)>1e-9) r.edited={from:r.b0, to:r.q, by, at};
+        if(!(r.b0>0)) r.added_by={by, at};
+        r.batches=r.q; r.make=Math.round(r.q*r.cpb*1000)/1000; r.minutes=dynMinutes(r.prep, r.q, r.cpb);
+        rows.push(r);
+      }else if(r.b0>0 && !r.skipped){
+        r.removed={by, at}; r.batches=r.b0; r.make=Math.round(r.b0*r.cpb*1000)/1000;
+        r.minutes=dynMinutes(r.prep, r.b0, r.cpb); r.assigned_to=null;
+        offRows.push(r);
+      }
+    }
+  }else{
+    rows=prepPlan(tgt,guests,counts).filter(r=>r.make>0 && !r.group.ids.every(id=>skip.has(id)));
+    rows.forEach(r=>{ r.countedPlaces=groupCounted(r.group,S.split); r.notCounted=!r.countedPlaces; });
+  }
   if(ids.length) splitTasks(rows,ids); else rows.forEach(r=>{ r.assigned_to=null; });
 
   const {error}=await db.from('inventory_counts').update({
@@ -3793,12 +4208,12 @@ async function submitCountGo(ctx, ids){
     item_count:kitchenLen-missingLen, counted_by:S.user?.name||S.count?.counted_by||''}).eq('id',cid);
   if(error) return toast('Error: '+error.message);
 
-  const ok=await writePrepList(tgt,guests,rows,{source:'count', count_id:cid, count_when:when,
-    counted_date:d, uncounted:missingLen, blank_mode:blank},
+  const ok=await writePrepList(tgt,guests,rows.concat(offRows),{source:'count', count_id:cid, count_when:when,
+    counted_date:d, uncounted:missingLen, blank_mode:blank, ...(ctx.reviewed?{reviewed:1}:{})},
     close?false:(S.guestsOverride!=null));
   if(!ok) return;
   S.count.status='completed'; S.count.completed_at=new Date().toISOString();
-  S.editPlan=false;
+  S.editPlan=false; S._rv=null;
   // Land on the list that was just built, whichever day that is. For a closing count that
   // means walking the user forward a day, so the Count tab's chooser is reset to that day's
   // opening count rather than staying on a mode that belongs to the night before.
@@ -3807,7 +4222,12 @@ async function submitCountGo(ctx, ids){
   toast(rows.length
     ? `${close?'Closing':'Opening'} count submitted ✔ — ${rows.length} item(s) to prep ${close?'tomorrow':'today'}`
     : `${close?'Closing':'Opening'} count submitted ✔ — pars are covered, nothing to prep`);
-  render();
+  await render();
+  // Oct 14 2026 (Dan): after the review the sheet downloads by itself — the same PDF as the
+  // Hoja PDF button, one page set per cook. Only once the Prep screen has the saved list.
+  if(ctx.reviewed && rows.length && can('prep.print')){
+    setTimeout(()=>{ try{ if(S.view==='prep' && (S.tasks||[]).length) prepSheetPDF(); }catch(e){} }, 400);
+  }
 }
 // One writer for the prep list, used by the Submit button on the count and by the
 // manual Generate button. Two copies of this would drift apart.
@@ -3849,6 +4269,9 @@ async function writePrepList(d, guests, rows, meta, overridden){
     station:r.prep.station, estimated_minutes:Math.round(r.minutes),
     notes:JSON.stringify({forecast:r.forecast, min_par:r.minPar, on_hand:r.onHand, containers:r.make,
                           container:r.prep.container, not_counted:!!r.notCounted,
+                          // Oct 14 2026 — decisions made on the Review screen before the list existed
+                          ...(r.edited?{edited:r.edited}:{}), ...(r.removed?{removed:r.removed}:{}),
+                          ...(r.added_by?{added_by:r.added_by, dyn_day:1}:{}),
                           // on_hand and min_par above are the TOTAL across every place this
                           // item lives. Kept so a list can always be read back and explained.
                           places:(r.places!=null?r.places:1),
@@ -3856,7 +4279,7 @@ async function writePrepList(d, guests, rows, meta, overridden){
                           // Sep 30 2026 — the dynamic par's own numbers for this line: what it
                           // asked (b0), what was on hand, the window it covers. Dan's fixes are
                           // read back against b0/oh to calibrate the item (dynLineRatio).
-                          ...(r.dyn?{dyn:{b0:r.batches, oh:Math.round(r.onHand*100)/100, cpb:r.cpb, t:r.par,
+                          ...(r.dyn?{dyn:{b0:(r.b0!=null?r.b0:r.batches), oh:Math.round(r.onHand*100)/100, cpb:r.cpb, t:r.par,
                             through:r.dyn.through, span:r.dyn.span, shelf:r.dyn.shelf, load:r.dyn.load,
                             rate:Math.round(r.dyn.rate*1e5)/1e5, src:r.dyn.src, n:r.dyn.n,
                             c:Math.round(r.dyn.c*1000)/1000, cap:r.cap}}:{})})}));
@@ -10566,7 +10989,7 @@ function taskLine(r,bil){
       <div class="stats">
         <span class="st"><i>Sell est · Venta</i><b>~${fmtQ(r.forecast)}</b></span>
         <span class="st parchip" onclick="parSheetOpen('${p.id}')" title="Tap to change the min par · Toca para cambiar el par mínimo"><i>Min par (${cu})</i><b>${fmtQ(r.minPar)}${r.places>1?`<em class="pl">${r.places} places</em>`:''}</b></span>
-        <span class="st"><i>${r.dyn&&r.dyn.span>1?`Par → ${esc(dynDayName(r.dyn.through))}`:'Par today'} (${cu})</i><b>${fmtQ(r.par)}${Number(r.par)>Number(r.minPar)+1e-9?'<em class="pl fc" title="Above the min par because the forecast asks for more">forecast</em>':''}</b></span>
+        <span class="st parchip" onclick="dynParSheetOpen('${p.id}')" title="Why this par · set a par · Por qué este par · fijar un par"><i>${r.dyn&&r.dyn.span>1?`Par → ${esc(dynDayName(r.dyn.through))}`:'Par today'} (${cu})</i><b>${fmtQ(r.par)}<em class="pl ${Number(r.par)>Number(r.minPar)+1e-9?'fc':''}">${Number(r.par)>Number(r.minPar)+1e-9?'forecast':(isES()?'tu mínimo':'your min')} · ${isES()?'¿por qué?':'why?'}</em></b></span>
         <span class="st"><i>On hand · Hay (${cu})</i><b title="${nc?'* nobody counted this — 0 is an assumption, not a measurement':'total across every place this item lives'}">${nc?'0*':fmtQ(r.onHand)}</b></span>
         ${r.dyn?dynThruHtml(Object.assign({cap:r.cap,t:r.par},r.dyn)):''}${platesMismHtml(p, r.onHand)}
       </div></div>
@@ -18820,8 +19243,9 @@ async function render(){
     return; }
   // 'pars' is no longer a tab — it lives inside Admin/Settings (Dan, Aug 11) — but it is
   // still a real view, reachable by anyone who can see Admin/Settings.
+  if(S.view==='review' && !(S._rv && sec('count'))) S.view='count';
   if(!allowed.includes(S.view) && !(S.view==='pars' && sec('admin')) && !(S.view==='dev' && devOn() && can('dev.report'))
-     && !(TM() && (S.view==='lists'||S.view==='more') && tmTabOn(S.view))) S.view=allowed[0];
+     && !(S.view==='review') && !(TM() && (S.view==='lists'||S.view==='more') && tmTabOn(S.view))) S.view=allowed[0];
   if(!TM() && (S.view==='lists'||S.view==='more')) S.view=allowed[0];
   $('#tabs').style.display='flex';
   // This table is what the tab bar actually shows — the labels in the static markup are only
@@ -18836,16 +19260,18 @@ async function render(){
     const tm=TM(); document.body.classList.toggle('tm',tm);
     b.style.display=tm?((TM_TABS.includes(v)&&tmTabOn(v))?'':'none'):((v!=='lists'&&v!=='more'&&sec(v))?'':'none');
     b.style.order=tm?String(TM_TABS.indexOf(v)):'';
-    b.classList.toggle('active', tm ? v===tmTabOf(S.view) : (v===S.view || ((S.view==='pars'||S.view==='dev') && v==='admin')));
+    b.classList.toggle('active', tm ? v===tmTabOf(S.view) : (v===S.view || ((S.view==='pars'||S.view==='dev') && v==='admin') || (S.view==='review' && v==='count')));
   });
   if(S.view!=='today' && sec('orders') && !(S.orDay&&S.orDay.d===todayLA())) orLoadToday(todayLA()).then(orPaintBadge); else orPaintBadge();
   // How long he stayed on the screen he is leaving — the "where the time went" bars.
   try{ const _s=S.dev.scr; if(_s.name!==S.view){ if(_s.name&&_s.at) devEvent('stay',_s.name,Date.now()-_s.at); S.dev.scr={name:S.view,at:Date.now()}; } }catch(e){}
   const _t0=(window.performance&&performance.now)?performance.now():Date.now();
+  document.body.classList.toggle('rv-on', S.view==='review');   // the note button rides above the review footer
   if(S.view==='today') await viewToday();
   else if(S.view==='prep') await viewPrep();
   else if(S.view==='checklist') await viewChecklist();
   else if(S.view==='count') await viewCount();
+  else if(S.view==='review') await viewReview();
   else if(S.view==='waste') await viewWaste();
   else if(S.view==='recipes') await viewRecipes();
   else if(S.view==='orders') await viewOrders();
