@@ -1525,6 +1525,39 @@
   .rv-why-t td{padding:4px;border-bottom:1px solid var(--sand-dark)}.rv-why-t .n{text-align:right;font-variant-numeric:tabular-nums}.rv-why-t tr.sum td{border-bottom:0;font-weight:700}
   @media (max-width:420px){ .rv-chip{min-width:78px} .rv-step .q{min-width:52px} }
   body.rv-on #devfab{bottom:calc(154px + var(--sab))}
+  /* ---- Ordering, Option A (Oct 17 2026) ---- */
+  .og-sticky{position:sticky;top:0;z-index:6;background:var(--white);padding:6px 0 8px;margin:-2px 0 6px}
+  .og-searchw{position:relative}
+  .og-search{width:100%;border:1.5px solid var(--line);border-radius:11px;padding:9px 34px 9px 34px;font-size:14px;font-family:inherit;background:var(--white);background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%236f7d79' stroke-width='2.2'%3E%3Ccircle cx='11' cy='11' r='7'/%3E%3Cpath d='m20 20-3.5-3.5'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:10px center;background-size:16px}
+  .og-search::-webkit-search-cancel-button{display:none}
+  .og-qx{position:absolute;right:6px;top:50%;transform:translateY(-50%);border:0;background:var(--sand-dark);color:var(--ink);border-radius:50%;width:24px;height:24px;font-size:16px;line-height:1;cursor:pointer;font-family:inherit}
+  .og-lastsw{margin-top:4px}
+  .og-lasts{font-size:11px;line-height:1.35;color:var(--muted);padding:2px 0 0}.og-lasts b{color:var(--palm)}.og-lasts.bad b{color:var(--danger)}.og-lasts.flat b{color:var(--muted);font-weight:600}.og-lasts .bad{color:var(--danger);font-weight:700}
+  .og-whyl{color:var(--ocean);text-decoration:underline;cursor:pointer;font-weight:700}
+  .og-tg{display:inline-block;font-size:9px;font-weight:800;border-radius:6px;padding:1px 5px;background:var(--sand-dark);color:var(--ink);margin-left:3px;vertical-align:middle}.og-tg.g{background:#dcebe0;color:var(--palm)}.og-tg.y{background:#f4e7c5;color:#8a6a1f}
+  .og-revhead .btn-ghost{margin-bottom:6px}
+  .og-ohchip{background:#e4f0f0!important;border-color:#9fc3c3!important;min-width:92px}.og-ohchip i{color:#2e5b5f!important}.og-ohchip b{color:#2e5b5f;font-size:17px}
+  .og-ohchip input{width:62px;border:1.5px solid #9fc3c3;border-radius:7px;font:inherit;font-weight:800;font-size:16px;text-align:center;padding:2px;color:#2e5b5f;background:#fff}
+  .rv-row .rv-need .og-lasts{font-size:10.5px}
+  .og-foot{bottom:78px}
+  .tag{display:inline-block;font-size:9.5px;font-weight:800;border-radius:6px;padding:2px 6px;margin-left:4px;vertical-align:middle}.tag.gold{background:#f4e7c5;color:#8a6a1f}
+  /* enter list */
+  .og-entertop{padding:8px 0 8px}
+  .og-entertop .rv-ttl{margin-bottom:6px}
+  .og-allin{display:flex;gap:8px;align-items:center;margin-top:7px}.og-allin .rv-prog{flex:1;margin:0}
+  .og-allbtn{flex:0 0 auto;padding:8px 12px;font-size:12.5px;background:var(--palm)}
+  .rv-prog{height:8px;border-radius:99px;background:var(--sand-dark);overflow:hidden;margin:6px 0}.rv-prog i{display:block;height:100%;background:var(--palm);border-radius:99px;transition:width .25s}
+  .og-enterbody{margin-top:4px}
+  .og-erail{top:150px}
+  .og-rbtn.full{border-color:#a9d3b8;color:var(--palm)}
+  .og-li{display:flex;align-items:center;gap:9px;padding:9px 0;border-bottom:1px solid var(--sand-dark);cursor:pointer}.og-li:last-child{border-bottom:0}
+  .og-li .chk{width:28px;height:28px;border-radius:8px;border:2px solid var(--line);display:flex;align-items:center;justify-content:center;font-weight:900;color:#fff;flex:0 0 auto}
+  .og-li .nm{flex:1;min-width:0}.og-li .nm b{display:block;font-size:13.5px;line-height:1.2}.og-li .nm small{color:var(--muted);font-size:10.5px}
+  .og-li .qty{font-weight:900;font-size:18px;color:var(--coral);text-align:right;white-space:nowrap}.og-li .qty small{display:block;font-size:9.5px;color:var(--muted);font-weight:600}
+  .og-li.done{background:#e6f3ea;border-radius:10px;padding-left:6px;padding-right:6px}.og-li.done .chk{background:var(--palm);border-color:var(--palm)}.og-li.done .nm b{color:var(--palm)}.og-li.done .qty{color:var(--palm)}
+  .og-alldone{background:#e6f3ea;border-color:#a9d3b8;text-align:center;padding:22px 12px}.og-alldone b{font-size:17px;color:var(--palm)}
+  .rv-go.btn-sm{padding:8px 12px;font-size:12.5px}
+  @media print{ .og-sticky,.og-foot,.og-erail{display:none!important} }
 </style>
 <script>
 // The background choice is a per-device thing — Dan's phone and the kitchen tablet can
@@ -1595,7 +1628,7 @@ const SB_KEY='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZ
 const TBID='9f8d7c6b-5a49-4e38-b271-06d5f00dbeef'; // Tommy Bahama tenant inside ChefOpsAI
 // Stamped by publish.sh at upload time. It is the only version label there is now —
 // one address, updated in place, so this tells you which build that address is serving.
-const BUILD='Oct 14, 2026 · count → review → who → sheet + dynamic par: why this number / set a par';
+const BUILD='Oct 17, 2026 · ordering: search on the walk, lasts through, review, enter-in-Sysco list, rates from the research';
 // ---------- IS THIS PHONE EVEN RUNNING THE LATEST BUILD? ----------
 // Sep 3 2026. Three prep fixes shipped and Dan still saw the old behaviour, because the app
 // installs to the home screen and an installed web app does not go back and re-fetch its own
@@ -15137,6 +15170,12 @@ async function loadOG(vendor){
     jobs.push(db.from('tb_order_guide_items').select('*').eq('vendor',vendor).eq('active',true).order('sort')
       .then(r=>{ S.og.items[vendor]=r.data||[]; },()=>{ S.og.items[vendor]=[]; }));
   }
+  // Oct 17 2026 — the ordering research: cases per $10k of sales per guide item (tb_order_rates).
+  if(!S.og.ratesFor||!S.og.ratesFor[vendor]){
+    S.og.ratesFor=S.og.ratesFor||{}; S.og.ratesFor[vendor]=true; S.og.rates=S.og.rates||{};
+    jobs.push(db.from('tb_order_rates').select('*').eq('vendor',vendor)
+      .then(r=>{ (r.data||[]).forEach(x=>{ S.og.rates[x.item_id]=x; }); },()=>{}));
+  }
   // Sep 30 2026 (mockup D): the vendor's own pack and the last price paid, keyed by guide item.
   // Pack from R365's vendor items, price from R365 receiving (tb_purchase_price_latest, per R365
   // inventory unit). Joined through tb_sku_map — only items Dan has matched to a SKU get one.
@@ -15228,6 +15267,218 @@ function ogPriceSoft(vendor){
     });
   }catch(e){}
 }
+// ---- ORDERING, OPTION A (Dan, Oct 16–17 2026) --------------------------------------------------
+// Four things, in the order he asked for them:
+//   1. a search box that floats on top of the walk (and of the Enter list);
+//   2. "lasts through" next to every suggestion, from the ordering research: what this kitchen
+//      takes in per $10k of sales (tb_order_rates, R365 receiving Jan 2025 – Sep 2026 against
+//      Oracle sales, week by week) × the app's own day-by-day sales forecast;
+//   3. a Review before the order list — on hand as the count chip, ± cases, ✕, fold the rest;
+//   4. an Enter-in-Sysco list to tick off while typing the order into the vendor's site.
+// The suggestion: ORDER = max(what the covered days will use × (1 + cushion), the min par)
+//                         − what is still on the shelf when the truck lands, rounded up to cases.
+// Items with no receiving history keep the par × day-dial rule they had, and say so.
+const OG_CUSHION=0.2;                      // the same +20% the prep list carries (safety stock)
+function ogRate(it){ return (S.og.rates||{})[it.id]||null; }
+// a rate with no sales pattern (4-week totals do not follow sales) is spread flat over the week
+function ogFlat(r){ return !!(r && r.corr!=null && Number(r.corr)<0.2 && Number(r.qty_per_wk)>0); }
+// The day's net-sales forecast: the engine's number when it has one, guests × check otherwise.
+function ogSalesOf(d){
+  try{ const X=fcExplain(d); if(X&&X.v2s>0) return Number(X.v2s); if(X&&X.chk>0) return Number(guestPlan(d))*Number(X.chk); }catch(e){}
+  return null;
+}
+function ogUseOn(it, d){
+  const r=ogRate(it); if(!r || !(Number(r.per10k)>0)) return null;
+  if(ogFlat(r)) return Number(r.qty_per_wk)/7;
+  const s=ogSalesOf(d); if(s==null) return Number(r.qty_per_wk)/7;
+  return Number(r.per10k)*s/10000;
+}
+// Every number the chip, the review line and the WHY sheet show comes from this one walk through
+// the days: today up to the truck runs on what is on hand; the order lands with the truck and has
+// to last until the next one lands.
+function ogPlan(it, oh, ord){
+  const vendor=S.og.vendor, today=todayLA(), lead=ogLead(vendor).days;
+  const win=ogWindow(vendor); const arrive=win[0]; const next=shiftDay(win[win.length-1],1);
+  const pre=[]; for(let d=today; d<arrive && pre.length<8; d=nextDay(d)) pre.push(d);
+  const r=ogRate(it); const hasRate=!!(r && Number(r.per10k)>0);
+  const par=it.par!=null?Number(it.par):null;
+  const use=d=>hasRate?(ogUseOn(it,d)||0):0;
+  const o=Number(oh); const ohN=(oh==null||!isFinite(o))?null:o;
+  const days=[]; let st=ohN==null?0:ohN, todayShort=0;
+  for(const d of pre){ const u=use(d); st-=u; if(st<0){ todayShort+=-st; st=0; } days.push({d,u,st,pre:true}); }
+  const carry=st;
+  let need=0; win.forEach(d=>{ need+=use(d); });
+  const fcTarget=need*(1+OG_CUSHION);
+  const target=hasRate ? Math.max(fcTarget, par||0) : null;
+  const sug = ohN==null ? null : (hasRate ? Math.max(0, Math.ceil(target-carry-1e-9)) : ogSuggest(par, ohN));
+  const ordN=(ord==null)?sug:Number(ord);
+  let lastOk=null, runOut=null; st=carry;
+  for(const d of win){ if(d===arrive) st+=(ordN||0); const u=use(d); st-=u; days.push({d,u,st,land:d===arrive}); if(st>=-1e-9 && !runOut) lastOk=d; else if(!runOut) runOut=d; }
+  const thu=win[win.length-1]; const ok=hasRate && ohN!=null && lastOk===thu;
+  const endSt=(days.find(x=>x.d===thu)||{st:0}).st;
+  return {hasRate, rate:r, flat:ogFlat(r), par, oh:ohN, ord:ordN, pre, win, arrive, next, carry, need, fcTarget, target, sug, days, lastOk, runOut, ok, todayShort, short:ok?0:Math.max(0,-endSt), spare:endSt, parWins:hasRate&&par!=null&&par>=fcTarget-1e-9};
+}
+// One door for every place that asks "what should this line order?"
+function ogSuggestFor(it, oh){
+  if(oh==null||oh==='') return null;
+  const r=ogRate(it);
+  if(!(r && Number(r.per10k)>0)) return ogSuggest(it.par, oh);
+  return ogPlan(it, oh, null).sug;
+}
+function ogDn(d){ return dateObjLA(d).toLocaleDateString(isES()?'es-US':'en-US',{weekday:'short'}).replace('.',''); }
+// The line under the ORDER box: lasts through Thu ✓ · next truck Fri · why
+function ogLastsHtml(it, l){
+  if(it.par==null && !ogRate(it)) return '';
+  if(!l || l.oh==null) return '';
+  const es=isES(); const P=ogPlan(it, l.oh, l.ordered);
+  if(!P.hasRate) return `<div class="og-lasts flat"><b>${es?'sin historial de compras':'no receiving history'}</b> · ${es?'regla del par':'par rule'}: ${fmtCase(it.par)} × ${ogDial().toFixed(2)} − ${fmtCase(l.oh)} · <span class="og-whyl" onclick="ogWhyOpen('${it.id}')">${es?'¿por qué?':'why'}</span></div>`;
+  const unit=it.par_unit||it.unit_code||'CS';
+  return `<div class="og-lasts ${P.ok?'ok':'bad'}"><b>${P.ok?`${es?'dura hasta el':'lasts through'} ${ogDn(P.lastOk)} ✓`:`${es?'se acaba el':'runs out'} ${ogDn(P.runOut||P.win[0])}`}</b> · ${P.ok?`${es?'siguiente camión':'next truck'} ${ogDn(P.next)}`:`${es?'faltan':'short'} ${fmtCase(P.short)} ${esc(unit)}`}${P.todayShort>0?` · <span class="bad">${es?'0 hoy':'0 today'}</span>`:''} · <span class="og-whyl" onclick="ogWhyOpen('${it.id}')">${es?'¿por qué?':'why'}</span></div>`;
+}
+// ---- WHY sheet: the day-by-day math behind the number --------------------------------------
+window.ogWhyOpen=(id)=>{
+  const it=(S.og.items[S.og.vendor]||[]).find(x=>x.id===id); if(!it) return;
+  const l=S.og.lines[it.id]||{}; const es=isES(); const unit=it.par_unit||it.unit_code||'CS';
+  const P=ogPlan(it, l.oh, l.ordered); const r=P.rate; const si=(S.og.skuInfo||{})[it.id]||{};
+  const old=document.getElementById('ogwhy'); if(old) old.remove();
+  const el=document.createElement('div'); el.className='rcov no-print'; el.id='ogwhy';
+  el.onclick=e=>{ if(e.target===el) el.remove(); };
+  const money=x=>'$'+Math.round(x).toLocaleString();
+  let body='';
+  if(!P.hasRate){
+    body=`<div class="rv-eff">${es?`Este producto no tiene líneas de recepción en el estudio (sin historial o sin SKU enlazado), así que aplica la <b>regla del par</b>: par ${fmtCase(it.par)} × marcador del día ${ogDial().toFixed(2)} − ${l.oh==null?'—':fmtCase(l.oh)} en mano → <b>pedir ${l.suggested==null?'—':fmtCase(l.suggested)}</b>.`
+      :`No receiving lines for this item in the research (no history, or no SKU linked yet), so the <b>par rule</b> applies: par ${fmtCase(it.par)} × day dial ${ogDial().toFixed(2)} − ${l.oh==null?'—':fmtCase(l.oh)} on hand → <b>order ${l.suggested==null?'—':fmtCase(l.suggested)}</b>.`}</div>`;
+  }else{
+    const rows=P.days.map(x=>{ const s=ogSalesOf(x.d); const red=x.st<=0 && !x.pre || (x.pre && P.todayShort>0 && x.st<=0);
+      return `<tr><td>${ogDn(x.d)} ${x.d.slice(5).replace('-','/')}${x.pre?` <span class="og-tg">${es?'en mano':'on hand'}</span>`:''}${x.land?` <span class="og-tg g">+${fmtCase(P.ord||0)} ${es?'llega':'lands'}</span>`:''}</td><td class="n">${s==null?'—':money(s)}</td><td class="n">${fmtCase(x.u)}</td><td class="n" style="${red?'color:var(--danger)':''}"><b>${fmtCase(Math.max(0,x.st))}${x.pre&&P.todayShort>0&&x.st<=0?' ('+(es?'faltan':'short')+' '+fmtCase(P.todayShort)+')':''}</b></td></tr>`; }).join('');
+    const winS=P.win.reduce((a,d)=>a+(ogSalesOf(d)||0),0);
+    body=`<div class="rv-eff">${es
+      ?`Según tus facturas, usas <b>${fmtCase(r.per10k)} ${esc(unit)} por cada $10k</b> de venta (${r.weeks_bought} de ${r.weeks_cov} semanas en archivo, ${fmtCase(r.orders_per_wk)} pedidos por semana, normalmente ${fmtCase(r.qty_per_order)} por pedido)${P.flat?` — este producto no sigue la venta (correlación ${r.corr}), así que se reparte parejo a <b>${fmtCase(r.qty_per_wk)} por semana</b>`:''}. Pronóstico ${ogDn(P.win[0])}–${ogDn(P.win[P.win.length-1])} ${money(winS)} → <b>${fmtCase(P.need)} ${esc(unit)}</b>, +${Math.round(OG_CUSHION*100)}% de colchón = ${fmtCase(P.fcTarget)}${P.parWins?`; tu par mínimo ${fmtCase(P.par)} es más alto y manda`:''} → meta <b>${fmtCase(P.target)}</b>, menos lo que queda cuando llega el camión (${fmtCase(P.carry)}) → <b>pedir ${P.sug==null?'—':fmtCase(P.sug)}</b>${(l.ordered!=null&&l.edited)?` (tú pusiste ${fmtCase(l.ordered)})`:''}.`
+      :`From your invoices you take in <b>${fmtCase(r.per10k)} ${esc(unit)} per $10k</b> of sales (${r.weeks_bought} of ${r.weeks_cov} weeks on file, ${fmtCase(r.orders_per_wk)} orders a week, usually ${fmtCase(r.qty_per_order)} per order)${P.flat?` — this item does not follow sales (correlation ${r.corr}), so it is spread flat at <b>${fmtCase(r.qty_per_wk)} a week</b>`:''}. ${ogDn(P.win[0])}–${ogDn(P.win[P.win.length-1])} forecast ${money(winS)} → <b>${fmtCase(P.need)} ${esc(unit)}</b>, +${Math.round(OG_CUSHION*100)}% cushion = ${fmtCase(P.fcTarget)}${P.parWins?`; your min par ${fmtCase(P.par)} is higher and wins`:''} → target <b>${fmtCase(P.target)}</b>, minus what is still on the shelf when the truck lands (${fmtCase(P.carry)}) → <b>order ${P.sug==null?'—':fmtCase(P.sug)}</b>${(l.ordered!=null&&l.edited)?` (you set ${fmtCase(l.ordered)})`:''}.`}</div>
+    <table class="rv-why-t"><tr><th>${es?'día':'day'}</th><th class="n">${es?'venta':'sales fc'}</th><th class="n">${es?'usa':'uses'}</th><th class="n">${es?'queda':'left'}</th></tr>${rows}<tr><td>${ogDn(P.next)} ${P.next.slice(5).replace('-','/')} <span class="og-tg y">${es?'camión':'truck'}</span></td><td class="n">${(()=>{ const s=ogSalesOf(P.next); return s==null?'—':money(s); })()}</td><td class="n">—</td><td class="n">—</td></tr></table>
+    <div class="muted" style="font-size:11.5px">${P.oh==null?(es?'Cuenta el producto y la tabla se llena.':'Count it and the table fills in.'):P.ok?(es?`✓ llega a la noche del ${ogDn(P.lastOk)} con ${fmtCase(P.spare)} ${esc(unit)} de sobra; el camión del ${ogDn(P.next)} toma el relevo.`:`✓ reaches ${ogDn(P.lastOk)} night with ${fmtCase(P.spare)} ${esc(unit)} to spare; the ${ogDn(P.next)} truck takes over.`):(es?`✗ se acaba el ${ogDn(P.runOut||P.win[0])} — faltan ${fmtCase(P.short)} ${esc(unit)} para llegar al camión.`:`✗ runs out ${ogDn(P.runOut||P.win[0])} — short ${fmtCase(P.short)} ${esc(unit)} by the truck.`)}${r.warn?`<br>⚠ ${es?'El empaque del archivo del proveedor y el precio de la factura no coinciden sobre qué es una caja — revisar.':'The vendor file pack and the invoice price disagree about what a case is — worth checking.'}`:''}</div>`;
+  }
+  el.innerHTML=`<div class="sheet"><div class="sh-head"><h3>${esc(it.item)} — ${es?'por qué':'why'} ${l.suggested==null&&(l.ordered==null)?'':(fmtCase(ogQty(l))+' '+esc(unit))}</h3>
+    <div class="sh-sub">${esc(it.pack||si.pack||'')}${si.sku?` · SKU ${esc(si.sku)}`:''} · ${es?'llega':'lands'} ${ogDn(P.arrive)} · ${es?'siguiente camión':'next truck'} ${ogDn(P.next)}</div></div>
+    <div class="sh-body">${body}</div>
+    <div style="display:flex;gap:8px;padding:0 16px 14px">${can('orders.edit')&&l.oh!=null?`<button class="btn-ghost" style="flex:1" onclick="ogWhyAdj('${it.id}',-1)">− 1</button><button class="btn-ghost" style="flex:1" onclick="ogWhyAdj('${it.id}',1)">+ 1</button>`:''}<button class="rv-save" style="flex:1.4" onclick="document.getElementById('ogwhy').remove()">${es?'Listo':'Done'}</button></div></div>`;
+  document.body.appendChild(el);
+};
+window.ogWhyAdj=async(id,d)=>{ const l=S.og.lines[id]; if(!l) return; const q=Math.max(0,(Number(ogQty(l))||0)+d); await ogSetOrder(id,q); ogWhyOpen(id); ogRefreshPage(); };
+// Repaint the page the user is on without touching an input mid-type (the walk patches itself).
+function ogRefreshPage(){ if(S.og.page==='review'||S.og.page==='enter') render(); }
+// ---- the floating search on the walk --------------------------------------------------------
+function ogSearchBar(ph){ const es=isES(); return `<div class="og-sticky no-print"><div class="og-searchw"><input class="og-search" id="og-q" type="search" placeholder="${ph||(es?'Buscar cualquier producto…':'Search any item… (ma → Mahi, Mango, Mayo)')}" value="${esc(S.ogWalk.q||'')}" oninput="ogSearch(this.value)">${(S.ogWalk.q||'')?`<button class="og-qx" onclick="ogSearch('')">×</button>`:''}</div></div>`; }
+function ogMatches(items){ const q=String(S.ogWalk.q||'').trim().toLowerCase(); if(!q) return null;
+  return items.filter(it=>{ const si=(S.og.skuInfo||{})[it.id]||{}; return (it.item+' '+(it.item_es||'')+' '+(it.pack||'')+' '+(si.sku||'')+' '+(si.r365||'')).toLowerCase().includes(q); }); }
+window.ogSearch=(v)=>{ S.ogWalk.q=v; const wrap=document.getElementById('og-listwrap'); if(!wrap){ render(); return; }
+  wrap.innerHTML=ogWalkListHtml(); const hd=document.getElementById('og-roomhd'); if(hd) hd.innerHTML=ogRoomHdHtml();
+  const x=document.querySelector('.og-searchw'); if(x) x.outerHTML=`<div class="og-searchw"><input class="og-search" id="og-q" type="search" placeholder="${isES()?'Buscar cualquier producto…':'Search any item… (ma → Mahi, Mango, Mayo)'}" value="${esc(v)}" oninput="ogSearch(this.value)">${v?`<button class="og-qx" onclick="ogSearch('')">×</button>`:''}</div>`;
+  const inp=document.getElementById('og-q'); if(inp && document.activeElement!==inp){ inp.focus(); try{ inp.setSelectionRange(v.length,v.length); }catch(e){} } };
+// ---- REVIEW: every line the app wants to order, with on hand as the count chip -----------------
+function ogRevRow(it, l, on){
+  const es=isES(); const q=ogQty(l)||0; const unit=it.par_unit||it.unit_code||'CS'; const ed=can('orders.edit');
+  const P=ogPlan(it, l&&l.oh, l&&l.ordered);
+  const pcs=ogPieces(it), pmode=ogUnitMode(it)==='piece';
+  const shown=(l&&l.oh!=null)?(pmode?ogRound2(ogFromCases(it,l.oh)):ogRound2(l.oh)):'';
+  const ulabel=pmode?ogPieceName(it,2):(it.unit_code||'cases');
+  const right = on
+    ? `<div class="rv-step"><button onclick="ogRevAdj('${it.id}',-1)" aria-label="less">−</button><div class="q">${fmtCase(q)}<small>${esc(unit)}</small></div><button onclick="ogRevAdj('${it.id}',1)" aria-label="more">+</button></div><button class="rv-x" onclick="ogRevOff('${it.id}')" title="${es?'Quitar del pedido':'Take off the order'}">✕</button>`
+    : `<button class="rv-add" onclick="ogRevAdd('${it.id}')">+ ${es?'añadir':'add'}</button>`;
+  return `<div class="rv-row${on?'':' off'}" id="ogrev-${it.id}"><div class="rv-top"><div class="rv-nm"><b>${esc(it.item)}</b><small>${esc(it.pack||'')}${it.pack?' · ':''}${esc(it.room||'')}${l&&l.edited&&l.suggested!=null?` <span class="tag gold">${es?'la app decía':'app said'} ${fmtCase(l.suggested)}</span>`:''}</small></div>${right}</div>
+    <div class="rv-chips"><span class="st"><i>min par</i><b>${it.par==null?'—':fmtCase(it.par)}</b></span>
+      <span class="st og-ohchip"><i>${es?'hay':'on hand'} · ${esc(ulabel)}</i>${ed?`<input type="number" inputmode="decimal" step="${pmode?'1':'0.25'}" min="0" value="${shown===''?'':fmtCase(shown)}" placeholder="—" onchange="ogRevOH('${it.id}',this.value)">`:`<b>${shown===''?'—':fmtCase(shown)}</b>`}</span>
+      <div class="rv-need">${ogLastsHtml(it,l)||`<span class="muted">${es?'sin contar':'not counted'}</span>`}</div></div></div>`;
+}
+window.ogRevAdj=async(id,d)=>{ const l=S.og.lines[id]; if(!l) return; const q=Math.max(0,(Number(ogQty(l))||0)+d); await ogSetOrder(id,q); render(); };
+window.ogRevOff=async(id)=>{ await ogSetOrder(id,0); render(); };
+window.ogRevAdd=async(id)=>{ const it=(S.og.items[S.og.vendor]||[]).find(x=>x.id===id); const l=S.og.lines[id]; const base=l&&l.suggested>0?l.suggested:1; await ogSetOrder(id, base); render(); };
+window.ogRevOH=async(id,v)=>{ await ogSetOH(id,v); render(); };
+function ogReviewPage(v, items){
+  const es=isES(); const st=ogHeaderStats();
+  const withLine=items.filter(i=>S.og.lines[i.id]);
+  const on=withLine.filter(i=>ogQty(S.og.lines[i.id])>0);
+  const short=on.filter(i=>{ const P=ogPlan(i,S.og.lines[i.id].oh,S.og.lines[i.id].ordered); return P.hasRate && P.oh!=null && !P.ok; });
+  const okOn=on.filter(i=>short.indexOf(i)<0);
+  const fine=items.filter(i=>!(ogQty(S.og.lines[i.id])>0));
+  const cases=on.reduce((a,i)=>a+(Number(ogQty(S.og.lines[i.id]))||0),0);
+  const W=ogWindow(S.og.vendor); const next=shiftDay(W[W.length-1],1);
+  return `<div class="card rv-head og-revhead">
+      <div class="no-print"><button class="btn-ghost btn-sm" onclick="S.og.page='guide';render()">${ic('back','ico-sm')}${es?'Volver al recorrido':'Back to the walk'}</button></div>
+      <div class="rv-ttl"><b>${es?'Revisa antes del pedido':'Review before the order'}</b><span>${esc(v.label)} · ${es?'llega':'lands'} ${ogDn(W[0])} · ${es?'siguiente camión':'next truck'} ${ogDn(next)}</span></div>
+      <div class="rv-sub">${st.counted}/${st.total} ${es?'contados':'counted'} · ${on.length} ${es?'líneas':'lines'} · ${fmtCase(Math.round(cases*100)/100)} ${es?'cajas':'cases'}</div>
+      <div class="rv-hint">${es?'Cada línea que la app quiere pedir, con lo que hay y hasta cuándo dura. ± cambia las cajas, ✕ la quita, corrige un conteo aquí mismo. Todavía no se envía nada.':'Every line the app wants to order, with what is on hand and what it lasts through. ± changes the cases, ✕ takes it off, fix an on-hand right here. Nothing is sent yet.'}</div>
+    </div>
+    ${short.length?`<div class="rv-grp rv-grp-bad">${es?'SE ACABA ANTES DEL CAMIÓN':'RUNS OUT BEFORE THE TRUCK'} <span>${short.length} · ${es?'toca + hasta que llegue':'tap + until it reaches'} ${ogDn(W[W.length-1])}</span></div><div class="card rv-card">${short.map(i=>ogRevRow(i,S.og.lines[i.id],true)).join('')}</div>`:''}
+    <div class="rv-grp">${es?'PEDIR':'ORDER'} <span>${okOn.length} ${es?'líneas':'lines'}</span></div>
+    <div class="card rv-card">${okOn.map(i=>ogRevRow(i,S.og.lines[i.id],true)).join('')||`<div class="muted rv-empty">${es?'Nada que pedir por ahora.':'Nothing to order by the math so far — tap + on anything below.'}</div>`}</div>
+    <div class="rv-grp rv-fold ${S.ogWalk.fineOpen?'open':''}" onclick="S.ogWalk.fineOpen=!S.ogWalk.fineOpen;render()">${es?'BIEN — NO SE PIDE':'FINE — NOT ORDERING'} <span class="car">›</span><span style="margin-left:auto">${fine.length} · ${S.ogWalk.fineOpen?(es?'toca para cerrar':'tap to close'):(es?'toca para abrir · + para añadir':'tap to open · + to add anyway')}</span></div>
+    ${S.ogWalk.fineOpen?`<div class="card rv-card">${fine.map(i=>ogRevRow(i,S.og.lines[i.id]||{item_id:i.id,oh:null},false)).join('')}</div>`:''}
+    <div class="rv-pad"></div>
+    <div class="rv-foot og-foot no-print"><button class="rv-back" onclick="S.og.page='guide';render()">‹ ${es?'Recorrido':'Walk'}</button><div class="t"><b>${on.length} ${es?'líneas':'lines'}</b> · ${fmtCase(Math.round(cases*100)/100)} ${es?'cajas':'cases'}<br><span>${es?'todavía no se envía nada':'nothing is sent yet'}</span></div><button class="rv-go" onclick="S.og.page='enter';S.ogWalk.q='';render()">${es?'Hacer la lista ›':'Make the order list ›'}</button></div>`;
+}
+// ---- ENTER IN SYSCO: tick each line as it goes into the vendor's site ---------------------------
+function ogEnterLine(it, l){
+  const es=isES(); const d=!!(l&&l.entered_at); const si=(S.og.skuInfo||{})[it.id]||{}; const unit=it.par_unit||it.unit_code||'CS';
+  return `<div class="og-li ${d?'done':''}" onclick="ogEnterTick('${it.id}')"><div class="chk">${d?'✓':''}</div><div class="nm"><b>${esc(it.item)}</b><small>${si.sku?`SKU ${esc(si.sku)} · `:''}${esc(it.pack||si.pack||'')}${si.r365?' · '+esc(si.r365):''}${S.ogWalk.q?' · '+esc(it.room||''):''}</small></div><div class="qty">${fmtCase(ogQty(l))}<small>${esc(unit)}${d?(es?' · ya está':' · in'):''}</small></div></div>`;
+}
+async function ogEnterSave(rows){
+  try{ const o=await ogEnsureOrder();
+    const {error}=await db.from('tb_vendor_order_lines').upsert(rows.map(l=>({order_id:o.id,item_id:l.item_id,oh:l.oh,suggested:l.suggested,ordered:l.ordered,edited:!!l.edited,entered_at:l.entered_at||null,updated_at:new Date().toISOString()})),{onConflict:'order_id,item_id'});
+    if(error) throw error; }catch(e){ toast('Did not save — '+(e.message||e)); }
+}
+window.ogEnterTick=async(id)=>{ if(!guard('orders.edit')) return; const l=S.og.lines[id]; if(!l) return;
+  l.entered_at=l.entered_at?null:new Date().toISOString(); render(); await ogEnterSave([l]); };
+window.ogEnterAll=async()=>{ if(!guard('orders.edit')) return; const items=S.og.items[S.og.vendor]||[];
+  const on=items.filter(i=>ogQty(S.og.lines[i.id])>0); const left=on.filter(i=>!S.og.lines[i.id].entered_at);
+  if(!left.length) return;
+  if(!confirm(isES()?`¿Marcar las ${left.length} líneas que faltan como ya puestas en el sitio del proveedor?`:`Mark all ${left.length} remaining lines as entered on the vendor site?`)) return;
+  S.ogWalk.enterUndo=left.map(i=>i.id); const now=new Date().toISOString(); left.forEach(i=>{ S.og.lines[i.id].entered_at=now; }); render();
+  await ogEnterSave(left.map(i=>S.og.lines[i.id])); };
+window.ogEnterUndoAll=async()=>{ const ids=S.ogWalk.enterUndo||[]; S.ogWalk.enterUndo=null; ids.forEach(id=>{ if(S.og.lines[id]) S.og.lines[id].entered_at=null; }); render(); await ogEnterSave(ids.map(id=>S.og.lines[id]).filter(Boolean)); };
+window.ogEnterJump=(k)=>{ const el=document.getElementById('oge-'+k); if(el){ el.scrollIntoView({block:'start'}); window.scrollBy(0,-150); } };
+function ogEnterPage(v, items){
+  const es=isES();
+  const on=items.filter(i=>ogQty(S.og.lines[i.id])>0);
+  const done=on.filter(i=>S.og.lines[i.id].entered_at); const d=done.length;
+  const m=ogMatches(on);
+  const G=ogGroupsOf(on);
+  const cases=on.reduce((a,i)=>a+(Number(ogQty(S.og.lines[i.id]))||0),0);
+  const prog=`<div class="rv-prog"><i style="width:${on.length?Math.round(d/on.length*100):0}%"></i></div>`;
+  const top=`<div class="og-sticky og-entertop no-print">
+      <div class="rv-ttl"><b>${es?'Poner en':'Enter in'} ${esc(v.label)}</b><span>${d} ${es?'de':'of'} ${on.length} ${es?'puestas':'in'}</span></div>
+      <div class="og-searchw"><input class="og-search" id="og-q" type="search" placeholder="${es?'Buscar en la lista… (nombre o SKU)':'Search the list… (name or SKU)'}" value="${esc(S.ogWalk.q||'')}" oninput="S.ogWalk.q=this.value;ogEnterPaint()">${(S.ogWalk.q||'')?`<button class="og-qx" onclick="S.ogWalk.q='';render()">×</button>`:''}</div>
+      <div class="og-allin">${prog}${can('orders.edit')?`<button class="rv-save og-allbtn" onclick="ogEnterAll()" ${d===on.length?'disabled style="opacity:.5"':''}>${es?'Todo puesto ✓':'All in ✓'}</button>`:''}<button class="btn-ghost btn-sm" onclick="S.ogWalk.hideDone=!S.ogWalk.hideDone;render()">${S.ogWalk.hideDone?(es?'ver hechas':'show done'):(es?'ocultar hechas':'hide done')}</button></div></div>`;
+  let body='';
+  if(!on.length){ body=`<div class="card"><div class="muted">${es?'No hay líneas en este pedido.':'No lines on this order yet.'}</div></div>`; }
+  else if(d===on.length && !m){
+    body=`<div class="card og-alldone"><div style="font-size:34px">✓</div><b>${es?`Las ${on.length} líneas están en ${esc(v.label)}`:`All ${on.length} lines are in ${esc(v.label)}`}</b><div class="muted" style="margin-top:4px">${fmtCase(Math.round(cases*100)/100)} ${es?'cajas':'cases'}</div>
+      <div style="display:flex;gap:8px;margin-top:14px;justify-content:center;flex-wrap:wrap">${S.ogWalk.enterUndo&&S.ogWalk.enterUndo.length?`<button class="btn-ghost btn-sm" onclick="ogEnterUndoAll()">↶ ${es?'Deshacer "todo puesto"':'Undo "all in"'}</button>`:`<button class="btn-ghost btn-sm" onclick="S.ogWalk.hideDone=false;S.ogWalk.showAll=true;render()">↺ ${es?'Ver la lista':'Show the list again'}</button>`}${can('orders.edit')?`<button class="rv-go btn-sm" onclick="ogSendOrder()">${es?'Marcar como enviado ›':'Mark as sent ›'}</button>`:''}</div></div>`;
+    if(S.ogWalk.showAll) body+=ogEnterGroups(G, on, m);
+  } else body=ogEnterGroups(G, on, m);
+  return `${top}
+    <div class="og-body og-enterbody">
+      <div class="og-rail og-erail" id="og-rail">${G.names.map((n,k)=>{ const its=G.by[n]||[]; const dn=its.filter(i=>S.og.lines[i.id].entered_at).length; return `<button class="og-rbtn ${dn===its.length?'full':''}" onclick="ogEnterJump(${k})"><span class="rnm">${esc(n.length>13?n.slice(0,12)+'.':n)}</span><span class="rct">${dn}/${its.length}</span></button>`; }).join('')}</div>
+      <div class="og-list" id="og-enterlist">${body}</div>
+    </div>
+    <div class="card no-print" style="margin-top:10px">
+      ${can('orders.edit')?`<div style="display:flex;flex-direction:column;gap:8px">
+        <div class="og-sendbox"><b>${es?'Paso 1 — mándalo a':'Step 1 — send it to'} ${esc(v.label)}</b><span>${es?'Ve tachando arriba mientras lo pones en el sitio del proveedor, o copia la lista como texto.':'Tick the lines above as you put them in on the vendor site, or copy the list as text.'}</span><button class="btn-secondary" onclick="ogCopyText()">${es?'Copiar como texto':'Copy as text · Copiar como texto'}</button></div>
+        <div class="og-sendbox step2"><b>${es?'Paso 2 — dile a la app que ya lo pediste':'Step 2 — tell the app you placed it'}</b><span>${es?'Congela estos números en el registro. La app nunca manda nada al proveedor.':`This locks these numbers into the record forever. The app never sends anything to ${esc(v.label)} itself.`}</span><button class="btn-primary" onclick="ogSendOrder()">${ic('check','ico-sm')}${es?'Ya lo pedí':'I placed this order · Ya lo pedí'}</button></div>
+        <button class="btn-ghost btn-sm" onclick="ogSaveOrder()">${es?'Todavía no — guardar para después':'Not yet — save for later · Guardar sin enviar'}</button>
+        <button class="btn-ghost" onclick="tbPrint()">${ic('print','ico-sm')}${es?'Imprimir':'Print · Imprimir'}</button>
+        <button class="btn-ghost btn-sm btn-danger" onclick="ogDiscard()">${es?'Descartar este pedido':'Discard this order · Descartar'}</button></div>`:''}
+    </div>
+    <div class="rv-foot og-foot no-print"><button class="rv-back" onclick="S.og.page='review';S.ogWalk.q='';render()">‹ ${es?'Revisar':'Review'}</button><div class="t"><b>${on.length-d} ${es?'por poner':'to go'}</b> · ${es?'toca una línea al ponerla; toca otra vez para deshacer':'tap a line as you put it in; tap again to undo'}</div></div>`;
+}
+function ogEnterGroups(G, on, m){
+  const es=isES();
+  if(m) return `<div class="card rv-card"><div class="muted" style="margin:4px 0">${m.length} ${es?'en la lista':'on the list match'}</div>${m.map(i=>ogEnterLine(i,S.og.lines[i.id])).join('')||`<div class="muted rv-empty">${es?'Nada con ese nombre en el pedido.':'Nothing on the order by that name.'}</div>`}</div>`;
+  return G.names.map((n,k)=>{ const its=G.by[n]||[]; const dn=its.filter(i=>S.og.lines[i.id].entered_at).length; const show=S.ogWalk.hideDone?its.filter(i=>!S.og.lines[i.id].entered_at):its;
+    return `<div class="rv-grp" id="oge-${k}">${esc(n)} <span>${dn}/${its.length} ${es?'puestas':'in'}</span></div>${show.length?`<div class="card rv-card">${show.map(i=>ogEnterLine(i,S.og.lines[i.id])).join('')}</div>`:`<div class="muted" style="margin:0 0 8px 2px">${es?'todo puesto ✓':'all in ✓'}</div>`}`; }).join('');
+}
+window.ogEnterPaint=()=>{ const items=S.og.items[S.og.vendor]||[]; const on=items.filter(i=>ogQty(S.og.lines[i.id])>0); const el=document.getElementById('og-enterlist'); if(!el) return;
+  el.innerHTML=ogEnterGroups(ogGroupsOf(on), on, ogMatches(on)); };
 async function ogEnsureOrder(){
   if(S.og.order) return S.og.order;
   const dial=S.og.dial||{};
@@ -15265,7 +15516,8 @@ function ogChipHtml(it,l){
   const buy=q>0;
   const f=ogDial();
   const why=edited?`You typed this (the math suggested ${l.suggested==null?'—':fmtCase(l.suggested)})`
-    :`par ${fmtCase(it.par)} × day dial ${f.toFixed(2)} = ${(Number(it.par)*f).toFixed(1)} target − ${fmtCase(l.oh)} on hand → ${fmtCase(q)}`;
+    :(ogRate(it)?`from your receiving history: what the covered days will use + ${Math.round(OG_CUSHION*100)}%, never under the min par, minus what is left when the truck lands → ${fmtCase(q)} (tap "why" under the box)`
+    :`par ${fmtCase(it.par)} × day dial ${f.toFixed(2)} = ${(Number(it.par)*f).toFixed(1)} target − ${fmtCase(l.oh)} on hand → ${fmtCase(q)}`);
   return `<div ${cid} onclick="ogEditLine('${it.id}')" title="${esc(why)}" style="width:64px;text-align:center;border-radius:9px;padding:4px 0;cursor:pointer;
       background:${buy?'#fdecd8':'var(--sand)'};color:${buy?'var(--warn)':'var(--muted)'};font-weight:800;
       ${edited?'outline:2px solid var(--warn);':''}">
@@ -15334,6 +15586,7 @@ function ogPatchChip(itemId){
     ogPatchCounted(card, !!(l&&l.oh!=null));
     const box=card.querySelector('.og-bx.oh');
     if(box) box.classList.toggle('filled', !!(l&&l.oh!=null));
+    const lw=card.querySelector('.og-lastsw'); if(lw) lw.innerHTML=ogLastsHtml(it,l);
   }
   ogPaintHeader();
 }
@@ -15458,6 +15711,18 @@ window.ogRoomReorder=async(from,to)=>{
 };
 window.ogToggleOrg=()=>{ S.ogWalk.org=!S.ogWalk.org; S.ogWalk.openEdit=null; render();
   if(S.ogWalk.org) toast('Organize · hold a handle and slide · nothing saves until Done'); };
+// The walk's list: the current room, or — while the search box has text — every match on the
+// whole guide, each card wearing its room. Repainted alone on each keystroke (focus stays).
+function ogWalkListHtml(){
+  const C=S.ogWalk._ctx||{}; const m=ogMatches(C.items||[]);
+  if(m){ const list=ogSortInGroup(ogCollapsePairs(m, C.items||[]));
+    return list.length?list.map(ogCardHtml).join(''):`<div class="muted" style="font-size:12.5px;padding:8px">${isES()?'Nada con ese nombre en esta guía.':'Nothing on this guide by that name.'}</div>`; }
+  const roomItems=C.roomItems||[];
+  return (roomItems.length?roomItems.map(ogCardHtml).join(''):'<div class="muted" style="font-size:12.5px;padding:8px">Nothing in this room.</div>')+(can('orders.edit')?ogAddRowHtml(C.cur):'');
+}
+function ogRoomHdHtml(){ const C=S.ogWalk._ctx||{}; const m=ogMatches(C.items||[]);
+  if(m) return `${isES()?'Búsqueda':'Search'} · ${m.length} ${isES()?'resultado':'match'}${m.length===1?'':(isES()?'s':'es')} ${isES()?'en toda la guía':'across every room'}`;
+  return `${esc(C.cur||'')} · ${(C.roomItems||[]).length} item${(C.roomItems||[]).length===1?'':'s'}`; }
 function ogRailHtml(items){
   const G=ogGroupsOf(items);
   const places=G.mode==='places';
@@ -15584,8 +15849,9 @@ function ogCardHtml(it){
   if(pcs && pmode && counted && l.oh!=null){
     tail=`<div class="og-conv">${fmtCase(ogFromCases(it,l.oh))} of ${fmtCase(pcs)} ${esc(ogPieceName(it,pcs))} = <b>${fmtCase(l.oh)} ${esc(it.unit_code||'CS')}</b>${it.par!=null?` · par ${fmtCase(it.par)} = ${fmtCase(it.par*pcs)} ${esc(ogPieceName(it,2))}`:''}</div>`;
   }
-  if(it.par==null) tail=`<div class="og-tail warn">No par yet — this item cannot suggest an order. Tap MIN PAR to set it. · Sin par no hay sugerencia.</div>`;
+  if(it.par==null && !ogRate(it)) tail=`<div class="og-tail warn">No par yet — this item cannot suggest an order. Tap MIN PAR to set it. · Sin par no hay sugerencia.</div>`;
   else if(l&&l.edited) tail=`<div class="og-tail ovr">You changed ${l.suggested==null?'—':fmtCase(l.suggested)} → <b>${fmtCase(q)}</b>${l.why?' · '+esc(l.why):''} — recorded. The next count shows who was right.</div>`;
+  tail+=`<div class="og-lastsw">${ogLastsHtml(it,l)}</div>`;
   return `<div class="og-card ${state}${counted?' counted':''}" id="ogrow-${it.id}" data-pid="${it.id}">
     <button class="grip" aria-label="Drag to reorder" style="${S.ogWalk.org?'':'display:none'}"><svg class="ico ico-sm" aria-hidden="true"><use href="#i-grip"/></svg></button>
     <div class="og-hd"><b>${esc(it.item)}</b>${it.pack?`<span class="og-pk">${esc(it.pack)}</span>`:''}${counted?'<span class="og-done">✓ counted</span>':''}${(()=>{
@@ -15668,7 +15934,7 @@ function ogEditPadHtml(it){
   if(l.oh==null) return `<div class="og-edit"><div class="muted" style="font-size:11px">Count it first — there is nothing to change yet.</div>
     <div class="og-pad" style="margin-top:5px"><button class="wide" onclick="ogCloseEdit()">OK</button></div></div>`;
   return `<div class="og-edit">
-    <div class="muted" style="font-size:11px;margin-bottom:5px">The math says <b>${l.suggested==null?'—':fmtCase(l.suggested)}</b> (par ${fmtCase(it.par)} × dial ${ogDial().toFixed(2)}, rounded, − ${fmtCase(l.oh)} on hand). Change it and both numbers are kept.</div>
+    <div class="muted" style="font-size:11px;margin-bottom:5px">The math says <b>${l.suggested==null?'—':fmtCase(l.suggested)}</b> (${ogRate(it)?`what the covered days will use + ${Math.round(OG_CUSHION*100)}%, never under the min par ${fmtCase(it.par)}, minus what is left when the truck lands — "why" under the ORDER box has the days`:`par ${fmtCase(it.par)} × dial ${ogDial().toFixed(2)}, rounded, − ${fmtCase(l.oh)} on hand`}). Change it and both numbers are kept.</div>
     <div class="og-pad">${pad}</div>
     <div class="muted" style="font-size:10.5px;margin-top:6px">Why? (optional)</div>
     <div class="og-why">${OG_WHY.map(w=>`<button class="${S.ogWalk.why===w?'on':''}" onclick="ogPickWhy('${w}')">${w}</button>`).join('')}
@@ -15714,7 +15980,7 @@ async function ogApplyPar(it,n){
   if(error){ toast('Did not save — '+error.message); return; }
   it.par=n; it.par_uncertain=false; it.par_source='dan'; if(!it.par_unit) it.par_unit='CS';
   const l=S.og.lines[it.id];
-  if(l&&l.oh!=null){ l.suggested=ogSuggest(it.par,l.oh);
+  if(l&&l.oh!=null){ l.suggested=ogSuggestFor(it,l.oh);
     try{ const o=await ogEnsureOrder();
       await db.from('tb_vendor_order_lines').upsert({order_id:o.id,item_id:it.id,oh:l.oh,suggested:l.suggested,ordered:l.ordered,edited:l.edited,updated_at:new Date().toISOString()},{onConflict:'order_id,item_id'});
     }catch(e){}
@@ -15936,7 +16202,7 @@ window.ogLiveOH=(itemId,val)=>{
     return;
   }
   const l=S.og.lines[itemId]||{item_id:itemId,ordered:null,edited:false};
-  l.oh=oh; l.suggested=ogSuggest(it.par,oh);
+  l.oh=oh; l.suggested=ogSuggestFor(it,oh);
   S.og.lines[itemId]=l;
   ogPatchChip(itemId);
 };
@@ -15959,7 +16225,7 @@ window.ogSetOH=async(itemId,val)=>{
       return;
     }
     const l=S.og.lines[itemId]||{item_id:itemId,ordered:null,edited:false};
-    l.order_id=o.id; l.oh=oh; l.suggested=ogSuggest(it.par,oh);
+    l.order_id=o.id; l.oh=oh; l.suggested=ogSuggestFor(it,oh);
     S.og.lines[itemId]=l;
     ogPatchChip(itemId);
     const {error}=await db.from('tb_vendor_order_lines').upsert({order_id:o.id,item_id:itemId,oh:l.oh,suggested:l.suggested,ordered:l.ordered,edited:l.edited,updated_at:new Date().toISOString()},{onConflict:'order_id,item_id'});
@@ -16033,13 +16299,13 @@ window.ogEditPar=async(itemId)=>{
     it.par=par; it.par_unit=par==null?null:(unit||null); it.par_uncertain=false;
     const l=S.og.lines[itemId];
     if(l&&l.oh!=null){
-      l.suggested=ogSuggest(it.par,l.oh);
+      l.suggested=ogSuggestFor(it,l.oh);
       // Resolve the order id fresh rather than trusting l.order_id — a line typed via the
       // live on-hand path can reach here before it has ever been saved (no order_id yet).
       const o=await ogEnsureOrder(); l.order_id=o.id;
       await db.from('tb_vendor_order_lines').upsert({order_id:o.id,item_id:itemId,oh:l.oh,suggested:l.suggested,ordered:l.ordered,edited:l.edited,updated_at:new Date().toISOString()},{onConflict:'order_id,item_id'});
     }
-    const row=document.getElementById('ogrow-'+itemId); if(row) row.outerHTML=ogRowHtml(it);
+    const row=document.getElementById('ogrow-'+itemId); if(row) row.outerHTML=(row.classList.contains('og-card')?ogCardHtml(it):ogRowHtml(it));
     ogPaintHeader();
     toast('Par saved · Par guardado');
   }catch(e){ toast('Did not save — '+(e.message||e)); }
@@ -16052,9 +16318,9 @@ window.ogSetOrder=async(itemId,n)=>{
     if(n==null){ l.ordered=null; l.edited=false; }           // back to the suggestion
     else { l.ordered=n; l.edited=(l.suggested==null)||(Number(n)!==Number(l.suggested)); }
     S.og.lines[itemId]=l;
-    const row=document.getElementById('ogrow-'+itemId); if(row) row.outerHTML=ogRowHtml(it);
-    const rrow=document.getElementById('ogrev-'+itemId);
-    if(rrow){ const q=ogQty(l); rrow.querySelector('.ogrev-q').innerHTML=`<b>${q==null?'—':fmtCase(q)}</b> ${esc(it.par_unit||'')}${l.edited?' <span class="drtag est">edited</span>':''}`; }
+    const row=document.getElementById('ogrow-'+itemId); if(row) row.outerHTML=(row.classList.contains('og-card')?ogCardHtml(it):ogRowHtml(it));
+    const rrow=document.getElementById('ogrev-'+itemId); const rq=rrow&&rrow.querySelector('.ogrev-q');
+    if(rq){ const q=ogQty(l); rq.innerHTML=`<b>${q==null?'—':fmtCase(q)}</b> ${esc(it.par_unit||'')}${l.edited?' <span class="drtag est">edited</span>':''}`; }
     ogPaintHeader();
     const {error}=await db.from('tb_vendor_order_lines').upsert({order_id:o.id,item_id:itemId,oh:l.oh,suggested:l.suggested,ordered:l.ordered,edited:l.edited,updated_at:new Date().toISOString()},{onConflict:'order_id,item_id'});
     if(error) throw error;
@@ -16168,7 +16434,7 @@ window.ogOpen=async(vendor)=>{
   tbMark('order.start', vendor);
   S.og.vendor=vendor; S.og.page='guide'; S.og.order=null; S.og.lines={}; S.og.histFor=null; S.og.past=null;
   // a fresh vendor is a fresh walk: first room, not organizing, no pad open
-  S.ogWalk.room=null; S.ogWalk.org=false; S.ogWalk.openEdit=null; S.ogWalk.moveFor=null; S.ogWalk.eraseFor=null;
+  S.ogWalk.room=null; S.ogWalk.org=false; S.ogWalk.openEdit=null; S.ogWalk.moveFor=null; S.ogWalk.eraseFor=null; S.ogWalk.q=''; S.ogWalk.fineOpen=false; S.ogWalk.hideDone=false; S.ogWalk.showAll=false; S.ogWalk.enterUndo=null;
   render();
 };
 window.ogPast=async(orderId)=>{
@@ -16593,8 +16859,11 @@ async function viewOrders(){
     </div>`);
     return;
   }
-  // ---- page: review ----
-  if(S.og.page==='review'){
+  // ---- page: review (Option A, Oct 17 2026) ----
+  if(S.og.page==='review'){ shell(ogReviewPage(v, items)); return; }
+  // ---- page: enter in the vendor's site ----
+  if(S.og.page==='enter'){ shell(ogEnterPage(v, items)); return; }
+  if(S.og.page==='review_old'){
     const lines=items.filter(i=>ogQty(S.og.lines[i.id])>0);
     const st=ogHeaderStats();
     shell(`<div class="card">
@@ -16673,7 +16942,7 @@ async function viewOrders(){
         <div class="muted" style="font-size:10.5px;margin-top:3px">${L.assumed
           ? 'Nobody has told the app how long this vendor takes, so it assumes one day and says so everywhere it matters. Pick the real number and the coverage window stops guessing.'
           : `Set to <b>${L.days===0?'same day':L.days+' day'+(L.days===1?'':'s')}</b> — the window this order has to cover starts when it actually lands.`}</div></div>`;})()}
-      <div class="muted" style="font-size:11px;margin-top:5px"><b>The formula, in the open:</b> ORDER = printed par × day dial − on hand, rounded up to whole cases (quarter steps when the target is under 1). The day dial = average forecast covers over the days this order has to cover (from the order day picked above, until the next one) ÷ a typical August-2026 day — August because that is when these pars were transcribed, so they are <i>treated</i> as right for an average August day. That anchor is an assumption and stays labeled until pars get re-set from real usage. The cover forecast is the same weekday × season × weather number the count and prep list already run on.</div>
+      <div class="muted" style="font-size:11px;margin-top:5px"><b>The formula, in the open (Oct 17 2026):</b> for an item with receiving history, ORDER = what the covered days will use (your cases per $10k of sales, from the ordering research, × each day's sales forecast) + ${Math.round(OG_CUSHION*100)}% cushion, never under the min par, minus what is still on the shelf when the truck lands — rounded up to whole cases; "why" under every ORDER box shows the days. An item with no receiving history keeps the old rule: ORDER = printed par × day dial − on hand, rounded up to whole cases (quarter steps when the target is under 1). The day dial = average forecast covers over the days this order has to cover (from the order day picked above, until the next one) ÷ a typical August-2026 day — August because that is when these pars were transcribed, so they are <i>treated</i> as right for an average August day. That anchor is an assumption and stays labeled until pars get re-set from real usage. The cover forecast is the same weekday × season × weather number the count and prep list already run on.</div>
     </div>
     <div class="muted" style="font-size:11px;margin-top:6px">Laid out like the paper sheet: <b>MIN PAR</b> on the left, count into <b>ON HAND</b>, and <b>ORDER</b> fills itself — same as count → prep. <b>Tap a MIN PAR to set or fix it</b> — it saves for every future order and the ORDER column recalculates on the spot. Tap the order number to override the suggestion — yours always wins, and both numbers are kept. A skipped row saves as not counted, never zero.</div>`;})())}
   </div>
@@ -16689,13 +16958,15 @@ async function viewOrders(){
     // Only a PLACE can be unconfirmed — a category is never somewhere.
     const unconfirmed=places && (S.og.roomOk||{})[cur]===false;
     const spans = places ? 0 : new Set(roomItems.map(i=>i.room||'—')).size;
+    S.ogWalk._ctx={cur, roomItems, items};
     return `<div class="card">
+    ${ogSearchBar()}
     ${ogSegHtml()}
     ${unconfirmed?`<div class="og-hidden" style="border-style:solid;background:#fdf3e4;border-color:#e8d5a8;color:#8a6d1a">
       <span><b>Nobody has confirmed where ${esc(cur)} is.</b> Walk it once and move it into place — the rail keeps it dashed until you do.</span></div>`:''}
     ${!places?`<div class="og-hidden" style="border-style:solid;background:#eef4f4;border-color:#cfe0e0;color:#1f5f63">
       <span><b>Grouped by what it is</b> — ${spans===1?'all in one room':'spread across '+spans+' rooms'}. Each card says where. The walk order only applies in PLACES.</span></div>`:''}
-    <div class="og-roomhd"><span>${esc(cur)} · ${roomItems.length} item${roomItems.length===1?'':'s'}</span>
+    <div class="og-roomhd"><span id="og-roomhd">${ogRoomHdHtml()}</span>
       <span style="display:flex;gap:6px">
         ${places&&can('orders.edit')?`<button onclick="${S.ogWalk.org?'ogOrgDone()':'ogToggleOrg()'}">${S.ogWalk.org?'Done':'Organize'}</button>`:''}
         ${places&&can('orders.edit')?`<button onclick="ogToggleRoomHide('${esc(cur).replace(/'/g,'&#39;')}')">${isHid?'show':'hide'}</button>`:''}
@@ -16706,14 +16977,11 @@ async function viewOrders(){
       <button onclick="S.ogWalk.skip={};render()">bring back</button></div>`:''}
     <div class="og-body">
       <div class="og-rail" id="og-rail">${ogRailHtml(items)}</div>
-      <div class="og-list drag-list ${S.ogWalk.org?'og-org':''}" data-defer="1">
-        ${roomItems.length?roomItems.map(ogCardHtml).join(''):'<div class="muted" style="font-size:12.5px;padding:8px">Nothing in this room.</div>'}
-        ${can('orders.edit')?ogAddRowHtml(cur):''}
-      </div>
+      <div class="og-list drag-list ${S.ogWalk.org?'og-org':''}" data-defer="1" id="og-listwrap">${ogWalkListHtml()}</div>
     </div>
     </div>`;})()}
   <div class="card">
-    ${can('orders.edit')?`<button class="btn-primary" onclick="S.og.page='review';render()">Review order (${st.lines} line${st.lines===1?'':'s'}) · Revisar pedido</button>`:''}
+    ${can('orders.edit')?`<button class="btn-primary" onclick="S.og.page='review';S.ogWalk.q='';render()">Review order (${st.lines} line${st.lines===1?'':'s'}) · Revisar pedido</button>`:''}
     ${can('orders.edit')&&S.og.order?`<button class="btn-secondary" style="width:100%;margin-top:8px" onclick="ogPark()">Park for later · Guardar a medias</button>`:''}
     ${can('orders.edit')&&S.og.order?`<div style="margin-top:12px;padding-top:10px;border-top:1px solid var(--sand-dark)">
       <button class="btn-ghost btn-sm btn-danger" onclick="ogDiscard()">Discard this order · Descartar este pedido</button>
@@ -19266,7 +19534,7 @@ async function render(){
   // How long he stayed on the screen he is leaving — the "where the time went" bars.
   try{ const _s=S.dev.scr; if(_s.name!==S.view){ if(_s.name&&_s.at) devEvent('stay',_s.name,Date.now()-_s.at); S.dev.scr={name:S.view,at:Date.now()}; } }catch(e){}
   const _t0=(window.performance&&performance.now)?performance.now():Date.now();
-  document.body.classList.toggle('rv-on', S.view==='review');   // the note button rides above the review footer
+  document.body.classList.toggle('rv-on', S.view==='review' || (S.view==='orders' && S.og && (S.og.page==='review'||S.og.page==='enter')));   // the note button rides above a sticky footer
   if(S.view==='today') await viewToday();
   else if(S.view==='prep') await viewPrep();
   else if(S.view==='checklist') await viewChecklist();
