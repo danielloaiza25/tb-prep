@@ -1567,6 +1567,10 @@
   .og-rarr b.dis{opacity:.3;pointer-events:none} .og-rbtn.on .og-rarr b{background:#fff}
   .og-rtog{border:1.5px dashed var(--line);background:transparent;border-radius:12px;padding:6px 2px;font-size:8.5px;font-weight:800;font-family:inherit;color:var(--ocean);cursor:pointer;line-height:1.15;min-height:36px}
   .og-rtog.on{background:var(--palm);border:1.5px solid var(--palm);color:#fff}
+  .og-bx.need{background:#f7efdc;border-color:#e3cf9b;cursor:pointer} .og-bx.need .lb{color:#8a6a1f} .og-bx.need .vl{color:#7a5a12}
+  .og-bx.need.floorwins{background:#f1ece0;border-color:transparent} .og-bx.need.floorwins .vl{color:var(--muted)}
+  .og-bx .sb{display:block;font-size:8.5px;color:var(--muted);line-height:1.2;margin-top:1px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .rv-chips .st.need{background:#f7efdc;border-color:#e3cf9b;cursor:pointer} .rv-chips .st.need i{color:#8a6a1f} .rv-chips .st.need b{color:#7a5a12}
   .og-pat{margin-top:7px;padding-top:6px;border-top:1px dashed var(--line)}
   .og-pat .plb{font-size:8.5px;font-weight:800;text-transform:uppercase;letter-spacing:.04em;color:var(--muted);display:flex;justify-content:space-between;align-items:center}
   .og-pat .plb a{color:var(--ocean);text-decoration:underline;cursor:pointer;text-transform:none;letter-spacing:0;font-size:10.5px;font-weight:700}
@@ -1649,7 +1653,7 @@ const SB_KEY='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZ
 const TBID='9f8d7c6b-5a49-4e38-b271-06d5f00dbeef'; // Tommy Bahama tenant inside ChefOpsAI
 // Stamped by publish.sh at upload time. It is the only version label there is now —
 // one address, updated in place, so this tells you which build that address is serving.
-const BUILD='Oct 18, 2026 · walk: search floats on every guide, rail reorder with arrows, order pattern in place of last 4 counts';
+const BUILD='Oct 18, 2026 · dynamic par on the order guide: NEED thru the last day before the next truck, floor, why/set, lasts-through on your number';
 // ---------- IS THIS PHONE EVEN RUNNING THE LATEST BUILD? ----------
 // Sep 3 2026. Three prep fixes shipped and Dan still saw the old behaviour, because the app
 // installs to the home screen and an installed web app does not go back and re-fetch its own
@@ -15137,7 +15141,9 @@ function ogPairState(members){
   const lead=members[0], l=S.og.lines[lead.id]||{};
   const par=Number(lead.pair_par);
   const oh=l.oh;
-  const need = (oh==null) ? null : Math.max(0, ogRoundTarget(par*ogDial(), par) - oh);
+  // Oct 18 2026: a pair with a rate (juices, cabbage, spring mix…) plans like any other line, in its pair unit
+  const rr=ogRate(lead); const P=(rr&&Number(rr.per10k)>0&&oh!=null)?ogPlan(Object.assign({},lead,{par:par}), oh, null):null;
+  const need = (oh==null) ? null : (P ? P.sug : Math.max(0, ogRoundTarget(par*ogDial(), par) - oh));
   const plan = need==null ? null : ogPairPlan(need, members);
   return {lead, par, oh, need, plan, unit:lead.pair_unit||'unit'};
 }
@@ -15329,19 +15335,28 @@ function ogPlan(it, oh, ord){
   const par=it.par!=null?Number(it.par):null;
   const use=d=>hasRate?(ogUseOn(it,d)||0):0;
   const o=Number(oh); const ohN=(oh==null||!isFinite(o))?null:o;
+  // Oct 18 2026 (Dan): what is on the shelf now feeds today too, so the need runs from today —
+  // not from the day the truck lands — and NEED vs ON HAND is a straight comparison.
+  let preUse=0; pre.forEach(d=>{ preUse+=use(d); });
+  let needWin=0; win.forEach(d=>{ needWin+=use(d); });
+  const need=preUse+needWin;
+  const fcTarget=need*(1+OG_CUSHION);
+  const target=hasRate ? Math.max(fcTarget, par||0) : null;
+  const shortBy=(hasRate&&ohN!=null)?target-ohN:null;
+  const sug = ohN==null ? null : (hasRate ? (shortBy<=0.1?0:Math.ceil(shortBy-1e-9)) : ogSuggest(par, ohN));
+  const ordN=(ord==null)?sug:Number(ord);
+  // the day-by-day walk, for lasts-through and the WHY table: today to the truck on what is on
+  // hand, the order lands with the truck, and it all has to last until the next truck
   const days=[]; let st=ohN==null?0:ohN, todayShort=0;
   for(const d of pre){ const u=use(d); st-=u; if(st<0){ todayShort+=-st; st=0; } days.push({d,u,st,pre:true}); }
   const carry=st;
-  let need=0; win.forEach(d=>{ need+=use(d); });
-  const fcTarget=need*(1+OG_CUSHION);
-  const target=hasRate ? Math.max(fcTarget, par||0) : null;
-  const sug = ohN==null ? null : (hasRate ? Math.max(0, Math.ceil(target-carry-1e-9)) : ogSuggest(par, ohN));
-  const ordN=(ord==null)?sug:Number(ord);
-  let lastOk=null, runOut=null; st=carry;
+  let lastOk=null, runOut=null;
   for(const d of win){ if(d===arrive) st+=(ordN||0); const u=use(d); st-=u; days.push({d,u,st,land:d===arrive}); if(st>=-1e-9 && !runOut) lastOk=d; else if(!runOut) runOut=d; }
-  const thu=win[win.length-1]; const ok=hasRate && ohN!=null && lastOk===thu;
+  if(ohN!=null && todayShort>0 && !runOut && pre.length){ /* ran dry before the truck */ }
+  const thu=win[win.length-1]; const ok=hasRate && ohN!=null && lastOk===thu && todayShort<=1e-9;
   const endSt=(days.find(x=>x.d===thu)||{st:0}).st;
-  return {hasRate, rate:r, flat:ogFlat(r), par, oh:ohN, ord:ordN, pre, win, arrive, next, carry, need, fcTarget, target, sug, days, lastOk, runOut, ok, todayShort, short:ok?0:Math.max(0,-endSt), spare:endSt, parWins:hasRate&&par!=null&&par>=fcTarget-1e-9};
+  const edited=(ord!=null && sug!=null && Number(ord)!==sug);
+  return {hasRate, rate:r, flat:ogFlat(r), par, oh:ohN, ord:ordN, pre, win, arrive, next, thru:thu, carry, preUse, needWin, need, fcTarget, target, shortBy, sug, edited, days, lastOk, runOut, ok, todayShort, short:ok?0:Math.max(0,-endSt)+todayShort, spare:endSt, parWins:hasRate&&par!=null&&par>=fcTarget-1e-9};
 }
 // One door for every place that asks "what should this line order?"
 function ogSuggestFor(it, oh){
@@ -15358,7 +15373,10 @@ function ogLastsHtml(it, l){
   const es=isES(); const P=ogPlan(it, l.oh, l.ordered);
   if(!P.hasRate) return `<div class="og-lasts flat"><b>${es?'sin historial de compras':'no receiving history'}</b> · ${es?'regla del par':'par rule'}: ${fmtCase(it.par)} × ${ogDial().toFixed(2)} − ${fmtCase(l.oh)} · <span class="og-whyl" onclick="ogWhyOpen('${it.id}')">${es?'¿por qué?':'why'}</span></div>`;
   const unit=it.par_unit||it.unit_code||'CS';
-  return `<div class="og-lasts ${P.ok?'ok':'bad'}"><b>${P.ok?`${es?'dura hasta el':'lasts through'} ${ogDn(P.lastOk)} ✓`:`${es?'se acaba el':'runs out'} ${ogDn(P.runOut||P.win[0])}`}</b> · ${P.ok?`${es?'siguiente camión':'next truck'} ${ogDn(P.next)}`:`${es?'faltan':'short'} ${fmtCase(P.short)} ${esc(unit)}`}${P.todayShort>0?` · <span class="bad">${es?'0 hoy':'0 today'}</span>`:''} · <span class="og-whyl" onclick="ogWhyOpen('${it.id}')">${es?'¿por qué?':'why'}</span></div>`;
+  const mine=P.edited?`<span class="og-tg y">${es?'con tus':'with your'} ${fmtCase(P.ord)}</span> `:'';
+  if(P.ok) return `<div class="og-lasts ok">${mine}<b>${es?'dura hasta el':'lasts through'} ${ogDn(P.lastOk)} ✓</b> · ${es?'siguiente camión':'next truck'} ${ogDn(P.next)}${(P.edited&&P.ord>P.sug)?` · ${fmtCase(P.ord-P.sug)} ${es?'más de lo sugerido':'more than suggested'}`:''} · <span class="og-whyl" onclick="ogWhyOpen('${it.id}')">${es?'¿por qué?':'why'}</span></div>`;
+  const when=P.todayShort>0&&!P.runOut?(es?'hoy, antes del camión':'today, before the truck'):ogDn(P.runOut||P.win[0]);
+  return `<div class="og-lasts bad">${mine}<b>${es?'se acaba':'runs out'} ${when}</b> · ${es?'faltan':'short'} ${fmtCase(Math.round(P.short*10)/10)} ${esc(unit)} ${es?'para llegar al camión del':'by the'} ${ogDn(P.next)}${es?'':' truck'} · <span class="og-whyl" onclick="ogWhyOpen('${it.id}')">${es?'¿por qué?':'why'}</span></div>`;
 }
 // ---- WHY sheet: the day-by-day math behind the number --------------------------------------
 window.ogWhyOpen=(id)=>{
@@ -15376,17 +15394,19 @@ window.ogWhyOpen=(id)=>{
   }else{
     const rows=P.days.map(x=>{ const s=ogSalesOf(x.d); const red=x.st<=0 && !x.pre || (x.pre && P.todayShort>0 && x.st<=0);
       return `<tr><td>${ogDn(x.d)} ${x.d.slice(5).replace('-','/')}${x.pre?` <span class="og-tg">${es?'en mano':'on hand'}</span>`:''}${x.land?` <span class="og-tg g">+${fmtCase(P.ord||0)} ${es?'llega':'lands'}</span>`:''}</td><td class="n">${s==null?'—':money(s)}</td><td class="n">${fmtCase(x.u)}</td><td class="n" style="${red?'color:var(--danger)':''}"><b>${fmtCase(Math.max(0,x.st))}${x.pre&&P.todayShort>0&&x.st<=0?' ('+(es?'faltan':'short')+' '+fmtCase(P.todayShort)+')':''}</b></td></tr>`; }).join('');
-    const winS=P.win.reduce((a,d)=>a+(ogSalesOf(d)||0),0);
+    const allS=P.pre.concat(P.win).reduce((a,d)=>a+(ogSalesOf(d)||0),0);
+    const r1=x=>fmtCase(Math.round(x*10)/10);
+    const basis2025=/^2025/.test(String(r.basis||''));
     body=`<div class="rv-eff">${es
-      ?`Según tus facturas, usas <b>${fmtCase(r.per10k)} ${esc(unit)} por cada $10k</b> de venta (${r.weeks_bought} de ${r.weeks_cov} semanas en archivo, ${fmtCase(r.orders_per_wk)} pedidos por semana, normalmente ${fmtCase(r.qty_per_order)} por pedido)${P.flat?` — este producto no sigue la venta (correlación ${r.corr}), así que se reparte parejo a <b>${fmtCase(r.qty_per_wk)} por semana</b>`:''}. Pronóstico ${ogDn(P.win[0])}–${ogDn(P.win[P.win.length-1])} ${money(winS)} → <b>${fmtCase(P.need)} ${esc(unit)}</b>, +${Math.round(OG_CUSHION*100)}% de colchón = ${fmtCase(P.fcTarget)}${P.parWins?`; tu par mínimo ${fmtCase(P.par)} es más alto y manda`:''} → meta <b>${fmtCase(P.target)}</b>, menos lo que queda cuando llega el camión (${fmtCase(P.carry)}) → <b>pedir ${P.sug==null?'—':fmtCase(P.sug)}</b>${(l.ordered!=null&&l.edited)?` (tú pusiste ${fmtCase(l.ordered)})`:''}.`
-      :`From your invoices you take in <b>${fmtCase(r.per10k)} ${esc(unit)} per $10k</b> of sales (${r.weeks_bought} of ${r.weeks_cov} weeks on file, ${fmtCase(r.orders_per_wk)} orders a week, usually ${fmtCase(r.qty_per_order)} per order)${P.flat?` — this item does not follow sales (correlation ${r.corr}), so it is spread flat at <b>${fmtCase(r.qty_per_wk)} a week</b>`:''}. ${ogDn(P.win[0])}–${ogDn(P.win[P.win.length-1])} forecast ${money(winS)} → <b>${fmtCase(P.need)} ${esc(unit)}</b>, +${Math.round(OG_CUSHION*100)}% cushion = ${fmtCase(P.fcTarget)}${P.parWins?`; your min par ${fmtCase(P.par)} is higher and wins`:''} → target <b>${fmtCase(P.target)}</b>, minus what is still on the shelf when the truck lands (${fmtCase(P.carry)}) → <b>order ${P.sug==null?'—':fmtCase(P.sug)}</b>${(l.ordered!=null&&l.edited)?` (you set ${fmtCase(l.ordered)})`:''}.`}</div>
+      ?`Según ${basis2025?'las facturas de 2025 (FreshPoint + Vesta)':'tus facturas'}, usas <b>${fmtCase(r.per10k)} ${esc(unit)} por cada $10k</b> de venta (${r.weeks_bought} de ${r.weeks_cov} semanas en archivo, ${fmtCase(r.orders_per_wk)} pedidos por semana, normalmente ${fmtCase(r.qty_per_order)} por pedido)${P.flat?` — este producto no sigue la venta (correlación ${r.corr}), así que se reparte parejo a <b>${fmtCase(r.qty_per_wk)} por semana</b>`:''}. Lo que hay en el estante hoy también alimenta hoy, así que la necesidad corre desde <b>hoy</b> hasta el <b>${ogDn(P.thru)}</b> (el siguiente camión llega el ${ogDn(P.next)}): pronóstico ${money(allS)} → <b>${r1(P.need)} ${esc(unit)}</b>${P.preUse>0?` (${r1(P.preUse)} hoy antes de que llegue el camión)`:''}, +${Math.round(OG_CUSHION*100)}% de colchón = <b>${r1(P.fcTarget)}</b>${P.parWins?`; tu piso de ${fmtCase(P.par)} es más alto y manda`:''} → <b>NECESITA ${r1(P.target)}</b>. PEDIR = necesita − en mano${P.oh!=null?` = ${r1(P.target)} − ${fmtCase(P.oh)} → <b>${P.sug==null?'—':fmtCase(P.sug)}</b> (cajas enteras)`:''}${P.edited?`; <b>tú pusiste ${fmtCase(P.ord)}</b>`:''}.`
+      :`From ${basis2025?'the 2025 invoices (FreshPoint + Vesta)':'your invoices'} you take in <b>${fmtCase(r.per10k)} ${esc(unit)} per $10k</b> of sales (${r.weeks_bought} of ${r.weeks_cov} weeks on file, ${fmtCase(r.orders_per_wk)} orders a week, usually ${fmtCase(r.qty_per_order)} per order)${P.flat?` — this item does not follow sales (correlation ${r.corr}), so it is spread flat at <b>${fmtCase(r.qty_per_wk)} a week</b>`:''}. What is on the shelf today feeds today too, so the need runs from <b>today</b> through <b>${ogDn(P.thru)}</b> (the next truck lands ${ogDn(P.next)}): forecast ${money(allS)} → <b>${r1(P.need)} ${esc(unit)}</b>${P.preUse>0?` (${r1(P.preUse)} today, before the truck lands)`:''}, +${Math.round(OG_CUSHION*100)}% cushion = <b>${r1(P.fcTarget)}</b>${P.parWins?`; your floor of ${fmtCase(P.par)} is higher and wins`:''} → <b>NEED ${r1(P.target)}</b>. ORDER = need − on hand${P.oh!=null?` = ${r1(P.target)} − ${fmtCase(P.oh)} → <b>${P.sug==null?'—':fmtCase(P.sug)}</b> (whole cases)`:''}${P.edited?`; <b>you set ${fmtCase(P.ord)}</b>`:''}.`}</div>
     <table class="rv-why-t"><tr><th>${es?'día':'day'}</th><th class="n">${es?'venta':'sales fc'}</th><th class="n">${es?'usa':'uses'}</th><th class="n">${es?'queda':'left'}</th></tr>${rows}<tr><td>${ogDn(P.next)} ${P.next.slice(5).replace('-','/')} <span class="og-tg y">${es?'camión':'truck'}</span></td><td class="n">${(()=>{ const s=ogSalesOf(P.next); return s==null?'—':money(s); })()}</td><td class="n">—</td><td class="n">—</td></tr></table>
     <div class="muted" style="font-size:11.5px">${P.oh==null?(es?'Cuenta el producto y la tabla se llena.':'Count it and the table fills in.'):P.ok?(es?`✓ llega a la noche del ${ogDn(P.lastOk)} con ${fmtCase(P.spare)} ${esc(unit)} de sobra; el camión del ${ogDn(P.next)} toma el relevo.`:`✓ reaches ${ogDn(P.lastOk)} night with ${fmtCase(P.spare)} ${esc(unit)} to spare; the ${ogDn(P.next)} truck takes over.`):(es?`✗ se acaba el ${ogDn(P.runOut||P.win[0])} — faltan ${fmtCase(P.short)} ${esc(unit)} para llegar al camión.`:`✗ runs out ${ogDn(P.runOut||P.win[0])} — short ${fmtCase(P.short)} ${esc(unit)} by the truck.`)}${r.warn?`<br>⚠ ${es?'El empaque del archivo del proveedor y el precio de la factura no coinciden sobre qué es una caja — revisar.':'The vendor file pack and the invoice price disagree about what a case is — worth checking.'}`:''}</div>`;
   }
   el.innerHTML=`<div class="sheet"><div class="sh-head"><h3>${esc(it.item)} — ${es?'por qué':'why'} ${l.suggested==null&&(l.ordered==null)?'':(fmtCase(ogQty(l))+' '+esc(unit))}</h3>
     <div class="sh-sub">${esc(it.pack||si.pack||'')}${si.sku?` · SKU ${esc(si.sku)}`:''} · ${es?'llega':'lands'} ${ogDn(P.arrive)} · ${es?'siguiente camión':'next truck'} ${ogDn(P.next)}</div></div>
     <div class="sh-body">${body}</div>
-    <div style="display:flex;gap:8px;padding:0 16px 14px">${can('orders.edit')&&l.oh!=null?`<button class="btn-ghost" style="flex:1" onclick="ogWhyAdj('${it.id}',-1)">− 1</button><button class="btn-ghost" style="flex:1" onclick="ogWhyAdj('${it.id}',1)">+ 1</button>`:''}<button class="rv-save" style="flex:1.4" onclick="document.getElementById('ogwhy').remove()">${es?'Listo':'Done'}</button></div></div>`;
+    <div style="display:flex;gap:8px;padding:0 16px 14px">${can('orders.edit')&&l.oh!=null?`<button class="btn-ghost" style="flex:1" onclick="ogWhyAdj('${it.id}',-1)">− 1</button><button class="btn-ghost" style="flex:1" onclick="ogWhyAdj('${it.id}',1)">+ 1</button>`:''}${can('orders.edit')&&P.hasRate?`<button class="btn-ghost" style="flex:1.2" onclick="document.getElementById('ogwhy').remove();ogOpenEdit('${it.id}','par')">${es?'Fijar piso':'Set floor'}</button>`:''}<button class="rv-save" style="flex:1.4" onclick="document.getElementById('ogwhy').remove()">${es?'Listo':'Done'}</button></div></div>`;
   document.body.appendChild(el);
 };
 window.ogWhyAdj=async(id,d)=>{ const l=S.og.lines[id]; if(!l) return; const q=Math.max(0,(Number(ogQty(l))||0)+d); await ogSetOrder(id,q); ogWhyOpen(id); ogRefreshPage(); };
@@ -15424,7 +15444,7 @@ function ogRevRow(it, l, on){
     ? `<div class="rv-step"><button onclick="ogRevAdj('${it.id}',-1)" aria-label="less">−</button><div class="q">${fmtCase(q)}<small>${esc(unit)}</small></div><button onclick="ogRevAdj('${it.id}',1)" aria-label="more">+</button></div><button class="rv-x" onclick="ogRevOff('${it.id}')" title="${es?'Quitar del pedido':'Take off the order'}">✕</button>`
     : `<button class="rv-add" onclick="ogRevAdd('${it.id}')">+ ${es?'añadir':'add'}</button>`;
   return `<div class="rv-row${on?'':' off'}" id="ogrev-${it.id}"><div class="rv-top"><div class="rv-nm"><b>${esc(it.item)}</b><small>${esc(it.pack||'')}${it.pack?' · ':''}${esc(it.room||'')}${l&&l.edited&&l.suggested!=null?` <span class="tag gold">${es?'la app decía':'app said'} ${fmtCase(l.suggested)}</span>`:''}</small></div>${right}</div>
-    <div class="rv-chips"><span class="st"><i>min par</i><b>${it.par==null?'—':fmtCase(it.par)}</b></span>
+    <div class="rv-chips">${P.hasRate?`<span class="st need" onclick="ogWhyOpen('${it.id}')"><i>${es?'necesita':'need'} · ${esc(ogDn(P.thru))}</i><b>${fmtCase(Math.round(P.target*10)/10)}</b></span>`:`<span class="st"><i>min par</i><b>${it.par==null?'—':fmtCase(it.par)}</b></span>`}
       <span class="st og-ohchip"><i>${es?'hay':'on hand'} · ${esc(ulabel)}</i>${ed?`<input type="number" inputmode="decimal" step="${pmode?'1':'0.25'}" min="0" value="${shown===''?'':fmtCase(shown)}" placeholder="—" onchange="ogRevOH('${it.id}',this.value)">`:`<b>${shown===''?'—':fmtCase(shown)}</b>`}</span>
       <div class="rv-need">${ogLastsHtml(it,l)||`<span class="muted">${es?'sin contar':'not counted'}</span>`}</div></div></div>`;
 }
@@ -15803,6 +15823,18 @@ window.ogRoomMove=async(name,dir)=>{
 // The ORDER box lives in its own renderer because two different paths draw it: the whole
 // card, and the per-keystroke patch that must NOT redraw the on-hand input (redrawing it
 // tears down a phone's numeric keyboard mid-count — that is why ogLiveOH exists at all).
+// Oct 18 2026: MIN PAR becomes NEED when the item has a rate — what the forecast uses from today
+// through the last day before the next truck, +20%, never under the floor; names the day it covers through.
+function ogNeedBoxHtml(it, l, parForPlan, unit){
+  const es=isES(); const ed=can('orders.edit');
+  const r=ogRate(it); const has=!!(r&&Number(r.per10k)>0);
+  if(!has) return null;
+  const P=ogPlan(parForPlan==null?it:Object.assign({},it,{par:parForPlan}), l&&l.oh, l&&l.ordered);
+  const t1=Math.round(P.target*10)/10;
+  const sub=P.parWins ? `${es?'piso':'floor'} ${fmtCase(P.par)} · ${es?'necesita':'need'} ${fmtCase(Math.round(P.fcTarget*10)/10)}`
+                      : `${fmtCase(Math.round(P.need*10)/10)} ${es?'desde hoy':'from today'} + ${Math.round(OG_CUSHION*100)}%`;
+  return `<div class="og-bx need ${P.parWins?'floorwins':''}" onclick="ogWhyOpen('${it.id}')"><span class="lb">${es?'NECESITA':'NEED'} · ${es?'HASTA':'THRU'} ${esc(ogDn(P.thru)).toUpperCase()} ▾</span><span class="vl">${fmtCase(t1)} ${esc(unit||it.par_unit||'')}</span><span class="sb">${sub}${r.warn?' ⚠':''}</span></div>`;
+}
 function ogOrdBoxHtml(it,l){
   const q=ogQty(l); const ed=can('orders.edit');
   if(it.par==null) return `<div id="ogchip-${it.id}" class="og-bx ord blocked"><span class="lb">ORDER</span><span class="vl">—</span></div>`;
@@ -15817,7 +15849,7 @@ function ogPairCardHtml(it, members){
   const counted = st.oh!=null;
   const state = counted ? ((st.plan&&st.plan.total>0)?'need':'done') : '';
   const u=st.unit, us=(n)=>`${fmtCase(n)} ${u}${Math.abs(n)===1?'':'s'}`;
-  const parBox=`<div class="og-bx par" ${ed?`onclick="ogOpenEdit('${it.id}','par')"`:''}>
+  const parBox=ogNeedBoxHtml(it, S.og.lines[it.id], st.par, u) || `<div class="og-bx par" ${ed?`onclick="ogOpenEdit('${it.id}','par')"`:''}>
     <span class="lb">MIN PAR</span><span class="vl">${fmtCase(st.par)} ${esc(u)}</span></div>`;
   const ohBox= ed
     ? `<div class="og-bx oh ${counted?'filled':''}"><span class="lb">ON HAND</span>
@@ -15944,9 +15976,9 @@ function ogCardHtml(it){
   const counted=l&&l.oh!=null;
   const state = it.par==null ? 'nopar' : (counted ? (q>0?'need':'done') : '');
   const ed=can('orders.edit');
-  const parBox = it.par==null
+  const parBox = ogNeedBoxHtml(it, l) || (it.par==null
     ? `<div class="og-bx par none" ${ed?`onclick="ogOpenEdit('${it.id}','par')"`:''}><span class="lb">MIN PAR</span><span class="vl">${ed?'set it':'—'}</span></div>`
-    : `<div class="og-bx par" ${ed?`onclick="ogOpenEdit('${it.id}','par')"`:''}><span class="lb">MIN PAR</span><span class="vl">${fmtCase(it.par)} ${esc(it.par_unit||'')}${it.par_uncertain?'<span title="read off a blurry printed column — confirm it"> ?</span>':''}</span></div>`;
+    : `<div class="og-bx par" ${ed?`onclick="ogOpenEdit('${it.id}','par')"`:''}><span class="lb">MIN PAR</span><span class="vl">${fmtCase(it.par)} ${esc(it.par_unit||'')}${it.par_uncertain?'<span title="read off a blurry printed column — confirm it"> ?</span>':''}</span></div>`);
   const pcs=ogPieces(it), pmode=ogUnitMode(it)==='piece';
   const shown = counted ? (pmode ? ogRound2(ogFromCases(it,l.oh)) : ogRound2(l.oh)) : '';
   const ulabel = pmode ? ogPieceName(it,2) : (it.unit_code||'cases');
@@ -17057,9 +17089,9 @@ async function viewOrders(){
         <div class="muted" style="font-size:10.5px;margin-top:3px">${L.assumed
           ? 'Nobody has told the app how long this vendor takes, so it assumes one day and says so everywhere it matters. Pick the real number and the coverage window stops guessing.'
           : `Set to <b>${L.days===0?'same day':L.days+' day'+(L.days===1?'':'s')}</b> — the window this order has to cover starts when it actually lands.`}</div></div>`;})()}
-      <div class="muted" style="font-size:11px;margin-top:5px"><b>The formula, in the open (Oct 17 2026):</b> for an item with receiving history, ORDER = what the covered days will use (your cases per $10k of sales, from the ordering research, × each day's sales forecast) + ${Math.round(OG_CUSHION*100)}% cushion, never under the min par, minus what is still on the shelf when the truck lands — rounded up to whole cases; "why" under every ORDER box shows the days. An item with no receiving history keeps the old rule: ORDER = printed par × day dial − on hand, rounded up to whole cases (quarter steps when the target is under 1). The day dial = average forecast covers over the days this order has to cover (from the order day picked above, until the next one) ÷ a typical August-2026 day — August because that is when these pars were transcribed, so they are <i>treated</i> as right for an average August day. That anchor is an assumption and stays labeled until pars get re-set from real usage. The cover forecast is the same weekday × season × weather number the count and prep list already run on.</div>
+      <div class="muted" style="font-size:11px;margin-top:5px"><b>The formula, in the open (Oct 18 2026):</b> for an item with a rate, <b>NEED</b> = what the forecast uses from <i>today</i> through the last day before the next truck lands (your cases per $10k of sales, from the ordering research, × each day's sales forecast) + ${Math.round(OG_CUSHION*100)}% cushion, never under the floor you set — the box names the day it covers through. <b>ORDER = NEED − ON HAND</b>, rounded up to whole cases (a tenth of a case short is not an order). Change the order and the line under it re-figures on your number. Tap NEED for the day-by-day and to set the floor. An item with no receiving history keeps the old rule: ORDER = printed par × day dial − on hand, rounded up to whole cases (quarter steps when the target is under 1). The day dial = average forecast covers over the days this order has to cover (from the order day picked above, until the next one) ÷ a typical August-2026 day — August because that is when these pars were transcribed, so they are <i>treated</i> as right for an average August day. That anchor is an assumption and stays labeled until pars get re-set from real usage. The cover forecast is the same weekday × season × weather number the count and prep list already run on.</div>
     </div>
-    <div class="muted" style="font-size:11px;margin-top:6px">Laid out like the paper sheet: <b>MIN PAR</b> on the left, count into <b>ON HAND</b>, and <b>ORDER</b> fills itself — same as count → prep. <b>Tap a MIN PAR to set or fix it</b> — it saves for every future order and the ORDER column recalculates on the spot. Tap the order number to override the suggestion — yours always wins, and both numbers are kept. A skipped row saves as not counted, never zero.</div>`;})())}
+    <div class="muted" style="font-size:11px;margin-top:6px">Laid out like the paper sheet: <b>NEED</b> (or MIN PAR where there is no rate yet) on the left, count into <b>ON HAND</b>, and <b>ORDER</b> fills itself — same as count → prep. <b>Tap NEED for why and to set the floor; tap a MIN PAR to set or fix it</b> — it saves for every future order and the ORDER column recalculates on the spot. Tap the order number to override the suggestion — yours always wins, and both numbers are kept. A skipped row saves as not counted, never zero.</div>`;})())}
   </div>
   ${(()=>{
     // ---- one room at a time, behind a rail: the station count's shape, applied to ordering ----
