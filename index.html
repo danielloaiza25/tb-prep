@@ -1557,7 +1557,28 @@
   .og-li.done{background:#e6f3ea;border-radius:10px;padding-left:6px;padding-right:6px}.og-li.done .chk{background:var(--palm);border-color:var(--palm)}.og-li.done .nm b{color:var(--palm)}.og-li.done .qty{color:var(--palm)}
   .og-alldone{background:#e6f3ea;border-color:#a9d3b8;text-align:center;padding:22px 12px}.og-alldone b{font-size:17px;color:var(--palm)}
   .rv-go.btn-sm{padding:8px 12px;font-size:12.5px}
-  @media print{ .og-sticky,.og-foot,.og-erail{display:none!important} }
+  /* ---- Oct 18 2026: floating search, rail reorder, order-pattern strip ---- */
+  .og-sph{display:none} .og-sph.on{display:block}
+  #og-sticky{position:relative;top:auto}   /* sticky-in-card was unreliable (Oct 18 desktop); the bar pins itself instead */
+  #og-sticky.fixed{position:fixed;top:0;z-index:30;background:var(--sand);padding:8px 8px 10px;margin:0;box-shadow:0 4px 12px rgba(15,47,58,.14);border-radius:0 0 12px 12px}
+  #og-sticky.fixed .og-search{box-shadow:0 2px 8px rgba(15,47,58,.10)}
+  .og-rarr{display:flex;gap:3px;justify-content:center;margin-top:4px}
+  .og-rarr b{width:22px;height:20px;border-radius:6px;background:var(--white);border:1px solid var(--line);color:var(--ocean);display:flex;align-items:center;justify-content:center;font-size:11px;cursor:pointer}
+  .og-rarr b.dis{opacity:.3;pointer-events:none} .og-rbtn.on .og-rarr b{background:#fff}
+  .og-rtog{border:1.5px dashed var(--line);background:transparent;border-radius:12px;padding:6px 2px;font-size:8.5px;font-weight:800;font-family:inherit;color:var(--ocean);cursor:pointer;line-height:1.15;min-height:36px}
+  .og-rtog.on{background:var(--palm);border:1.5px solid var(--palm);color:#fff}
+  .og-pat{margin-top:7px;padding-top:6px;border-top:1px dashed var(--line)}
+  .og-pat .plb{font-size:8.5px;font-weight:800;text-transform:uppercase;letter-spacing:.04em;color:var(--muted);display:flex;justify-content:space-between;align-items:center}
+  .og-pat .plb a{color:var(--ocean);text-decoration:underline;cursor:pointer;text-transform:none;letter-spacing:0;font-size:10.5px;font-weight:700}
+  .og-pat .prow{display:flex;gap:5px;margin-top:5px}
+  .og-pst{flex:1;background:var(--sand);border:1px solid var(--line);border-radius:8px;padding:4px 4px;text-align:center;line-height:1.15;min-width:0}
+  .og-pst i{display:block;font-style:normal;font-size:8px;letter-spacing:.3px;text-transform:uppercase;color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .og-pst b{font-size:13.5px;color:var(--ocean-dark);display:block} .og-pst em{font-style:normal;font-size:9px;color:var(--muted);display:block;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .og-pst.w{background:#e6f3ea;border-color:#a9d3b8} .og-pst.w b{color:var(--palm)}
+  .og-pst.none{background:var(--white)} .og-pst.none b{color:var(--muted);font-size:11px;padding:2px 0}
+  .og-pat .pnt{font-size:10.5px;color:var(--muted);margin-top:5px;line-height:1.35} .og-pat .pnt b{color:var(--ink)} .og-pat .pnt .bad{color:var(--danger);font-weight:800} .og-pat .pnt .ok{color:var(--palm);font-weight:800}
+  .og-pwt{width:100%;border-collapse:collapse;font-size:12px;margin:6px 0} .og-pwt th{text-align:left;font-size:9.5px;color:var(--muted);padding:2px 4px;border-bottom:1px solid var(--line)} .og-pwt td{padding:4px;border-bottom:1px solid var(--sand-dark)} .og-pwt td.n{text-align:right;font-variant-numeric:tabular-nums}
+  @media print{ .og-sticky,.og-foot,.og-erail,.og-rtog,.og-rarr{display:none!important} }
 </style>
 <script>
 // The background choice is a per-device thing — Dan's phone and the kitchen tablet can
@@ -1628,7 +1649,7 @@ const SB_KEY='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZ
 const TBID='9f8d7c6b-5a49-4e38-b271-06d5f00dbeef'; // Tommy Bahama tenant inside ChefOpsAI
 // Stamped by publish.sh at upload time. It is the only version label there is now —
 // one address, updated in place, so this tells you which build that address is serving.
-const BUILD='Oct 17, 2026 · ordering: search on the walk, lasts through, review, enter-in-Sysco list, rates from the research';
+const BUILD='Oct 18, 2026 · walk: search floats on every guide, rail reorder with arrows, order pattern in place of last 4 counts';
 // ---------- IS THIS PHONE EVEN RUNNING THE LATEST BUILD? ----------
 // Sep 3 2026. Three prep fixes shipped and Dan still saw the old behaviour, because the app
 // installs to the home screen and an installed web app does not go back and re-fetch its own
@@ -6939,6 +6960,7 @@ function shell(inner){
   // The room rail's drag listeners die with the old nodes on every repaint, same as the
   // station handles above. No-op on every screen without a rail in Organize.
   if(typeof ogWireRoomDrag==='function') ogWireRoomDrag();
+  if(S.view==='orders' && typeof ogFloatTick==='function') ogFloatTick();
   if((S.reorder||S.org) && typeof rrRenumber==='function') rrRenumber();
   // The prep action bar rides directly on top of the tab bar. The nav's height moves with
   // safe-area insets and the phone-width paddings, so it is measured off the real element
@@ -15216,11 +15238,14 @@ async function loadOG(vendor){
         const ids=(S.og.history||[]).filter(o=>o.status!=='duplicate').map(o=>o.id);
         const byId={}; (S.og.history||[]).forEach(o=>{ byId[o.id]=o; });
         if(ids.length){
-          const hl=await db.from('tb_vendor_order_lines').select('order_id,item_id,oh')
-            .in('order_id',ids).not('oh','is',null);
+          // Oct 18 2026: the ordered quantity rides along, so the walk can show the order
+          // pattern (usually / last order) and not only what the shelf held.
+          const hl=await db.from('tb_vendor_order_lines').select('order_id,item_id,oh,ordered')
+            .in('order_id',ids);
           (hl.data||[]).forEach(r=>{
             const o=byId[r.order_id]; if(!o) return;
-            (S.og.hist[r.item_id]=S.og.hist[r.item_id]||[]).push({d:o.order_date, oh:Number(r.oh), st:o.status});
+            if(r.oh==null && r.ordered==null) return;
+            (S.og.hist[r.item_id]=S.og.hist[r.item_id]||[]).push({d:o.order_date, oh:(r.oh==null?null:Number(r.oh)), ord:(r.ordered==null?null:Number(r.ordered)), st:o.status});
           });
           Object.keys(S.og.hist).forEach(k=>{
             S.og.hist[k].sort((a,b)=> a.d<b.d?-1:a.d>b.d?1:0);
@@ -15368,7 +15393,20 @@ window.ogWhyAdj=async(id,d)=>{ const l=S.og.lines[id]; if(!l) return; const q=Ma
 // Repaint the page the user is on without touching an input mid-type (the walk patches itself).
 function ogRefreshPage(){ if(S.og.page==='review'||S.og.page==='enter') render(); }
 // ---- the floating search on the walk --------------------------------------------------------
-function ogSearchBar(ph){ const es=isES(); return `<div class="og-sticky no-print"><div class="og-searchw"><input class="og-search" id="og-q" type="search" placeholder="${ph||(es?'Buscar cualquier producto…':'Search any item… (ma → Mahi, Mango, Mayo)')}" value="${esc(S.ogWalk.q||'')}" oninput="ogSearch(this.value)">${(S.ogWalk.q||'')?`<button class="og-qx" onclick="ogSearch('')">×</button>`:''}</div></div>`; }
+// Oct 18 2026: the bar is in flow until it would scroll off the top, then it is pinned to the
+// screen (position:fixed, measured off its own placeholder) — the same way the rail stays put.
+// Sticky inside the card was not enough on Dan's desktop (Oct 18 screenshot: scrolled, no bar).
+function ogFloatTick(){
+  const b=document.getElementById('og-sticky'), ph=document.getElementById('og-sph'); if(!b||!ph) return;
+  const fixed=b.classList.contains('fixed'); const r=(fixed?ph:b).getBoundingClientRect();
+  if(r.top<0){
+    if(!fixed){ b.classList.add('fixed'); ph.style.height=b.offsetHeight+'px'; ph.classList.add('on'); }
+    b.style.left=r.left+'px'; b.style.width=r.width+'px';
+  }else if(fixed){ b.classList.remove('fixed'); b.style.left=''; b.style.width=''; ph.classList.remove('on'); ph.style.height=''; }
+}
+window.addEventListener('scroll',()=>{ if(S.view==='orders') ogFloatTick(); },{passive:true});
+window.addEventListener('resize',()=>{ if(S.view==='orders') ogFloatTick(); });
+function ogSearchBar(ph){ const es=isES(); return `<div class="og-sph" id="og-sph"></div><div class="og-sticky no-print" id="og-sticky"><div class="og-searchw"><input class="og-search" id="og-q" type="search" placeholder="${ph||(es?'Buscar cualquier producto…':'Search any item… (ma → Mahi, Mango, Mayo)')}" value="${esc(S.ogWalk.q||'')}" oninput="ogSearch(this.value)">${(S.ogWalk.q||'')?`<button class="og-qx" onclick="ogSearch('')">×</button>`:''}</div></div>`; }
 function ogMatches(items){ const q=String(S.ogWalk.q||'').trim().toLowerCase(); if(!q) return null;
   return items.filter(it=>{ const si=(S.og.skuInfo||{})[it.id]||{}; return (it.item+' '+(it.item_es||'')+' '+(it.pack||'')+' '+(si.sku||'')+' '+(si.r365||'')).toLowerCase().includes(q); }); }
 window.ogSearch=(v)=>{ S.ogWalk.q=v; const wrap=document.getElementById('og-listwrap'); if(!wrap){ render(); return; }
@@ -15738,15 +15776,27 @@ function ogRailHtml(items){
     // sit in the order Dan's feet actually go (Aug 30). Only in PLACES — a category list has
     // no walk order to get wrong.
     const drag = places && S.ogWalk.org;
+    // Oct 18 2026: ▲▼ on every room while "Reorder" is on (or in Organize) — tap to move,
+    // saved on the spot through ogRoomReorder. Drag still works on a desktop in Organize.
+    const arrows = places && can('orders.edit') && (S.ogWalk.rord || S.ogWalk.org);
+    const i=G.names.indexOf(n), q=esc(n).replace(/'/g,"&#39;");
     return `<button class="og-rbtn ${n===cur?'on':''} ${isHid?'hid':''} ${unconf?'unconf':''} ${drag?'drag':''}"
       ${unconf?'title="Nobody has confirmed where this is yet"':''}
       ${drag?`draggable="true" data-room="${esc(n)}"`:''}
-      onclick="${drag?'':`ogGoGroup('${esc(n).replace(/'/g,"&#39;")}')`}">
+      onclick="${drag?'':`ogGoGroup('${q}')`}">
       ${drag?'<span class="rgrip">☰</span>':''}
       <span class="rnm">${esc(n.length>13?n.slice(0,12)+'.':n)}</span>
-      <span class="rct">${isHid?'hidden':done+'/'+its.length}</span></button>`;
-  }).join('');
+      <span class="rct">${isHid?'hidden':done+'/'+its.length}</span>
+      ${arrows?`<span class="og-rarr"><b class="${i===0?'dis':''}" onclick="event.stopPropagation();ogRoomMove('${q}',-1)">▲</b><b class="${i===G.names.length-1?'dis':''}" onclick="event.stopPropagation();ogRoomMove('${q}',1)">▼</b></span>`:''}</button>`;
+  }).join('') + (places && can('orders.edit') && G.names.length>1
+      ? `<button class="og-rtog ${S.ogWalk.rord?'on':''}" onclick="ogRailToggle()">${S.ogWalk.rord?(isES()?'✓ Listo':'✓ Done'):(isES()?'⇅ Ordenar':'⇅ Reorder')}</button>` : '');
 }
+window.ogRailToggle=()=>{ S.ogWalk.rord=!S.ogWalk.rord; render(); };
+window.ogRoomMove=async(name,dir)=>{
+  const items=S.og.items[S.og.vendor]||[]; const names=ogRoomsOf(items).names;
+  const i=names.indexOf(name), j=i+dir; if(i<0||j<0||j>=names.length) return;
+  await ogRoomReorder(name, names[j]);
+};
 // The card. ON HAND keeps the real <input> rather than a tap-sheet: the numeric keyboard and
 // the per-keystroke recalculation are already proven on Dan's phone, and a sheet would add a
 // tap to the one number he types 130 times.
@@ -15785,7 +15835,7 @@ function ogPairCardHtml(it, members){
       ? `sends ${ogPlanText(st.plan)}${st.plan.over>0?` <span class="ovr">(${us(st.plan.over)} spare — smallest combination)</span>`:''}`
       : 'enough on hand — nothing to order'}</div>`
      :`<div class="og-tail">Two case sizes, one thing. ${esc(packs)} ${esc(u)}s per case — count the ${esc(u)}s and the cases work themselves out.</div>`}
-    ${TM()?'':ogHistHtml(it)}
+    ${TM()?'':ogPatHtml(it)}
     ${S.ogWalk.openEdit===it.id?ogEditPadHtml(it):''}
     ${ogPromptHtml(it)}
     ${ed&&!TM()?`<div class="og-acts no-print">
@@ -15800,7 +15850,7 @@ function ogHistHtml(it){
   const all=(S.og.hist&&S.og.hist[it.id])||[];
   const curId=S.og.order&&S.og.order.id;
   const curDate=S.og.order&&S.og.order.order_date;
-  const h=all.filter(r=>!(curDate&&r.d===curDate)).slice(-4);
+  const h=all.filter(r=>r.oh!=null&&!(curDate&&r.d===curDate)).slice(-4);
   if(!h.length) return '';
   const par=it.par!=null?Number(it.par):null;
   const mx=Math.max(par||0, ...h.map(r=>r.oh), 0.0001);
@@ -15816,6 +15866,71 @@ function ogHistHtml(it){
   else if(par!=null&&h.length>1) msg=`<span class="og-hnote ok">never went under par</span>`;
   return `<div class="og-hist"><span class="og-hlb">last ${h.length} count${h.length===1?'':'s'} · últimos</span>${chips}${msg}</div>`;
 }
+// ---- Oct 18 2026: "order pattern" in place of "last 4 counts" ------------------------------
+// usually = the middle quantity of the sent orders that had the item; last order = the most recent
+// sent order with a quantity; weekly rate = the research rate (tb_order_rates, cases per $10k) at a
+// $90k week. Under it: the last count and whether it has run under par — the one thing the old
+// bars were good for. The bars themselves live behind the "why" tap (ogPatWhy).
+function ogPattern(it){
+  const all=(S.og.hist&&S.og.hist[it.id])||[]; const curDate=S.og.order&&S.og.order.order_date;
+  const past=all.filter(r=>!(curDate&&r.d===curDate));
+  const sent=past.filter(r=>r.st==='sent'); const withQ=sent.filter(r=>Number(r.ord)>0);
+  const med=a=>{ a=a.slice().sort((x,y)=>x-y); const m=Math.floor(a.length/2); return a.length%2?a[m]:(a[m-1]+a[m])/2; };
+  const usual=withQ.length?med(withQ.map(r=>Number(r.ord))):null;
+  const last=withQ.length?withQ[withQ.length-1]:null;
+  const cnts=past.filter(r=>r.oh!=null); const lastc=cnts.length?cnts[cnts.length-1]:null;
+  const par=it.par!=null?Number(it.par):null; const l4=cnts.slice(-4); const under=par==null?null:l4.filter(r=>r.oh<par).length;
+  const spanW=sent.length>1?Math.max(1,(Date.parse(sent[sent.length-1].d)-Date.parse(sent[0].d))/864e5/7):null;
+  const recentWk=spanW?sent.reduce((a,r)=>a+(Number(r.ord)||0),0)/spanW:null;
+  const r=ogRate(it); const wk90=(r&&Number(r.per10k)>0)?Number(r.per10k)*9:null;
+  const tracks=r&&r.corr!=null?(Number(r.corr)>=0.5?'yes':Number(r.corr)>=0.2?'some':'flat'):null;
+  // only when the app has seen a real run of orders (4+, about weekly) — otherwise the app's
+  // history is partial and the research rate is the better number, not a contradiction
+  const steady=sent.length>=4&&spanW&&(sent.length/spanW)>=0.8;
+  const clash=!!(steady&&wk90!=null&&recentWk!=null&&(wk90>3*Math.max(recentWk,0.01)||recentWk>3*wk90));
+  return {sent:sent.length, withQ:withQ.length, usual, last, cnts, lastc, under, n4:l4.length, recentWk, r, wk90, tracks, clash};
+}
+function ogPatHtml(it){
+  const p=ogPattern(it); if(!p.sent&&!p.cnts.length&&!p.r) return '';
+  const es=isES(); const u=esc(it.par_unit||it.unit_code||'CS');
+  const usual=p.usual!=null?`<div class="og-pst"><i>${es?'normalmente':'usually'}</i><b>${fmtCase(p.usual)} ${u}</b><em>${p.withQ} ${es?'de':'of'} ${p.sent} ${es?'pedidos':'orders'}</em></div>`
+                           :`<div class="og-pst none"><i>${es?'normalmente':'usually'}</i><b>${es?'no se pidió':'not ordered'}</b><em>${p.sent?(es?`últimos ${p.sent} pedidos`:`last ${p.sent} orders`):(es?'sin pedidos aún':'no orders yet')}</em></div>`;
+  const last=p.last?`<div class="og-pst"><i>${es?'último pedido':'last order'}</i><b>${fmtCase(Number(p.last.ord))} ${u}</b><em>${ogShortDate(p.last.d)}</em></div>`
+                   :`<div class="og-pst none"><i>${es?'último pedido':'last order'}</i><b>—</b><em>${p.sent?(es?'había':'stock held'):''}</em></div>`;
+  const wk=p.wk90!=null?`<div class="og-pst w"><i>${es?'ritmo semanal':'weekly rate'}</i><b>${fmtCase(Math.round(p.wk90*10)/10)} ${u}/${es?'sem':'wk'}</b><em>90k ${es?'sem':'wk'} · ${p.tracks==='yes'?(es?'sigue la venta':'tracks sales'):p.tracks==='some'?(es?'sigue algo':'tracks some'):(es?'plano':'flat')}${p.r&&p.r.warn?' ⚠':''}</em></div>`
+                       :`<div class="og-pst none"><i>${es?'ritmo semanal':'weekly rate'}</i><b>${es?'sin historial':'no history yet'}</b><em>${es?'sin recepción en el estudio':'no receiving in the research'}</em></div>`;
+  let under='';
+  if(p.under!=null&&p.n4) under=p.under===0?`<span class="ok">${es?'nunca bajo par':'never under par'}</span>`:p.under===p.n4&&p.n4>1?`<span class="bad">${es?'bajo par en cada conteo — el par puede estar bajo':'under par every count — par may be low'}</span>`:`<span class="bad">${es?'bajo par':'under par'} ${p.under} ${es?'de':'of'} ${p.n4}</span>`;
+  const clash=p.clash?` · <span class="bad">⚠ ${es?'el ritmo no cuadra con los pedidos recientes':'rate ≠ recent orders'} (${fmtCase(Math.round(p.recentWk*10)/10)} ${u}/${es?'sem':'wk'})</span>`:'';
+  const lastc=p.lastc?`${es?'Último conteo':'Last count'} <b>${fmtCase(p.lastc.oh)} ${u}</b> ${ogShortDate(p.lastc.d)}${under?' · '+under:''}`:(es?'Sin conteos todavía':'No counts yet');
+  return `<div class="og-pat no-print"><div class="plb"><span>${es?'Patrón de pedido':'Order pattern · patrón'}</span><a onclick="ogPatWhy('${it.id}')">${es?'por qué ›':'why ›'}</a></div>
+    <div class="prow">${usual}${last}${wk}</div><div class="pnt">${lastc}${clash}</div></div>`;
+}
+window.ogPatWhy=(id)=>{
+  const it=(S.og.items[S.og.vendor]||[]).find(x=>x.id===id); if(!it) return;
+  const p=ogPattern(it); const es=isES(); const u=esc(it.par_unit||it.unit_code||'CS'); const r=p.r;
+  const old=document.getElementById('ogpwhy'); if(old) old.remove();
+  const el=document.createElement('div'); el.className='rcov no-print'; el.id='ogpwhy';
+  el.onclick=e=>{ if(e.target===el) el.remove(); };
+  const all=((S.og.hist&&S.og.hist[it.id])||[]).slice(-12);
+  const rows=all.map(h=>`<tr><td>${ogShortDate(h.d)}</td><td>${h.st==='sent'?(es?'pedido enviado':'order sent'):h.st==='saved'?(es?'solo conteo':'count only'):esc(h.st||'')}</td><td class="n">${h.oh==null?'–':fmtCase(h.oh)}</td><td class="n">${h.ord==null?'–':fmtCase(h.ord)}</td></tr>`).join('');
+  const rate=r&&p.wk90!=null
+    ?(es?`<b>Ritmo semanal</b> — del estudio de pedidos: <b>${fmtCase(r.per10k)} ${u} por cada $10k</b> de venta (${r.weeks_bought} de ${r.weeks_cov} semanas en archivo) → <b>${fmtCase(Math.round(Number(r.per10k)*6*10)/10)} / ${fmtCase(Math.round(p.wk90*10)/10)} / ${fmtCase(Math.round(Number(r.per10k)*12*10)/10)} ${u} por semana</b> en una semana de 60k / 90k / 120k.${r.warn?' ⚠ El empaque del proveedor y el precio no coinciden en qué es una caja.':''}`
+         :`<b>Weekly rate</b> — from the ordering research: <b>${fmtCase(r.per10k)} ${u} per $10k</b> of sales (${r.weeks_bought} of ${r.weeks_cov} weeks on file) → <b>${fmtCase(Math.round(Number(r.per10k)*6*10)/10)} / ${fmtCase(Math.round(p.wk90*10)/10)} / ${fmtCase(Math.round(Number(r.per10k)*12*10)/10)} ${u} a week</b> on a 60k / 90k / 120k week.${r.warn?' ⚠ The vendor file and the invoice price disagree about what a case is.':''}`)
+    :(es?`<b>Ritmo semanal</b> — este producto no tiene líneas de recepción en el estudio todavía (sin historial o sin SKU enlazado).`:`<b>Weekly rate</b> — no receiving lines for this item in the research yet (no history, or no SKU linked).`);
+  el.innerHTML=`<div class="sheet"><div class="sh-head"><h3>${esc(it.item)} — ${es?'patrón de pedido':'order pattern'}</h3>
+    <div class="sh-sub">${esc(it.pack||'')} · par ${it.par==null?'—':fmtCase(it.par)} ${u}</div></div>
+    <div class="sh-body">
+      <div class="rv-eff">${es
+        ?`<b>Normalmente ${p.usual!=null?fmtCase(p.usual)+' '+u:'no se pidió'}</b> — la cantidad del medio de los pedidos enviados que lo incluyeron (${p.withQ} de ${p.sent}). <b>Último pedido</b> es el más reciente con cantidad. Los conteos sin pedido alimentan la línea del último conteo, no el patrón.`
+        :`<b>Usually ${p.usual!=null?fmtCase(p.usual)+' '+u:'not ordered'}</b> — the middle quantity of the sent orders that had it (${p.withQ} of ${p.sent}). <b>Last order</b> is the most recent sent order with a quantity. Counts with no order (saved) feed the last-count line, not the pattern.`}</div>
+      ${rows?`<table class="og-pwt"><tr><th>${es?'fecha':'date'}</th><th>${es?'qué':'what'}</th><th class="n">${es?'en mano':'on hand'}</th><th class="n">${es?'pedido':'ordered'}</th></tr>${rows}</table>`:''}
+      <div class="rv-eff">${rate}</div>
+      ${ogHistHtml(it)}
+    </div>
+    <div style="display:flex;gap:8px;padding:0 16px 14px"><button class="btn-ghost" style="flex:1" onclick="document.getElementById('ogpwhy').remove()">${es?'Cerrar':'Close'}</button></div></div>`;
+  document.body.appendChild(el);
+};
 function ogShortDate(d){
   const p=String(d).split('-'); if(p.length!==3) return String(d);
   const M=['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
@@ -15864,7 +15979,7 @@ function ogCardHtml(it){
     ${unitSw}
     <div class="og-boxes">${TM()?ogComesBox(it):''}${parBox}${ohBox}${ordBox}</div>
     ${tail}
-    ${TM()?'':ogHistHtml(it)}
+    ${TM()?'':ogPatHtml(it)}
     ${S.ogWalk.openEdit===it.id?ogEditPadHtml(it):''}
     ${ogPromptHtml(it)}
     ${can('orders.edit')&&!TM()?`<div class="og-acts no-print">
