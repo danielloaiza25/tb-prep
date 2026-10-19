@@ -1442,6 +1442,19 @@
   .tm-step.off{cursor:default;opacity:.7}
   .tm-step .nm{flex:1;min-width:0}.tm-step .nm b{display:block;font-size:14.5px;color:var(--ink)}.tm-step .nm span{font-size:12px;color:var(--muted)}
   .tm-time{font-size:10.5px;font-weight:800;letter-spacing:1px;color:var(--muted);margin:12px 0 0}
+  .tm-who{display:inline-flex;align-items:center;gap:5px;margin-top:5px;font-size:11px;font-weight:800;color:var(--palm);background:#e6f3ea;border-radius:999px;padding:2px 9px}
+  .tm-who .av{width:16px;height:16px;border-radius:50%;background:var(--palm);color:#fff;font-size:9px;display:inline-flex;align-items:center;justify-content:center}
+  .tm-step.nob{border-bottom:0;padding-bottom:4px}
+  .tm-pl{margin:0 0 0 39px;border-left:2px solid var(--sand-dark);padding:0 0 8px 10px}
+  #tm-cp .tm-pl{border-bottom:1px solid var(--sand-dark);margin-left:0;padding-left:49px;border-left:0;background:linear-gradient(to right,transparent 39px,var(--sand-dark) 39px,var(--sand-dark) 41px,transparent 41px)}
+  .tm-pl .r{display:flex;align-items:center;gap:8px;padding:5px 0;font-size:12.5px;border-bottom:1px dashed var(--sand-dark);cursor:pointer}
+  .tm-pl .r:last-of-type{border-bottom:0}
+  .tm-pl .r .tk{width:16px;height:16px;border-radius:4px;border:1.5px solid var(--line);flex:none;background:#fff;display:flex;align-items:center;justify-content:center;font-size:10px;color:#fff}
+  .tm-pl .r.d .tk{background:var(--palm);border-color:var(--palm)}
+  .tm-pl .r.d .n{color:var(--muted);text-decoration:line-through}
+  .tm-pl .r .n{flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.tm-pl .r .q{font-weight:800;font-size:12px;color:var(--ocean);white-space:nowrap}
+  .tm-pl .r .st{font-size:10.5px;color:var(--muted);background:var(--sand-dark);border-radius:999px;padding:1px 7px;white-space:nowrap}
+  .tm-pl .more{font-size:12px;font-weight:800;color:var(--ocean);padding:7px 0 2px;cursor:pointer}
   .tm-flow{display:flex;align-items:center;gap:5px;margin-top:5px;font-size:10.5px;font-weight:800;color:var(--muted)}
   .tm-flow i{font-style:normal;border-radius:999px;padding:2px 8px;background:var(--sand-dark);color:var(--muted)}
   .tm-flow i.on{background:var(--ocean);color:#fff}.tm-flow i.ok{background:#e6f3ea;color:var(--palm)}
@@ -1653,7 +1666,7 @@ const SB_KEY='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZ
 const TBID='9f8d7c6b-5a49-4e38-b271-06d5f00dbeef'; // Tommy Bahama tenant inside ChefOpsAI
 // Stamped by publish.sh at upload time. It is the only version label there is now —
 // one address, updated in place, so this tells you which build that address is serving.
-const BUILD='Oct 19, 2026 · Day by day shows sales, not covers, for everyone; comps and voids off Today';
+const BUILD='Oct 19, 2026 · Lists: Start prep list / Count done by who and the list itself; order-guide search no longer rebuilds everything per key';
 // ---------- IS THIS PHONE EVEN RUNNING THE LATEST BUILD? ----------
 // Sep 3 2026. Three prep fixes shipped and Dan still saw the old behaviour, because the app
 // installs to the home screen and an installed web app does not go back and re-fetch its own
@@ -15454,10 +15467,23 @@ window.addEventListener('resize',()=>{ if(S.view==='orders') ogFloatTick(); });
 function ogSearchBar(ph){ const es=isES(); return `<div class="og-sph" id="og-sph"></div><div class="og-sticky no-print" id="og-sticky"><div class="og-searchw"><input class="og-search" id="og-q" type="search" placeholder="${ph||(es?'Buscar cualquier producto…':'Search any item… (ma → Mahi, Mango, Mayo)')}" value="${esc(S.ogWalk.q||'')}" oninput="ogSearch(this.value)">${(S.ogWalk.q||'')?`<button class="og-qx" onclick="ogSearch('')">×</button>`:''}</div></div>`; }
 function ogMatches(items){ const q=String(S.ogWalk.q||'').trim().toLowerCase(); if(!q) return null;
   return items.filter(it=>{ const si=(S.og.skuInfo||{})[it.id]||{}; return (it.item+' '+(it.item_es||'')+' '+(it.pack||'')+' '+(si.sku||'')+' '+(si.r365||'')).toLowerCase().includes(q); }); }
-window.ogSearch=(v)=>{ S.ogWalk.q=v; const wrap=document.getElementById('og-listwrap'); if(!wrap){ render(); return; }
-  wrap.innerHTML=ogWalkListHtml(); const hd=document.getElementById('og-roomhd'); if(hd) hd.innerHTML=ogRoomHdHtml();
-  const x=document.querySelector('.og-searchw'); if(x) x.outerHTML=`<div class="og-searchw"><input class="og-search" id="og-q" type="search" placeholder="${isES()?'Buscar cualquier producto…':'Search any item… (ma → Mahi, Mango, Mayo)'}" value="${esc(v)}" oninput="ogSearch(this.value)">${v?`<button class="og-qx" onclick="ogSearch('')">×</button>`:''}</div>`;
-  const inp=document.getElementById('og-q'); if(inp && document.activeElement!==inp){ inp.focus(); try{ inp.setSelectionRange(v.length,v.length); }catch(e){} } };
+// Oct 19 2026 (Dan: "the search bar is sluggish, feels like it wants to crash"). Before, every keystroke
+// rebuilt every matching card across the whole guide (one letter = 200+ cards) and replaced the input
+// element itself. Now: the input is never replaced (only the × toggles), the rebuild waits 120 ms for
+// the next key, and only the first 30 matches render until "show more" is tapped.
+let _ogQT=null;
+window.ogSearch=(v)=>{ S.ogWalk.q=v; S.ogWalk.qAll=false;
+  const w=document.querySelector('.og-searchw');
+  if(w){ let x=w.querySelector('.og-qx'); if(v&&!x){ x=document.createElement('button'); x.className='og-qx'; x.textContent='×'; x.onclick=()=>{ ogSearch(''); const i=document.getElementById('og-q'); if(i){ i.value=''; i.focus(); } }; w.appendChild(x); } else if(!v&&x) x.remove(); }
+  if(_ogQT) clearTimeout(_ogQT);
+  _ogQT=setTimeout(()=>{ _ogQT=null; ogSearchPaint(); }, 120); };
+window.ogSearchPaint=()=>{ const wrap=document.getElementById('og-listwrap'); if(!wrap){ render(); return; }
+  wrap.innerHTML=ogWalkListHtml(); const hd=document.getElementById('og-roomhd'); if(hd) hd.innerHTML=ogRoomHdHtml(); };
+window.ogSearchMore=()=>{ S.ogWalk.qAll=true; ogSearchPaint(); };
+const OG_QCAP=30;
+function ogRankMatches(list){ const q=String(S.ogWalk.q||'').trim().toLowerCase(); if(!q) return list;
+  const r=it=>{ const nm=String(it.item||'').toLowerCase(); if(nm.startsWith(q)) return 0; if(nm.split(/[^a-z0-9]+/).some(w=>w.startsWith(q))) return 1; if(String(it.item_es||'').toLowerCase().split(/[^a-záéíóúñ0-9]+/).some(w=>w.startsWith(q))) return 1; return 2; };
+  return list.map((it,i)=>({it,i,r:r(it)})).sort((a,b)=>a.r-b.r||a.i-b.i).map(x=>x.it); }
 // ---- REVIEW: every line the app wants to order, with on hand as the count chip -----------------
 function ogRevRow(it, l, on){
   const es=isES(); const q=ogQty(l)||0; const unit=it.par_unit||it.unit_code||'CS'; const ed=can('orders.edit');
@@ -15798,13 +15824,15 @@ window.ogToggleOrg=()=>{ S.ogWalk.org=!S.ogWalk.org; S.ogWalk.openEdit=null; ren
 // whole guide, each card wearing its room. Repainted alone on each keystroke (focus stays).
 function ogWalkListHtml(){
   const C=S.ogWalk._ctx||{}; const m=ogMatches(C.items||[]);
-  if(m){ const list=ogSortInGroup(ogCollapsePairs(m, C.items||[]));
-    return list.length?list.map(ogCardHtml).join(''):`<div class="muted" style="font-size:12.5px;padding:8px">${isES()?'Nada con ese nombre en esta guía.':'Nothing on this guide by that name.'}</div>`; }
+  if(m){ const list=ogRankMatches(ogSortInGroup(ogCollapsePairs(m, C.items||[])));
+    if(!list.length) return `<div class="muted" style="font-size:12.5px;padding:8px">${isES()?'Nada con ese nombre en esta guía.':'Nothing on this guide by that name.'}</div>`;
+    const cap=S.ogWalk.qAll?list.length:OG_QCAP; const shown=list.slice(0,cap);
+    return shown.map(ogCardHtml).join('')+(list.length>cap?`<button class="btn" style="width:100%;margin:6px 0 10px" onclick="ogSearchMore()">${isES()?`Ver ${list.length-cap} más`:`Show ${list.length-cap} more`}</button>`:''); }
   const roomItems=C.roomItems||[];
   return (roomItems.length?roomItems.map(ogCardHtml).join(''):'<div class="muted" style="font-size:12.5px;padding:8px">Nothing in this room.</div>')+(can('orders.edit')?ogAddRowHtml(C.cur):'');
 }
 function ogRoomHdHtml(){ const C=S.ogWalk._ctx||{}; const m=ogMatches(C.items||[]);
-  if(m) return `${isES()?'Búsqueda':'Search'} · ${m.length} ${isES()?'resultado':'match'}${m.length===1?'':(isES()?'s':'es')} ${isES()?'en toda la guía':'across every room'}`;
+  if(m) return `${isES()?'Búsqueda':'Search'} · ${m.length} ${isES()?'resultado':'match'}${m.length===1?'':(isES()?'s':'es')} ${isES()?'en toda la guía':'across every room'}${(!S.ogWalk.qAll&&m.length>OG_QCAP)?` · ${isES()?`primeros ${OG_QCAP}`:`first ${OG_QCAP}`}`:''}`;
   return `${esc(C.cur||'')} · ${(C.roomItems||[]).length} item${(C.roomItems||[]).length===1?'':'s'}`; }
 function ogRailHtml(items){
   const G=ogGroupsOf(items);
@@ -17819,10 +17847,30 @@ async function viewLists(){
     const dn=mine.filter(t=>t.status==='done').length;
     if(S.listId && sec('prep')){
       if(dn<mine.length) left++;
-      html.push(`<div id="tm-cp">${tmStep(mine.length&&dn===mine.length?'done':'now', mine.length&&dn===mine.length?'✓':n, es?'Lista de prep':'Prep list',
-        mgr?`${tasks.length} ${es?'artículos · armada con el conteo':'items · built from the count'}`:(mine.length?`${mine.length} ${es?'tuyos de':'yours of'} ${tasks.length}`:`${es?'nada asignado a ti todavía':'nothing assigned to you yet'} · ${tasks.length} ${es?'en la lista':'on the list'}`),
-        (mgr||mine.length)?`<span class="tm-st${mine.length&&dn===mine.length?' ok':''}">${dn}/${mine.length}</span>`:'', `tmGoPrep()`,
-        sec('count')?`<div class="tm-flow"><i class="ok">1 ${es?'Conteo':'Count'} ✓</i>→<i class="on">2 ${es?'Lista de prep':'Prep list'}</i></div>`:'')}</div>`);
+      const allDone=!!mine.length&&dn===mine.length;
+      // Oct 19 2026 (Dan): the card says what to do. Someone ELSE did the count and the list was built
+      // from it → "Prep list · Count done", who and when, and the list itself. Otherwise → "Start prep
+      // list" until the first item is ticked. The name and time come from the count the list links to.
+      const cr=(S.countRows&&S.countRows.open)||null, cm=S.listMeta||{};
+      const by=(cr&&cm.count_id&&String(cr.id)===String(cm.count_id))?cr:null;
+      const myName=String((me&&me.name)||'').trim().toLowerCase();
+      const other=!!(by&&by.counted_by&&String(by.counted_by).trim().toLowerCase()!==myName);
+      const right=(mgr||mine.length)?`<span class="tm-st${allDone?' ok':''}">${dn}/${mine.length}</span>`:'';
+      if(other && !allDone){
+        const when=by.completed_at?fmtTime(by.completed_at):'';
+        const who=`<div class="tm-who"><span class="av">${esc(String(by.counted_by).trim().charAt(0).toUpperCase())}</span>${esc(by.counted_by)}${when?` · ${when}`:''}</div>`;
+        const meId=me&&me.id; const order=tasks.slice().sort((a,b)=>((b.assigned_to===meId)-(a.assigned_to===meId)));
+        const SHOW=8; const st=id=>{ const p=(S.preps||[]).find(x=>x.id===id); return p&&p.station?p.station:''; };
+        const rows=order.slice(0,SHOW).map(t=>`<div class="r${t.status==='done'?' d':''}" onclick="event.stopPropagation();tmGoPrep()"><span class="tk">${t.status==='done'?'✓':''}</span><span class="n">${esc(t.item_name||'?')}</span><span class="q">${fmtQ(t.final_qty)} ${es?'tanda':'batch'}${Number(t.final_qty)===1?'':(es?'s':'es')}</span>${st(t.prep_item_id)?`<span class="st">${esc(st(t.prep_item_id))}</span>`:''}</div>`).join('');
+        const more=order.length>SHOW?`<div class="more" onclick="event.stopPropagation();tmGoPrep()">+ ${order.length-SHOW} ${es?'más · abrir la lista':'more · open the list'} ›</div>`:`<div class="more" onclick="event.stopPropagation();tmGoPrep()">${es?'abrir la lista':'open the list'} ›</div>`;
+        html.push(`<div id="tm-cp">${tmStep('now nob', n, es?'Lista de prep':'Prep list', es?'Conteo hecho · lista armada con él':'Count done · list built from it', right, `tmGoPrep()`, who)}<div class="tm-pl">${rows}${more}</div></div>`);
+      } else {
+        const title=allDone?(es?'Lista de prep':'Prep list'):(dn>0?(es?'Lista de prep':'Prep list'):(es?'Empezar lista de prep':'Start prep list'));
+        const sub=mgr?`${tasks.length} ${es?'artículos · armada con el conteo':'items · built from the count'}`:(mine.length?`${mine.length} ${es?'tuyos de':'yours of'} ${tasks.length}`:`${es?'nada asignado a ti todavía':'nothing assigned to you yet'} · ${tasks.length} ${es?'en la lista':'on the list'}`);
+        const go=(!allDone&&dn===0&&(mgr||mine.length))?`<span class="tm-st go">${es?'Empezar':'Start'}</span>`:right;
+        html.push(`<div id="tm-cp">${tmStep(allDone?'done':'now', allDone?'✓':n, title, sub, go, `tmGoPrep()`,
+          sec('count')?`<div class="tm-flow"><i class="ok">1 ${es?'Conteo':'Count'} ✓</i>→<i class="on">2 ${es?'Lista de prep':'Prep list'}</i></div>`:'')}</div>`);
+      }
     } else if(sec('count')){
       left++;
       const r=S.countRows&&S.countRows.open, kitchen=S.preps.filter(p=>p.station!=='bar').length;
